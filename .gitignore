@@ -1,0 +1,49 @@
+# Composer dependencies
+/vendor/
+
+# PHPUnit result cache
+.phpunit.result.cache
+
+# Log files
+*.log
+
+# Environment variables
+.env
+.env.*.local
+
+# PHPStorm IDE files
+.idea/
+
+# VSCode settings
+.vscode/
+
+# MacOS files
+.DS_Store
+
+# Thumbnails
+._*
+
+# Coverage reports
+coverage/
+.clover
+
+# Build files
+/build/
+dist/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+*.swp
+
+# PHPUnit Coverage files
+coverage-*.xml
+
+# Ignore lock files
+composer.lock
+
+# Ignore PHPUnit XML cache
+phpunit.xml.cache
