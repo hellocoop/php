@@ -1,0 +1,33 @@
+name: Run PHP Tests
+
+on:
+  push:
+    branches:
+      - master
+      - develop # Add any other branches you want to test on push
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Set up PHP
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4' # Specify the PHP version (adjust as needed)
+          extensions: mbstring, pdo, json, tokenizer, xml # Add required PHP extensions
+          coverage: none # Set to xdebug if you're generating coverage
+
+      # Install Composer dependencies
+      - name: Install Dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      # Run Tests
+      - name: Run Tests
+        run: vendor/bin/phpunit --configuration phpunit.xml
