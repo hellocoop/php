@@ -13,10 +13,10 @@ class LogoutTest extends TestCase
         $this->logout = new Logout();
     }
 
-    public function testCanCreateLogoutRedirectURL(): void
+    public function testCanGenerateLogoutUrl(): void
     {
         $this->assertTrue(
-            filter_var($this->logout->createLogoutRedirectURL(), FILTER_VALIDATE_URL) !== false,
+            filter_var($this->logout->generateLogoutUrl(), FILTER_VALIDATE_URL) !== false,
             "The URL is not valid."
         );
     }

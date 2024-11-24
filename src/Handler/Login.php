@@ -19,7 +19,7 @@ class Login{
 
     }
 
-    public function createLoginRedirectURL(): string 
+    public function generateLoginUrl(): string 
     {
        return ""; 
     }

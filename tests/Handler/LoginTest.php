@@ -13,10 +13,10 @@ class LoginTest extends TestCase
         $this->login = new Login();
     }
 
-    public function testCanCreateLoginRedirectURL(): void
+    public function testCanGenerateLoginUrl(): void
     {
         $this->assertTrue(
-            filter_var($this->login->createLoginRedirectURL(), FILTER_VALIDATE_URL) !== false,
+            filter_var($this->login->generateLoginUrl(), FILTER_VALIDATE_URL) !== false,
             "The URL is not valid."
         );
     }
