@@ -2,10 +2,23 @@ name: Run PHP Tests
 
 on:
   push:
-    branches:
-      - master
-      - develop # Add any other branches you want to test on push
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'phpunit.xml'
+      - 'phpunit.xml.dist'
+      - '.github/workflows/**'
   pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'phpunit.xml'
+      - 'phpunit.xml.dist'
+      - '.github/workflows/**'
 
 jobs:
   tests:
