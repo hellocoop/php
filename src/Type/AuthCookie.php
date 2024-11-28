@@ -52,4 +52,11 @@ class AuthCookie extends Claims {
 
         return $instance;
     }
+    
+    /**
+     * Convert the instance to an array of key-value pairs.
+     */
+    public function toArray(): array {
+        return array_merge(['sub' => $this->sub, 'iat' => $this->iat], $this->extraProperties);
+    }
 }

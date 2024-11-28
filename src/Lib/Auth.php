@@ -4,7 +4,6 @@ namespace HelloCoop\Lib;
 
 use Exception;
 use HelloCoop\Type\Auth as AuthType;
-use HelloCoop\Type\AuthCookie;
 use HelloCoop\Cookie\CookieManagerInterface;
 
 class Auth{
@@ -14,13 +13,16 @@ class Auth{
 
     private CookieManagerInterface $cookieManager;
 
+    private OIDCManager $oidcManager;
+
     private ?string $cookieToken = null;
 
     public function __construct(
         string $oidcName, 
         string $authName, 
         Crypto $crypto, 
-        CookieManagerInterface $cookieManager, 
+        CookieManagerInterface $cookieManager,
+        OIDCManager $oidcManager,
         ?string $cookieToken = null
     )
     {
@@ -28,21 +30,23 @@ class Auth{
         $this->authName = $authName;
         $this->crypto = $crypto;
         $this->cookieManager = $cookieManager;
+        $this->oidcManager = $oidcManager;
 
         $this->cookieToken = $cookieToken;
     }
 
     public function saveAuthCookie(AuthType $auth):bool {
         try {
-            $encCookie = $this->crypto->encrypt($auth);
+            $encCookie = $this->crypto->encrypt($auth->toArray());
             if (!$encCookie) {
                 return false;
             }
             $this->cookieManager->set($this->authName, $encCookie);
+            return true;
 
         }
         catch(Exception $e) {
-
+            //TODO: log error
         }
 
         return false;
@@ -50,48 +54,34 @@ class Auth{
 
     public function getAuthfromCookies(): ?AuthType 
     {
-        $cookieHeader = isset($_SERVER['HTTP_COOKIE']) ? $_SERVER['HTTP_COOKIE'] : '';
-        $cookies = $this->parseCookies($cookieHeader);
-        if ($cookies[$this->oidcName]) {
-            //TODO: delete open id cookie.
+        $oidCookie = $this->cookieManager->get($this->oidcName);
+        if ($oidCookie) {
+            $this->oidcManager->clearOidcCookie();
         }
-
-        $authCookie = $cookies[$this->authName];
+        $authCookie = $this->cookieManager->get($this->authName);
         if (!$authCookie) {
             return null;
         }
 
         try{
             $auth = $this->crypto->decrypt($authCookie);
-            if ($auth) {
+
+            if (is_array($auth)) {
                 if ($auth['isLoggedIn'] && $this->cookieToken) {
-                    return new AuthType(true, AuthCookie::fromArray($authCookie));
+                    $auth = array_merge($auth, ['cookieToken' => $this->cookieToken]);
                 }
+                return AuthType::fromArray($auth);
                 
             }
         }
         catch(Exception $e) {
-            $this->cookieManager->delete($this->authName);
+            $this->clearAuthCookie();
             //TODO: log error
         }
         return null;
     }
 
-    public function clearAuthCookie():bool {
-        return false;
-    }
-
-    private function parseCookies(string $cookieHeader): array {
-        $cookies = [];
-        // Split the cookie header into individual cookies
-        $cookieArray = explode(';', $cookieHeader);
-        foreach ($cookieArray as $cookie) {
-            $cookie = trim($cookie); // Remove extra spaces
-            if (strpos($cookie, '=') !== false) {
-                list($name, $value) = explode('=', $cookie, 2);
-                $cookies[urldecode($name)] = urldecode($value);
-            }
-        }
-        return $cookies;
+    public function clearAuthCookie():void {
+        $this->cookieManager->delete($this->authName);
     }
 }

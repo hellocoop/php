@@ -1,6 +1,6 @@
 <?php
 
-namespace HelloCoop\Tests;
+namespace HelloCoop\Tests\Cookie;
 
 use HelloCoop\Cookie\CookieManager;
 use PHPUnit\Framework\TestCase;

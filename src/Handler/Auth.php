@@ -12,12 +12,8 @@ class Auth{
 
     }
 
-    public function handleAuth(?callable $setAuthCookie): bool 
+    public function handleAuth(): bool 
     {
-        if ($setAuthCookie) {
-            $setAuthCookie(); 
-            return true;
-        }
        return false; 
     }
     public function updateAuth(AuthUpdates $authUpdates): ?AuthType 
