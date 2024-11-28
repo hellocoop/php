@@ -22,7 +22,13 @@ class OIDCManagerTest extends TestCase {
             'sameSiteStrict' => true,
         ];
 
-        $this->oidcManager = new OIDCManager($this->cookieManager, $this->crypto, 'oidc_cookie', $this->config);
+        $this->oidcManager = new OIDCManager(
+            $this->cookieManager, 
+            $this->crypto, 
+            'oidc_cookie', 
+            $this->config,
+            '/path'
+        );
     }
 
     public function testGetOidcValid(): void {
@@ -33,8 +39,8 @@ class OIDCManagerTest extends TestCase {
             'target_uri' => '/home',
         ];
 
-        $this->cookieManager->method('get')->with(['oidc_cookie'])->willReturn('encrypted_cookie');
-        $this->crypto->method('decrypt')->with(['encrypted_cookie'])->willReturn($oidcData);
+        $this->cookieManager->method('get')->with('oidc_cookie')->willReturn('encrypted_cookie');
+        $this->crypto->method('decrypt')->with('encrypted_cookie')->willReturn($oidcData);
 
         $oidc = $this->oidcManager->getOidc();
 
@@ -43,7 +49,7 @@ class OIDCManagerTest extends TestCase {
     }
 
     public function testGetOidcInvalid(): void {
-        $this->cookieManager->method('get')->with(['oidc_cookie'])->willReturn(null);
+        $this->cookieManager->method('get')->with('oidc_cookie')->willReturn(null);
 
         $oidc = $this->oidcManager->getOidc();
 
@@ -57,23 +63,23 @@ class OIDCManagerTest extends TestCase {
 
         $this->cookieManager->expects($this->once())
             ->method('set')
-            ->with([
+            ->with(
                 'oidc_cookie',
                 'encrypted_cookie',
                 $this->greaterThan(0), // maxAge calculation, non-zero expiry
-                '/test-path',
+                '/path',
                 '',
                 true,  // secure flag
                 true   // httponly flag
-            ]);
+            );
 
-        $this->oidcManager->saveOidc('/test-path', $oidc);
+        $this->oidcManager->saveOidc($oidc);
     }
 
     public function testClearOidcCookie(): void {
         $this->cookieManager->expects($this->once())
             ->method('delete')
-            ->with(['oidc_cookie', '/path', '']);
+            ->with('oidc_cookie', '/path', '');
 
         $this->oidcManager->clearOidcCookie();
     }

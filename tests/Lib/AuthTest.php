@@ -41,7 +41,7 @@ class AuthTest extends TestCase
         $this->cookieManagerMock
             ->expects($this->once())
             ->method('set')
-            ->with(['auth_name', 'encrypted_cookie']);
+            ->with('auth_name', 'encrypted_cookie');
 
         $result = $this->auth->saveAuthCookie($authMock);
         $this->assertTrue($result);

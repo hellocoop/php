@@ -11,22 +11,26 @@ class OIDCManager {
     private Crypto $crypto;
     private string $oidcName;
     private array $config;
-    private string $apiRoute = '/';
+    private string $apiRoute;
 
     public function __construct(
         CookieManagerInterface $cookieManager,
         Crypto $crypto,
         string $oidcName,
-        array $config
+        array $config,
+        string $path = '/'
     ) {
         $this->cookieManager = $cookieManager;
         $this->crypto = $crypto;
         $this->oidcName = $oidcName;
         $this->config = $config;
+        $this->apiRoute = $path;
+        
     }
 
     public function getOidc(): ?OIDC {
         $oidcCookie = $this->cookieManager->get($this->oidcName);
+       
         if (!$oidcCookie) {
             return null;
         }
@@ -44,11 +48,7 @@ class OIDCManager {
         return null;
     }
 
-    public function saveOidc(string $path, OIDC $oidc): void {
-        if ($this->apiRoute === '/') {
-            $this->apiRoute = $path;
-        }
-
+    public function saveOidc(OIDC $oidc): void {
         try {
             $encCookie = $this->crypto->encrypt($oidc->toArray());
 

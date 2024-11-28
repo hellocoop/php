@@ -3,11 +3,12 @@
 namespace HelloCoop\Tests\Cookie;
 
 use HelloCoop\Cookie\CookieManager;
+use HelloCoop\Cookie\CookieManagerInterface;
 use PHPUnit\Framework\TestCase;
 
 class CookieManagerTest extends TestCase
 {
-    private CookieManager $cookieManager;
+    private CookieManagerInterface $cookieManager;
 
     protected function setUp(): void
     {
@@ -18,9 +19,7 @@ class CookieManagerTest extends TestCase
     {
         // Use output buffering to capture setcookie calls
         $this->expectOutputString('');
-
         $this->cookieManager->set('test_cookie', 'test_value', time() + 3600);
-
         $this->assertTrue(headers_sent());
     }
 

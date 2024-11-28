@@ -58,6 +58,7 @@ class Auth{
         if ($oidCookie) {
             $this->oidcManager->clearOidcCookie();
         }
+        
         $authCookie = $this->cookieManager->get($this->authName);
         if (!$authCookie) {
             return null;
