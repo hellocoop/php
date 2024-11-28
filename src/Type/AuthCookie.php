@@ -2,6 +2,8 @@
 
 namespace HelloCoop\Type;
 
+use InvalidArgumentException;
+
 // Authentication cookie class, extending Claims
 class AuthCookie extends Claims {
     /** @var int */
@@ -30,5 +32,24 @@ class AuthCookie extends Claims {
      */
     public function getExtraProperty(string $key) {
         return $this->extraProperties[$key] ?? null;
+    }
+
+    /**
+     * Create an instance from an array of key-value pairs.
+     */
+    public static function fromArray(array $data): self {
+        if (!isset($data['sub'], $data['iat'])) {
+            throw new InvalidArgumentException('Missing required keys "sub" or "iat".');
+        }
+
+        $instance = new self($data['sub'], $data['iat']);
+
+        foreach ($data as $key => $value) {
+            if (!in_array($key, ['sub', 'iat'], true)) {
+                $instance->setExtraProperty($key, $value);
+            }
+        }
+
+        return $instance;
     }
 }
