@@ -60,13 +60,14 @@ class Auth{
         }
         
         $authCookie = $this->cookieManager->get($this->authName);
+
         if (!$authCookie) {
             return null;
         }
 
         try{
-            $auth = $this->crypto->decrypt($authCookie);
 
+            $auth = $this->crypto->decrypt($authCookie);
             if (is_array($auth)) {
                 if ($auth['isLoggedIn'] && $this->cookieToken) {
                     $auth = array_merge($auth, ['cookieToken' => $this->cookieToken]);

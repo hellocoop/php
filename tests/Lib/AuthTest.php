@@ -50,7 +50,7 @@ class AuthTest extends TestCase
     public function testSaveAuthCookieEncryptionFails()
     {
         $authMock = $this->createMock(AuthType::class);
-        $this->cryptoMock->method('encrypt')->willReturn(false);
+        $this->cryptoMock->method('encrypt')->willReturn('0');
 
         $this->cookieManagerMock->expects($this->never())->method('set');
 
@@ -61,11 +61,13 @@ class AuthTest extends TestCase
     public function testGetAuthFromCookiesSuccess()
     {
         $_SERVER['HTTP_COOKIE'] = 'auth_name=encrypted_cookie';
+
+        $this->cookieManagerMock->method('get')->willReturn('encrypted_cookie');
         $this->cryptoMock->method('decrypt')->willReturn([
             'isLoggedIn' => true,
             'authData' => ['sub' => 'user123', 'iat' => time()]
         ]);
-
+        
         $this->cookieManagerMock->expects($this->never())->method('delete');
 
         $auth = $this->auth->getAuthfromCookies();
@@ -75,12 +77,14 @@ class AuthTest extends TestCase
     public function testGetAuthFromCookiesDecryptFails()
     {
         $_SERVER['HTTP_COOKIE'] = 'auth_name=encrypted_cookie';
+
+        $this->cookieManagerMock->method('get')->willReturn('encrypted_cookie');
         $this->cryptoMock->method('decrypt')->willThrowException(new Exception());
 
         $this->cookieManagerMock
             ->expects($this->once())
             ->method('delete')
-            ->with(['auth_name']);
+            ->with('auth_name');
 
         $auth = $this->auth->getAuthfromCookies();
         $this->assertNull($auth);
