@@ -25,8 +25,6 @@ class CookieManager implements CookieManagerInterface
 
     public function get(string $name): ?string
     {
-        print "heer we go";
-        exit();
         return $_COOKIE[$name] ?? null;
     }
 
