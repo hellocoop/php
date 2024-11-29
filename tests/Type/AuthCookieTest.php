@@ -3,7 +3,7 @@
 namespace HelloCoop\Tests\Type;
 
 use PHPUnit\Framework\TestCase;
-use Hellocoop\Type\AuthCookie;
+use HelloCoop\Type\AuthCookie;
 use InvalidArgumentException;
 
 class AuthCookieTest extends TestCase
