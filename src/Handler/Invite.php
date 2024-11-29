@@ -2,21 +2,12 @@
 
 namespace HelloCoop\Handler;
 
+use HelloCoop\Config\HelloConfig;
 class Invite{
-    //TODO: we can use a builder patter here
-    public function __construct(
-        string $appName,
-        string $prompt,
-        string $role,
-        string $tenant,
-        string $state,
-        string $inviter,
-        string $clientId,
-        string $initiateLoginUri,
-        string $returnUri
-    )
+    private HelloConfig $config;
+    public function __construct(HelloConfig $config)
     {
-
+        $this->config = $config;
     }
 
     public function generateInviteUrl(): string 

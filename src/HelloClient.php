@@ -2,9 +2,13 @@
 
 namespace HelloCoop;
 
+use HelloCoop\Config\HelloConfig;
+
 class HelloClient{
-    public function __construct()
+    private HelloConfig $config;
+    public function __construct(HelloConfig $config)
     {
+        $this->config = $config;
     }
     public function getAuth() {}
     public function login() {}
