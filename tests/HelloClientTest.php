@@ -19,6 +19,7 @@ class HelloClientTest extends TestCase
 
         // Simulate a fresh environment by clearing cookies
         $_COOKIE = [];
+
         $this->configMock = $this->createMock(HelloConfig::class);
         // Initialize the client
         $this->client = new HelloClient($this->configMock);

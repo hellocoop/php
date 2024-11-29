@@ -3,15 +3,17 @@
 namespace HelloCoop\Handler;
 
 use HelloCoop\Config\HelloConfig;
-class Invite{
+
+class Invite
+{
     private HelloConfig $config;
     public function __construct(HelloConfig $config)
     {
         $this->config = $config;
     }
 
-    public function generateInviteUrl(): string 
+    public function generateInviteUrl(): string
     {
-       return ""; 
+        return `https://hello.hello.coop/invite`;
     }
 }
