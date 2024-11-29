@@ -2,21 +2,21 @@
 
 namespace HelloCoop\Handler;
 
+use HelloCoop\Config\HelloConfig;
+
 class Logout{
-    private $logoutSync = null;
-    public function __construct(
-        string $targetUri,
-        ?callable $logoutSync
-    )
+
+    private HelloConfig $config;
+    public function __construct(HelloConfig $config)
     {
-        $this->logoutSync = $logoutSync;
+        $this->config = $config;
     }
     public function generateLogoutUrl(): string 
     {
         //clearAuthCookie();
-        if ($this->logoutSync) {
+        if ($this->config->getLoginSync()) {
             // Call the logoutSync callback
-            call_user_func($this->logoutSync);
+            call_user_func($this->config->getLoginSync());
         }
         return ""; 
     }

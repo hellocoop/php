@@ -2,6 +2,7 @@
 
 namespace HelloCoop\Tests;
 
+use HelloCoop\Config\HelloConfig;
 use PHPUnit\Framework\TestCase;
 use HelloCoop\HelloClient;
 
@@ -9,6 +10,7 @@ class HelloClientTest extends TestCase
 {
     protected string $cookieName;
     protected HelloClient $client;
+    private $configMock;
 
     protected function setUp(): void
     {
@@ -17,9 +19,9 @@ class HelloClientTest extends TestCase
 
         // Simulate a fresh environment by clearing cookies
         $_COOKIE = [];
-
+        $this->configMock = $this->createMock(HelloConfig::class);
         // Initialize the client
-        $this->client = new HelloClient();
+        $this->client = new HelloClient($this->configMock);
     }
 
     public function testGetAuthBeforeLogin(): void
