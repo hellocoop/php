@@ -1,4 +1,4 @@
-name: Run PHP Tests
+name: PHP Tests
 
 on:
   push:
@@ -35,12 +35,20 @@ jobs:
         with:
           php-version: '7.4' # Specify the PHP version (adjust as needed)
           extensions: mbstring, pdo, json, tokenizer, xml # Add required PHP extensions
-          coverage: none # Set to xdebug if you're generating coverage
+          coverage: xdebug # Set to xdebug if you're generating coverage
 
       # Install Composer dependencies
       - name: Install Dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
 
       # Run Tests
-      - name: Run Tests
-        run: vendor/bin/phpunit --configuration phpunit.xml
+      - name: Run tests
+        run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true

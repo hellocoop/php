@@ -1,6 +1,10 @@
-# Hellō identity provider(IdP) client in PHP
+# [Hellō](https://www.hello.coop/) identity provider(IdP) client in PHP
 
-![Run PHP Tests](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions/workflows/php-tests.yml/badge.svg)
+| Build | Tests | Coverage |
+| :---: | :----: | :------: | 
+| [![Build Status](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions/workflows/php-tests.yml/badge.svg)](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions) | [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions) | [![Coverage](https://codecov.io/gh/UnnikrishnanBhargavakurup/hellocoop/branch/main/graph/badge.svg)](https://codecov.io/gh/UnnikrishnanBhargavakurup/hellocoop) |
+
+
 
 ### Code Quality: Pre-Commit Hook for Linting
 
@@ -21,4 +25,8 @@ To maintain code quality in this project, we use a pre-commit hook for automatic
    ```
 
 This will ensure that the hook runs automatically whenever you try to commit your code, helping maintain consistent code quality across the project.
+
+## License
+
+[![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE)
 

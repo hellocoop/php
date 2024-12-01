@@ -47,3 +47,4 @@ composer.lock
 
 # Ignore PHPUnit XML cache
 phpunit.xml.cache
+coverage.xml
