@@ -10,6 +10,9 @@ class HelloConfig
     private array $routes;
     private $loginSync;
     private $logoutSync;
+    private ?string $redirectURI;
+
+    private string $helloDomain;
 
     public function __construct(
         string $clientId,
@@ -21,7 +24,9 @@ class HelloConfig
             'error' => '/error',
         ],
         ?callable $loginSync = null,
-        ?callable $logoutSync = null
+        ?callable $logoutSync = null,
+        $redirectURI = null,
+        $helloDomain = 'hello.coop'
     ) {
         $this->clientId = $clientId;
         $this->scope = $scope;
@@ -29,6 +34,8 @@ class HelloConfig
         $this->routes = $routes;
         $this->loginSync = $loginSync;
         $this->logoutSync = $logoutSync;
+        $this->redirectURI = $redirectURI;
+        $this->helloDomain = $helloDomain;
     }
 
     public function getClientId(): string
@@ -59,5 +66,14 @@ class HelloConfig
     public function getLogoutSync(): ?callable
     {
         return $this->logoutSync;
+    }
+
+    public function getRedirectURI(): ?string
+    {
+        return $this->redirectURI;
+    }
+    public function getHelloDomain(): string
+    {
+        return $this->helloDomain;
     }
 }
