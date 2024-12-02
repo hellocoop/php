@@ -46,17 +46,6 @@ class InviteTest extends TestCase
         $authMockData->method('toArray')->willReturn(['sub' => 'user123']);
         $this->authMock->method('getAuthfromCookies')->willReturn($authMockData);
 
-        // Setting up the $_GET superglobal to mock the query parameters
-        $_GET = [
-            'target_uri' => 'https://example.com',
-            'app_name' => 'TestApp',
-            'prompt' => 'TestPrompt',
-            'role' => 'admin',
-            'tenant' => 'TestTenant',
-            'state' => 'state123',
-            'redirect_uri' => 'https://redirect.com'
-        ];
-
         // Test the URL generation
         $url = $this->invite->generateInviteUrl();
 
@@ -67,7 +56,7 @@ class InviteTest extends TestCase
         );
 
         // Define the expected URL
-        $expectedUrl = "https://hello.com/invite?app_name=TestApp&prompt=TestPrompt&role=admin&tenant=TestTenant&state=state123&inviter=user123&client_id=testClientId&initiate_login_uri=%2Fredirect&return_uri=https%3A%2F%2Fexample.com";
+        $expectedUrl = "https://hello.com/invite?app_name=MyApp&prompt=Login&role=Admin&tenant=Tenant123&state=state456&inviter=user123&client_id=testClientId&initiate_login_uri=%2Fredirect&return_uri=https%3A%2F%2Fexample.com";
 
         // Assert that the generated URL matches the expected one
         $this->assertSame($expectedUrl, $url);
