@@ -11,7 +11,7 @@ interface ParamFetcherInterface
      * @param mixed $default Default value if the key is not found.
      * @return mixed The value of the parameter or default.
      */
-    public function fetch(string $key, $default = null);
+    public function fetch(string $key, $default = null): ?string;
 
     /**
      * Fetch multiple parameters by keys from either GET or POST data.
@@ -20,4 +20,13 @@ interface ParamFetcherInterface
      * @return array An associative array of parameters.
      */
     public function fetchMultiple(array $keys): array;
+
+    /**
+     * Fetch a header by key from the request headers.
+     *
+     * @param string $key The key of the header to fetch.
+     * @param mixed $default Default value if the key is not found.
+     * @return mixed The value of the header or default.
+     */
+    public function fetchHeader(string $key, $default = null): ?string;
 }
