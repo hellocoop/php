@@ -7,18 +7,21 @@ use HelloCoop\Lib\Auth;
 use HelloCoop\Type\Auth as AuthType;
 use PHPUnit\Framework\TestCase;
 use HelloCoop\Handler\Invite;
+use HelloCoop\RequestParamFetcher\ParamFetcherInterface;
 
 class InviteTest extends TestCase
 {
     private Invite $invite;
     private $configMock;
     private $authMock;
+    private $mockFetcher;
 
     public function setUp(): void
     {
         $this->configMock = $this->createMock(HelloConfig::class);
         $this->authMock = $this->createMock(Auth::class);
-        $this->invite = new Invite($this->configMock, $this->authMock);
+        $this->mockFetcher = $this->createMock(ParamFetcherInterface::class);
+        $this->invite = new Invite($this->configMock, $this->authMock, $this->mockFetcher);
     }
     public function testCanGenerateInviteUrl(): void
     {
@@ -26,6 +29,17 @@ class InviteTest extends TestCase
         $this->configMock->method('getClientId')->willReturn('testClientId');
         $this->configMock->method('getRedirectURI')->willReturn('/redirect');
         $this->configMock->method('getHelloDomain')->willReturn('hello.com');
+
+        $this->mockFetcher->method('fetchMultiple')
+        ->willReturn([
+            'target_uri' => 'https://example.com',
+            'app_name' => 'MyApp',
+            'prompt' => 'Login',
+            'role' => 'Admin',
+            'tenant' => 'Tenant123',
+            'state' => 'state456',
+            'redirect_uri' => 'https://redirect.com'
+        ]);
 
         // Mocking the dependencies for Auth
         $authMockData = $this->createMock(AuthType::class);
