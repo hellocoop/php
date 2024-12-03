@@ -13,12 +13,10 @@
         <include>
             <directory>src</directory>
         </include>
+        <report>
+            <clover outputFile="clover.xml"/>
+        </report>
     </coverage>
-
-    <!-- placement of logging settings for coverage report -->
-    <logging>
-        <log type="coverage-clover" target="coverage.xml"/>
-    </logging>
 </phpunit>
 
 
