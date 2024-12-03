@@ -15,7 +15,7 @@
         </include>
     </coverage>
 
-    <!-- Logging settings for coverage report -->
+    <!-- placement of logging settings for coverage report -->
     <logging>
         <log type="coverage-clover" target="coverage.xml"/>
     </logging>

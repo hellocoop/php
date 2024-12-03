@@ -33,9 +33,10 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4' # Specify the PHP version (adjust as needed)
+          php-version: '7.4' # Specify the PHP version
           extensions: mbstring, pdo, json, tokenizer, xml # Add required PHP extensions
-          coverage: xdebug # Set to xdebug if you're generating coverage
+          coverage: xdebug # Enable Xdebug for code coverage
+
 
       # Install Composer dependencies
       - name: Install Dependencies
