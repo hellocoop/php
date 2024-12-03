@@ -8,12 +8,17 @@
         </testsuite>
     </testsuites>
 
-    <!-- Optional: Code coverage settings -->
+    <!-- Code coverage settings -->
     <coverage>
         <include>
             <directory>src</directory>
         </include>
     </coverage>
+
+    <!-- Logging settings for coverage report -->
+    <logging>
+        <log type="coverage-clover" target="coverage.xml"/>
+    </logging>
 </phpunit>
 
 
