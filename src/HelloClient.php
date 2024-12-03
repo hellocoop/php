@@ -11,8 +11,9 @@ class HelloClient
     {
         $this->config = $config;
     }
-    public function getAuth()
+    public function getAuth(): array
     {
+        return ['isLoggedIn' => false];
     }
     public function login()
     {
