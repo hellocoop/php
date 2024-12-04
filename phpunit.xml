@@ -11,11 +11,8 @@
     <!-- Code coverage settings -->
     <coverage>
         <include>
-            <directory>src</directory>
+            <directory suffix=".php">src</directory>
         </include>
-        <report>
-            <clover outputFile="coverage.xml"/>
-        </report>
     </coverage>
 </phpunit>
 

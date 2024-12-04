@@ -1,5 +1,7 @@
 <?php
 
+namespace HelloCoop\Tests\Lib;
+
 use PHPUnit\Framework\TestCase;
 use HelloCoop\Lib\TokenFetcher;
 use HelloCoop\Utils\CurlWrapper;

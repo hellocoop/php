@@ -4,6 +4,8 @@ namespace HelloCoop\Config;
 
 class HelloConfig
 {
+    private string $apiRoute;
+    private bool $sameSiteStrict;
     private ?string $clientId;
     private array $scope;
     private array $providerHint;
@@ -21,8 +23,9 @@ class HelloConfig
     private ?string $prompt;
     private ?string $loginHint;
     private ?string $domainHint;
-
     public function __construct(
+        $apiRoute,
+        $sameSiteStrict,
         ?string $clientId = null,
         array $scope = ['openid', 'name', 'email', 'picture'],
         array $providerHint = ['github'],
@@ -43,6 +46,8 @@ class HelloConfig
         ?string $loginHint = null,
         ?string $domainHint = null
     ) {
+        $this->apiRoute = $apiRoute;
+        $this->sameSiteStrict = $sameSiteStrict;
         $this->clientId = $clientId;
         $this->scope = $scope;
         $this->providerHint = $providerHint;
@@ -98,6 +103,14 @@ class HelloConfig
     public function getHelloDomain(): string
     {
         return $this->helloDomain;
+    }
+    public function getSameSiteStrict(): bool
+    {
+        return $this->sameSiteStrict;
+    }
+    public function getApiRoute(): string
+    {
+        return $this->apiRoute;
     }
 
     public function getHelloWallet(): string

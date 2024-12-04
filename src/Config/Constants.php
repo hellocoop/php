@@ -6,6 +6,7 @@ class Constants
 {
     public static string $PRODUCTION_WALLET = 'https://wallet.hello.coop';
 
+    public static string $HELLO_API_ROUTE =  '/api/hellocoop';
     public static array $DEFAULT_SCOPE = ['openid', 'name', 'email', 'picture'];
     public static string $DEFAULT_RESPONSE_TYPE = 'code';
     public static string $DEFAULT_RESPONSE_MODE = 'query';
