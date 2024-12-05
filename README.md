@@ -2,7 +2,7 @@
 
 | Build | Tests | Coverage |
 | :---: | :----: | :------: | 
-| [![Build Status](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions/workflows/php-tests.yml/badge.svg)](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions) | [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions) | [![Coverage](https://codecov.io/gh/UnnikrishnanBhargavakurup/hellocoop/branch/main/graph/badge.svg)](https://codecov.io/gh/UnnikrishnanBhargavakurup/hellocoop) |
+| [![Build Status](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions/workflows/php-tests.yml/badge.svg)](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions) | [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions) | [![Coverage](https://codecov.io/gh/UnnikrishnanBhargavakurup/hellocoop/graph/badge.svg?token=GFPX13L1TM)](https://codecov.io/gh/UnnikrishnanBhargavakurup/hellocoop) |
 
 
 
