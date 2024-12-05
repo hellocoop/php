@@ -54,7 +54,31 @@ interface HelloResponseInterface
      * This method sends an HTTP Location header to redirect the user to the provided URL.
      *
      * @param string $url The URL to redirect the user to.
-     * @return void
+     * @return mixed
      */
-    public function redirect(string $url): void;
+    public function redirect(string $url);
+
+    /**
+     * Converts the given data array into a JSON response format.
+     *
+     * This method prepares the data to be sent as a JSON response. It allows
+     * different frameworks or environments to implement their own mechanisms
+     * for encoding and returning JSON data.
+     *
+     * @param array $data The data to be converted to a JSON response.
+     * @return array The structured JSON response data.
+     */
+    public function json(array $data): string;
+
+    /**
+     * Renders the given content as an HTTP response.
+     *
+     * This method is responsible for returning the content in a format that
+     * can be sent as a response to the client. The implementation will vary
+     * depending on the framework or environment being used.
+     *
+     * @param string $content The content to render as a response.
+     * @return string The rendered response content.
+     */
+    public function render(string $content): string;
 }

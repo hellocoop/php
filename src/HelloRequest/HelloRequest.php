@@ -85,4 +85,23 @@ class HelloRequest implements HelloRequestInterface
     {
         return $_COOKIE[$name] ?? null;
     }
+
+    /**
+     * Retrieves the current request URI from the server.
+     *
+     * This method fetches the request URI from the `$_SERVER` superglobal,
+     * which includes the path and query string of the current HTTP request.
+     * It is useful for identifying the requested resource or endpoint.
+     *
+     * @return string The current request URI as provided by the server.
+     */
+    public function getRequestUri(): string
+    {
+        return $_SERVER["REQUEST_URI"];
+    }
+
+    public function getMethod(): string
+    {
+        return $_SERVER['REQUEST_METHOD'];
+    }
 }

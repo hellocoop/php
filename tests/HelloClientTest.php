@@ -2,84 +2,113 @@
 
 namespace HelloCoop\Tests;
 
-use HelloCoop\Config\HelloConfig;
-use PHPUnit\Framework\TestCase;
 use HelloCoop\HelloClient;
+use HelloCoop\Config\HelloConfig;
+use HelloCoop\Handler\Auth;
+use HelloCoop\Type\Auth as AuthType;
+use HelloCoop\Handler\Invite;
+use HelloCoop\Handler\Logout;
+use HelloCoop\Handler\Login;
+use HelloCoop\Renderers\PageRendererInterface;
+use HelloCoop\Handler\Callback;
+use HelloCoop\Exception\SameSiteCallbackException;
+use HelloCoop\HelloResponse\HelloResponseInterface;
+use HelloCoop\HelloRequest\HelloRequestInterface;
+use PHPUnit\Framework\TestCase;
 
 class HelloClientTest extends TestCase
 {
-    protected string $cookieName;
-    protected HelloClient $client;
-    private $configMock;
+    private $config;
+    private $pageRenderer;
+    private $callbackHandler;
+    private $authHandler;
+    private $invite;
+    private $logout;
+    private $login;
+    private $helloRequest;
+    private $helloResponse;
+    private $helloClient;
 
-    // protected function setUp(): void
-    // {
-    //     // Simulate the config setting for the cookie name (this could be dynamic)
-    //     $this->cookieName = 'hello_user';
+    protected function setUp(): void
+    {
+        $this->config = $this->createMock(HelloConfig::class);
+        $this->pageRenderer = $this->createMock(PageRendererInterface::class);
+        $this->callbackHandler = $this->createMock(Callback::class);
+        $this->authHandler = $this->createMock(Auth::class);
+        $this->invite = $this->createMock(Invite::class);
+        $this->logout = $this->createMock(Logout::class);
+        $this->login = $this->createMock(Login::class);
+        $this->helloRequest = $this->createMock(HelloRequestInterface::class);
+        $this->helloResponse = $this->createMock(HelloResponseInterface::class);
 
-    //     // Simulate a fresh environment by clearing cookies
-    //     $_COOKIE = [];
+        $this->helloClient = new HelloClient(
+            $this->config,
+            $this->pageRenderer,
+            $this->callbackHandler,
+            $this->authHandler,
+            $this->invite,
+            $this->logout,
+            $this->login,
+            $this->helloRequest,
+            $this->helloResponse
+        );
+    }
 
-    //     $this->configMock = $this->createMock(HelloConfig::class);
-    //     // Initialize the client
-    //     $this->client = new HelloClient($this->configMock, );
-    // }
+    public function testRouteAuth()
+    {
+        $this->helloRequest->method('getMethod')->willReturn('GET');
+        $this->helloRequest->method('fetch')->with('op')->willReturn('auth');
 
-    // public function testGetAuthBeforeLogin(): void
-    // {
-    //     // Test the state before any login
-    //     $auth = $this->client->getAuth();
+        $this->authHandler->expects($this->once())->method('handleAuth')->willReturn(AuthType::fromArray(['isLoggedIn' => true]));
+        $this->helloResponse->expects($this->once())->method('json')->with([
+            'isLoggedIn' => true,
+            'cookieToken' => null,
+            'authCookie' => null
+        ]);
 
-    //     // Assert that user is not logged in
-    //     $this->assertEquals(['isLoggedIn' => false], $auth);
-    // }
+        $this->helloClient->route();
+    }
 
-    // public function testGetAuthAfterLogin(): void
-    // {
-    //     // Simulate login (this would normally set the cookie internally in a real scenario)
-    //     $this->client->login();
+    public function testRouteLogin()
+    {
+        $this->helloRequest->method('getMethod')->willReturn('GET');
+        $this->helloRequest->method('fetch')->with('op')->willReturn('login');
 
-    //     // Simulate the cookie being set after login
-    //     $userData = [
-    //         "isLoggedIn" => true,
-    //         "sub" => "sub_vvCgtpv35lDgQpHtxmpvmnxK_2nZ",
-    //         "iat" => 1699234659,
-    //         "name" => "Dick Hardt",
-    //         "picture" => "https://pictures.hello.coop/r/7a160eed-46bf-48e2-a909-161745535895.png",
-    //         "email" => "dick.hardt@hello.coop"
-    //     ];
+        $this->login->expects($this->once())->method('generateLoginUrl')->willReturn('https://login.example.com');
+        $this->helloResponse->expects($this->once())->method('redirect')->with('https://login.example.com');
 
-    //     // Manually set the cookie with the user data as the login action would do
-    //     $_COOKIE[$this->cookieName] = json_encode($userData);
+        $this->helloClient->route();
+    }
 
-    //     // After login, getAuth should return the user data
-    //     $auth = $this->client->getAuth();
+    public function testRouteCallback()
+    {
+        $this->helloRequest->method('getMethod')->willReturn('GET');
+        $this->helloRequest->method('fetch')->withConsecutive(['op'], ['code'])->willReturnOnConsecutiveCalls(null, 'authCode');
 
-    //     // Assert the auth data is correct
-    //     $this->assertEquals($userData, $auth);
-    // }
+        $this->callbackHandler->expects($this->once())->method('handleCallback')->willReturn('https://callback.example.com');
+        $this->helloResponse->expects($this->once())->method('redirect')->with('https://callback.example.com');
 
-    // public function testGetAuthAfterLogout(): void
-    // {
-    //     // Simulate login by setting a cookie
-    //     $userData = [
-    //         "isLoggedIn" => true,
-    //         "sub" => "sub_vvCgtpv35lDgQpHtxmpvmnxK_2nZ"
-    //     ];
+        $this->helloClient->route();
+    }
 
-    //     // Manually set the cookie to simulate login
-    //     $_COOKIE[$this->cookieName] = json_encode($userData);
+    public function testRouteSameSiteCallbackException()
+    {
+        $this->helloRequest->method('getMethod')->willReturn('GET');
+        $this->helloRequest->method('fetch')->withConsecutive(['op'], ['code'])->willReturnOnConsecutiveCalls(null, 'authCode');
 
-    //     // Call the logout method
-    //     $this->client->logout();
+        $this->callbackHandler->method('handleCallback')->willThrowException(new SameSiteCallbackException());
 
-    //     // After logout, getAuth should return isLoggedIn: false
-    //     $auth = $this->client->getAuth();
+        $this->pageRenderer->expects($this->once())->method('renderSameSitePage');
+        $this->helloResponse->expects($this->once())->method('render');
 
-    //     // Assert that the user is logged out
-    //     $this->assertEquals(['isLoggedIn' => false], $auth);
+        $this->helloClient->route();
+    }
 
-    //     // Assert that the cookie has been cleared (i.e., the configured cookie name should not exist)
-    //     $this->assertArrayNotHasKey($this->cookieName, $_COOKIE);
-    // }
+    public function testRouteInvalidMethod()
+    {
+        $this->helloRequest->method('getMethod')->willReturn('PUT');
+        $this->helloResponse->expects($this->never())->method($this->anything());
+
+        $this->helloClient->route();
+    }
 }

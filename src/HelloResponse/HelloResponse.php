@@ -82,9 +82,38 @@ class HelloResponse implements HelloResponseInterface
      * @return void
      * @throws \RuntimeException if in the testing environment.
      */
-    public function redirect(string $url): void
+    public function redirect(string $url)
     {
         header('Location: ' . $url);
-        exit;
+        return;
+    }
+
+    /**
+     * Renders the given content as a plain string response.
+     *
+     * This method simply returns the provided content without any modifications.
+     * It can be used in environments where the response content does not need
+     * additional processing or wrapping.
+     *
+     * @param string $content The content to render as a response.
+     * @return string The rendered response content.
+     */
+    public function render(string $content): string
+    {
+        return $content;
+    }
+
+    /**
+     * Converts the given data array into a JSON string.
+     *
+     * This method encodes the provided data into a JSON format string, which
+     * can be sent as a response in environments that expect JSON output.
+     *
+     * @param array $data The data to be converted to a JSON string.
+     * @return string The JSON-encoded string representation of the data.
+     */
+    public function json(array $data): string
+    {
+        return json_encode($data);
     }
 }

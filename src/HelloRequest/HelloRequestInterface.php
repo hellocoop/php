@@ -37,4 +37,22 @@ interface HelloRequestInterface
      * @return string|null The value of the cookie if found, or null if it doesn't exist.
      */
     public function getCookie(string $name): ?string;
+
+    /**
+     * Retrieves the current request URI.
+     *
+     * This method returns the URI of the current HTTP request, which typically includes
+     * the path and query string (if present). It can be used to determine the resource
+     * or endpoint being accessed.
+     *
+     * @return string The current request URI.
+     */
+    public function getRequestUri(): string;
+
+    /**
+     * Retrieves the HTTP method of the current request.
+     *
+     * @return string The HTTP method (e.g., 'GET', 'POST', 'PUT', 'DELETE').
+     */
+    public function getMethod(): string;
 }
