@@ -3,7 +3,7 @@
 namespace HelloCoop\Handler;
 
 use HelloCoop\Config\HelloConfig;
-use HelloCoop\RequestParamFetcher\ParamFetcherInterface;
+use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Lib\Auth;
 
 class Invite
@@ -11,17 +11,17 @@ class Invite
     private HelloConfig $config;
 
     private Auth $auth;
-    private ParamFetcherInterface $paramFetcher;
-    public function __construct(HelloConfig $config, Auth $auth, ParamFetcherInterface $paramFetcher)
+    private HelloRequestInterface $helloRequest;
+    public function __construct(HelloConfig $config, Auth $auth, HelloRequestInterface $helloRequest)
     {
         $this->config = $config;
         $this->auth = $auth;
-        $this->paramFetcher = $paramFetcher;
+        $this->helloRequest = $helloRequest;
     }
 
     public function generateInviteUrl(): string
     {
-        $params = $this->paramFetcher->fetchMultiple([
+        $params = $this->helloRequest->fetchMultiple([
             'target_uri',
             'app_name',
             'prompt',

@@ -1,10 +1,10 @@
 <?php
 
-namespace HelloCoop\RequestParamFetcher;
+namespace HelloCoop\HelloRequest;
 
-use HelloCoop\RequestParamFetcher\ParamFetcherInterface;
+use HelloCoop\HelloRequest\HelloRequestInterface;
 
-class RequestParamFetcher implements ParamFetcherInterface
+class HelloRequest implements HelloRequestInterface
 {
     /**
      * Fetch a parameter by key from either GET or POST data.
@@ -73,5 +73,16 @@ class RequestParamFetcher implements ParamFetcherInterface
         }
 
         return $headers;
+    }
+
+    /**
+     * Retrieve the value of a cookie by its name.
+     *
+     * @param string $name The name of the cookie to retrieve.
+     * @return string|null The value of the cookie if it exists, or null if it does not.
+     */
+    public function getCookie(string $name): ?string
+    {
+        return $_COOKIE[$name] ?? null;
     }
 }

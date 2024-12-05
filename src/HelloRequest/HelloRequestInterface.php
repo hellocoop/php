@@ -1,8 +1,8 @@
 <?php
 
-namespace HelloCoop\RequestParamFetcher;
+namespace HelloCoop\HelloRequest;
 
-interface ParamFetcherInterface
+interface HelloRequestInterface
 {
     /**
      * Fetch a parameter by key from either GET or POST data.
@@ -29,4 +29,12 @@ interface ParamFetcherInterface
      * @return mixed The value of the header or default.
      */
     public function fetchHeader(string $key, $default = null): ?string;
+
+    /**
+     * Fetch a cookie value by name.
+     *
+     * @param string $name The name of the cookie to retrieve.
+     * @return string|null The value of the cookie if found, or null if it doesn't exist.
+     */
+    public function getCookie(string $name): ?string;
 }

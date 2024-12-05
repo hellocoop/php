@@ -4,20 +4,18 @@ namespace HelloCoop\Tests\Handler;
 
 use PHPUnit\Framework\TestCase;
 use HelloCoop\Handler\Callback;
-use HelloCoop\RequestParamFetcher\ParamFetcherInterface;
+use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Config\HelloConfig;
 use HelloCoop\Lib\OIDCManager;
 use HelloCoop\Lib\Auth;
 use HelloCoop\Lib\TokenFetcher;
 use HelloCoop\Lib\TokenParser;
 use HelloCoop\Exception\CallbackException;
-use HelloCoop\Exception\SameSiteCallbackException;
-use HelloCoop\Type\Auth as AuthType;
 use HelloCoop\Type\OIDC;
 
 class CallbackTest extends TestCase
 {
-    private $paramFetcherMock;
+    private $helloRequestMock;
     private $configMock;
     private $oidcManagerMock;
     private $authMock;
@@ -29,7 +27,7 @@ class CallbackTest extends TestCase
     protected function setUp(): void
     {
         // Mock dependencies
-        $this->paramFetcherMock = $this->createMock(ParamFetcherInterface::class);
+        $this->helloRequestMock = $this->createMock(HelloRequestInterface::class);
         $this->configMock = $this->createMock(HelloConfig::class);
         $this->oidcManagerMock = $this->createMock(OIDCManager::class);
         $this->authMock = $this->createMock(Auth::class);
@@ -38,7 +36,7 @@ class CallbackTest extends TestCase
 
         // Create instance of Callback
         $this->callback = new Callback(
-            $this->paramFetcherMock,
+            $this->helloRequestMock,
             $this->configMock,
             $this->oidcManagerMock,
             $this->authMock,
@@ -46,12 +44,12 @@ class CallbackTest extends TestCase
             $this->tokenParserMock
         );
 
-        $this->oidcManagerMock->method('getOidc')->willReturn(OIDC::fromArray([
-            'code_verifier' => 'valid_code_verifier',
-            'target_uri' => '/dashboard',
-            'nonce' => '',
-            'redirect_uri' => '/'
-        ]));
+        // $this->oidcManagerMock->method('getOidc')->willReturn(OIDC::fromArray([
+        //     'code_verifier' => 'valid_code_verifier',
+        //     'target_uri' => '/dashboard',
+        //     'nonce' => '',
+        //     'redirect_uri' => '/'
+        // ]));
     }
 
     public function testHandleCallbackSuccessfulLogin()
@@ -67,7 +65,7 @@ class CallbackTest extends TestCase
             'nonce' => 'valid_nonce'
         ];
 
-        $this->paramFetcherMock->method('fetchMultiple')->willReturn($params);
+        $this->helloRequestMock->method('fetchMultiple')->willReturn($params);
 
         $this->configMock->method('getSameSiteStrict')->willReturn(true);
         $this->configMock->method('getHelloWallet')->willReturn('valid_wallet');
@@ -78,6 +76,13 @@ class CallbackTest extends TestCase
         $this->oidcManagerMock->expects(self::once())->method('clearOidcCookie');
 
         $this->authMock->method('saveAuthCookie')->willReturn(true);
+
+        $this->oidcManagerMock->method('getOidc')->willReturn(OIDC::fromArray([
+            'code_verifier' => 'valid_code_verifier',
+            'target_uri' => '/dashboard',
+            'nonce' => '',
+            'redirect_uri' => '/'
+        ]));
 
         $this->tokenFetcherMock->method('fetchToken')->willReturn('valid_id_token');
         $this->tokenParserMock->method('parseToken')->willReturn([
@@ -110,14 +115,16 @@ class CallbackTest extends TestCase
             'nonce' => 'valid_nonce'
         ];
 
-        $this->paramFetcherMock->method('fetchMultiple')->willReturn($params);
+        $this->oidcManagerMock->method('getOidc')->willReturn(OIDC::fromArray([
+                'code_verifier' => 'valid_code_verifier',
+                'target_uri' => '/dashboard',
+                'nonce' => '',
+                'redirect_uri' => '/'
+        ]));
 
-        // Expect CallbackException for missing code
-        $this->expectException(CallbackException::class);
-        $this->expectExceptionMessage('Missing code parameter in callback request.');
+        $this->helloRequestMock->method('fetchMultiple')->willReturn($params);
 
-        // Call the method under test
-        $this->callback->handleCallback();
+        $this->assertEquals('/dashboard?error=invalid_request&error_description=Missing+code+parameter', $this->callback->handleCallback());
     }
 
     public function testHandleCallbackInvalidTokenAudience()
@@ -133,7 +140,14 @@ class CallbackTest extends TestCase
             'nonce' => 'valid_nonce'
         ];
 
-        $this->paramFetcherMock->method('fetchMultiple')->willReturn($params);
+        $this->oidcManagerMock->method('getOidc')->willReturn(OIDC::fromArray([
+            'code_verifier' => 'valid_code_verifier',
+            'target_uri' => '',
+            'nonce' => '',
+            'redirect_uri' => '/'
+        ]));
+
+        $this->helloRequestMock->method('fetchMultiple')->willReturn($params);
 
         $this->configMock->method('getSameSiteStrict')->willReturn(true);
         $this->configMock->method('getHelloWallet')->willReturn('valid_wallet');

@@ -3,34 +3,39 @@
 namespace HelloCoop\Lib;
 
 use HelloCoop\Type\OIDC;
-use HelloCoop\Cookie\CookieManagerInterface;
+use HelloCoop\HelloRequest\HelloRequestInterface;
+use HelloCoop\HelloResponse\HelloResponseInterface;
 use Exception;
 
-class OIDCManager {
-    private CookieManagerInterface $cookieManager;
+class OIDCManager
+{
+    private HelloResponseInterface $helloResponse;
+    private HelloRequestInterface $helloRequest;
     private Crypto $crypto;
     private string $oidcName;
     private array $config;
     private string $apiRoute;
 
     public function __construct(
-        CookieManagerInterface $cookieManager,
+        HelloRequestInterface $helloRequest,
+        HelloResponseInterface $helloResponse,
         Crypto $crypto,
         string $oidcName,
         array $config,
         string $path = '/'
     ) {
-        $this->cookieManager = $cookieManager;
+        $this->helloRequest = $helloRequest;
+        $this->helloResponse = $helloResponse;
         $this->crypto = $crypto;
         $this->oidcName = $oidcName;
         $this->config = $config;
         $this->apiRoute = $path;
-        
     }
 
-    public function getOidc(): ?OIDC {
-        $oidcCookie = $this->cookieManager->get($this->oidcName);
-       
+    public function getOidc(): ?OIDC
+    {
+        $oidcCookie = $this->helloRequest->getCookie($this->oidcName);
+
         if (!$oidcCookie) {
             return null;
         }
@@ -48,11 +53,12 @@ class OIDCManager {
         return null;
     }
 
-    public function saveOidc(OIDC $oidc): void {
+    public function saveOidc(OIDC $oidc): void
+    {
         try {
             $encCookie = $this->crypto->encrypt($oidc->toArray());
 
-            $this->cookieManager->set(
+            $this->helloResponse->setCookie(
                 $this->oidcName,
                 $encCookie,
                 time() + 5 * 60, // 5 minutes
@@ -66,8 +72,9 @@ class OIDCManager {
         }
     }
 
-    public function clearOidcCookie(): void {
-        $this->cookieManager->delete(
+    public function clearOidcCookie(): void
+    {
+        $this->helloResponse->deleteCookie(
             $this->oidcName,
             $this->apiRoute,
             ''

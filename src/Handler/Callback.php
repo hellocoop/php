@@ -2,7 +2,7 @@
 
 namespace HelloCoop\Handler;
 
-use HelloCoop\RequestParamFetcher\ParamFetcherInterface;
+use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Config\HelloConfig;
 use HelloCoop\Config\Constants;
 use HelloCoop\Lib\OIDCManager;
@@ -16,7 +16,7 @@ use Exception;
 
 class Callback
 {
-    private ParamFetcherInterface $paramFetcher;
+    private HelloRequestInterface $helloRequest;
     private HelloConfig $config;
     private OIDCManager $oidcManager;
     private Auth $auth;
@@ -25,14 +25,14 @@ class Callback
     private TokenParser $tokenParser;
 
     public function __construct(
-        ParamFetcherInterface $paramFetcher,
+        HelloRequestInterface $helloRequest,
         HelloConfig $config,
         OIDCManager $oidcManager,
         Auth $auth,
         TokenFetcher $tokenFetcher,
         TokenParser $tokenParser
     ) {
-        $this->paramFetcher = $paramFetcher;
+        $this->helloRequest = $helloRequest;
         $this->config = $config;
         $this->oidcManager = $oidcManager;
         $this->auth = $auth;
@@ -43,7 +43,7 @@ class Callback
     public function handleCallback(): ?string
     {
         try {
-            $params = $this->paramFetcher->fetchMultiple([
+            $params = $this->helloRequest->fetchMultiple([
                 'code',
                 'error',
                 'same_site',
@@ -68,7 +68,7 @@ class Callback
             $oidcState = $this->oidcManager->getOidc()->toArray();
 
             if (!$oidcState) {
-                throw new CallbackException([
+                return $this->sendErrorPage([
                     'error' => 'invalid_request',
                     'error_description' => 'OpenID Connect cookie lost',
                     'target_uri' => '',
@@ -79,11 +79,11 @@ class Callback
             $targetUri = $oidcState['target_uri'] ?? null;
 
             if ($error) {
-                throw new CallbackException($params, 'Callback contains an error.');
+                return $this->sendErrorPage($params, 'Callback contains an error.');
             }
 
             if (!$code) {
-                throw new CallbackException([
+                return $this->sendErrorPage([
                     'error' => 'invalid_request',
                     'error_description' => 'Missing code parameter',
                     'target_uri' => $targetUri,
@@ -91,7 +91,7 @@ class Callback
             }
 
             if (is_array($code)) {
-                throw new CallbackException([
+                return $this->sendErrorPage([
                     'error' => 'invalid_request',
                     'error_description' => 'Received more than one code',
                     'target_uri' => $targetUri,
@@ -99,7 +99,7 @@ class Callback
             }
 
             if (!$codeVerifier) {
-                throw new CallbackException([
+                return $this->sendErrorPage([
                     'error' => 'invalid_request',
                     'error_description' => 'Missing code_verifier from session',
                     'target_uri' => $targetUri,
@@ -117,7 +117,7 @@ class Callback
 
             $payload = $this->tokenParser->parseToken($token)['payload'];
             if ($payload['aud'] != $this->config->getClientId()) {
-                throw new CallbackException([
+                return $this->sendErrorPage([
                     'error' => 'invalid_client',
                     'error_description' => 'Wrong ID token audience',
                     'target_uri' => $targetUri,
@@ -125,7 +125,7 @@ class Callback
             }
 
             if ($payload['nonce'] != $nonce) {
-                throw new CallbackException([
+                return $this->sendErrorPage([
                     'error' => 'invalid_request',
                     'error_description' => 'Wrong nonce in ID token',
                     'target_uri' => $targetUri,
@@ -134,7 +134,7 @@ class Callback
 
             $currentTimeInt = time();
             if ($payload['exp'] < $currentTimeInt) {
-                throw new CallbackException([
+                return $this->sendErrorPage([
                     'error' => 'invalid_request',
                     'error_description' => 'The ID token has expired.',
                     'target_uri' => $targetUri,
@@ -142,7 +142,7 @@ class Callback
             }
 
             if ($payload['iat'] > $currentTimeInt + 5) { // 5 seconds clock skew
-                throw new CallbackException([
+                return $this->sendErrorPage([
                     'error' => 'invalid_request',
                     'error_description' => 'The ID token is not yet valid.',
                     'target_uri' => $targetUri,
@@ -176,7 +176,7 @@ class Callback
 
                     $targetUri = $callback['target_uri'] ?? $targetUri;
                     if ($callback['accessDenied']) {
-                        throw new CallbackException([
+                        return $this->sendErrorPage([
                             'error' => 'access_denied',
                             'error_description' => 'loginSync denied access',
                             'target_uri' => $targetUri,
@@ -185,11 +185,11 @@ class Callback
                         $auth = array_merge($callback['updatedAuth'], $auth);
                     }
                 } catch (Exception $e) {
-                    throw new CallbackException([
+                    return $this->sendErrorPage([
                         'error' => 'server_error',
                         'error_description' => 'loginSync failed',
                         'target_uri' => $targetUri,
-                    ], 'loginSync failed.', 0, $e);
+                    ], 'loginSync failed.', $e);
                 }
             }
 
@@ -218,14 +218,44 @@ class Callback
             return $targetUri;
         } catch (Exception $e) {
             if (!($e instanceof SameSiteCallbackException) && !($e instanceof CallbackException)) {
-                print_r($e->getMessage());
-                exit();
                 $this->oidcManager->clearOidcCookie();
             }
-            // Let it handled in HelloClinet
+            // Let it handled in HelloClient
             throw $e;
         }
     }
 
-    // Helper methods like fetchToken, parseToken
+    /**
+     * Constructs and returns a URL for the error page with updated query parameters.
+     *
+     * Uses the target URI from error details or a fallback error route. Updates the query
+     * string with error information. Throws an exception if no error URI is available.
+     *
+     * @param array $error Error details including 'target_uri', 'error', and 'error_description'.
+     * @param string $errorMessage A message describing the error.
+     * @param \Throwable|null $previous Previous exception for chaining (optional).
+     *
+     * @return string The error page URL.
+     *
+     * @throws CallbackException If no error URI is provided.
+     */
+    private function sendErrorPage(array $error, string $errorMessage, \Throwable $previous = null): string
+    {
+        $error_uri = $error['target_uri'] ?? $this->config->getRoutes()['error'] ?? null;
+        if ($error_uri) {
+            list($pathString, $queryString) = array_pad(explode('?', $error_uri, 2), 2, '');
+            // Parse the query string into an array
+            parse_str($queryString, $queryArray);
+            foreach ($error as $key => $value) {
+                if (strpos($key, 'error') === 0) {
+                    $queryArray[$key] = $value;
+                }
+            }
+            // Build the new query string
+            $newQueryString = http_build_query($queryArray);
+            // Construct the URL
+            return $pathString . '?' . $newQueryString;
+        }
+        throw new CallbackException($error, $errorMessage, 0, $previous);
+    }
 }

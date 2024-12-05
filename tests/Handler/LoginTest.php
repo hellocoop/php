@@ -4,7 +4,7 @@ namespace HelloCoop\Tests\Handler;
 
 use HelloCoop\Handler\Login;
 use HelloCoop\Config\HelloConfig;
-use HelloCoop\RequestParamFetcher\ParamFetcherInterface;
+use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Lib\Auth;
 use HelloCoop\Lib\AuthHelper;
 use HelloCoop\Lib\OIDCManager;
@@ -15,7 +15,7 @@ class LoginTest extends TestCase
 {
     private $configMock;
     private $authMock;
-    private $paramFetcherMock;
+    private $helloRequestMock;
     private $oidcManagerMock;
     private $authHelperMock;
     private $login;
@@ -24,14 +24,14 @@ class LoginTest extends TestCase
     {
         $this->configMock = $this->createMock(HelloConfig::class);
         $this->authMock = $this->createMock(Auth::class);
-        $this->paramFetcherMock = $this->createMock(ParamFetcherInterface::class);
+        $this->helloRequestMock = $this->createMock(HelloRequestInterface::class);
         $this->oidcManagerMock = $this->createMock(OIDCManager::class);
         $this->authHelperMock = $this->createMock(AuthHelper::class);
 
         $this->login = new Login(
             $this->configMock,
             $this->authMock,
-            $this->paramFetcherMock,
+            $this->helloRequestMock,
             $this->oidcManagerMock,
             $this->authHelperMock,
             ['example.com' => 'https://example.com/callback']
@@ -43,7 +43,7 @@ class LoginTest extends TestCase
         // Setup mocks
         $this->configMock->method('getClientId')->willReturn('client_id');
         $this->configMock->method('getRedirectURI')->willReturn('https://example.com/callback');
-        $this->paramFetcherMock->method('fetchMultiple')->willReturn([
+        $this->helloRequestMock->method('fetchMultiple')->willReturn([
             'provider_hint' => 'google',
             'scope' => 'openid profile',
             'target_uri' => 'https://example.com/target',
@@ -53,7 +53,7 @@ class LoginTest extends TestCase
             'login_hint' => 'user@example.com',
             'domain_hint' => 'example.com'
         ]);
-        $this->paramFetcherMock->method('fetchHeader')->willReturn('example.com');
+        $this->helloRequestMock->method('fetchHeader')->willReturn('example.com');
 
         // Mock the AuthHelper::createAuthRequest method
         $authResponse = [
@@ -88,13 +88,13 @@ class LoginTest extends TestCase
     {
         $this->configMock->method('getClientId')->willReturn('client_id');
         $this->configMock->method('getRedirectURI')->willReturn(null);
-        $this->paramFetcherMock->method('fetchMultiple')->willReturn([
+        $this->helloRequestMock->method('fetchMultiple')->willReturn([
             'provider_hint' => 'google',
             'scope' => 'openid profile',
             'target_uri' => 'https://example.com/target',
             'redirect_uri' => null
         ]);
-        $this->paramFetcherMock->method('fetchHeader')->willReturn('example2.com');
+        $this->helloRequestMock->method('fetchHeader')->willReturn('example2.com');
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('RedirectURI not found');

@@ -7,18 +7,19 @@ use HelloCoop\Lib\TokenParser;
 
 class TokenParserTest extends TestCase
 {
-    protected $tokenParserMock;
+    protected $tokenParser;
 
     protected function setUp(): void
     {
         // Initialize the PKCE instance here
-        $this->tokenParserMock = $this->createMock(TokenParser::class);
+        $this->tokenParser = new TokenParser();
     }
     public function testParseTokenSuccess()
     {
+
         $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZXhwIjoxNjU0MjA4ODAwfQ.sflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
 
-        $result = $this->tokenParserMock->parseToken($token);
+        $result = $this->tokenParser->parseToken($token);
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('header', $result);
@@ -34,7 +35,7 @@ class TokenParserTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Failed to parse token');
 
-        $this->tokenParserMock->parseToken($invalidToken);
+        $this->tokenParser->parseToken($invalidToken);
     }
 
     public function testParseTokenInvalidFormat()
@@ -44,6 +45,6 @@ class TokenParserTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid token format.');
 
-        $this->tokenParserMock->parseToken($invalidToken);
+        $this->tokenParser->parseToken($invalidToken);
     }
 }

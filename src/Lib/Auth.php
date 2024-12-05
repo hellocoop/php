@@ -4,86 +4,88 @@ namespace HelloCoop\Lib;
 
 use Exception;
 use HelloCoop\Type\Auth as AuthType;
-use HelloCoop\Cookie\CookieManagerInterface;
+use HelloCoop\HelloRequest\HelloRequestInterface;
+use HelloCoop\HelloResponse\HelloResponseInterface;
 
-class Auth{
+class Auth
+{
     private string $oidcName;
     private string $authName;
     private Crypto $crypto;
 
-    private CookieManagerInterface $cookieManager;
+    private HelloRequestInterface $helloRequest;
+
+    private HelloResponseInterface $helloResponse;
 
     private OIDCManager $oidcManager;
 
     private ?string $cookieToken = null;
 
     public function __construct(
-        string $oidcName, 
-        string $authName, 
-        Crypto $crypto, 
-        CookieManagerInterface $cookieManager,
+        string $oidcName,
+        string $authName,
+        Crypto $crypto,
+        HelloRequestInterface $helloRequest,
+        HelloResponseInterface $helloResponse,
         OIDCManager $oidcManager,
         ?string $cookieToken = null
-    )
-    {
+    ) {
         $this->oidcName = $oidcName;
         $this->authName = $authName;
         $this->crypto = $crypto;
-        $this->cookieManager = $cookieManager;
+        $this->helloRequest = $helloRequest;
+        $this->helloResponse = $helloResponse;
         $this->oidcManager = $oidcManager;
 
         $this->cookieToken = $cookieToken;
     }
 
-    public function saveAuthCookie(AuthType $auth):bool {
+    public function saveAuthCookie(AuthType $auth): bool
+    {
         try {
             $encCookie = $this->crypto->encrypt($auth->toArray());
             if (!$encCookie) {
                 return false;
             }
-            $this->cookieManager->set($this->authName, $encCookie);
+            $this->helloResponse->setCookie($this->authName, $encCookie);
             return true;
-
-        }
-        catch(Exception $e) {
+        } catch (Exception $e) {
             //TODO: log error
         }
 
         return false;
     }
 
-    public function getAuthfromCookies(): ?AuthType 
+    public function getAuthfromCookies(): ?AuthType
     {
-        $oidCookie = $this->cookieManager->get($this->oidcName);
+        $oidCookie = $this->helloRequest->getCookie($this->oidcName);
         if ($oidCookie) {
             $this->oidcManager->clearOidcCookie();
         }
-        
-        $authCookie = $this->cookieManager->get($this->authName);
+
+        $authCookie = $this->helloRequest->getCookie($this->authName);
 
         if (!$authCookie) {
             return null;
         }
 
-        try{
-
+        try {
             $auth = $this->crypto->decrypt($authCookie);
             if (is_array($auth)) {
                 if ($auth['isLoggedIn'] && $this->cookieToken) {
                     $auth = array_merge($auth, ['cookieToken' => $this->cookieToken]);
                 }
                 return AuthType::fromArray($auth);
-                
             }
-        }
-        catch(Exception $e) {
+        } catch (Exception $e) {
             $this->clearAuthCookie();
             //TODO: log error
         }
         return null;
     }
 
-    public function clearAuthCookie():void {
-        $this->cookieManager->delete($this->authName);
+    public function clearAuthCookie(): void
+    {
+        $this->helloResponse->deleteCookie($this->authName);
     }
 }

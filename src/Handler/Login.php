@@ -3,7 +3,7 @@
 namespace HelloCoop\Handler;
 
 use HelloCoop\Config\HelloConfig;
-use HelloCoop\RequestParamFetcher\ParamFetcherInterface;
+use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Lib\Auth;
 use HelloCoop\Lib\AuthHelper;
 use RuntimeException;
@@ -14,7 +14,7 @@ class Login
 {
     private HelloConfig $config;
     private Auth $auth;
-    private ParamFetcherInterface $paramFetcher;
+    private HelloRequestInterface $helloRequest;
     private OIDCManager $oidcManager;
     private AuthHelper $authHelper;
     private array $redirectURIs;
@@ -22,14 +22,14 @@ class Login
     public function __construct(
         HelloConfig $config,
         Auth $auth,
-        ParamFetcherInterface $paramFetcher,
+        HelloRequestInterface $helloRequest,
         OIDCManager $oidcManager,
         AuthHelper $authHelper,
         array $redirectURIs = []
     ) {
         $this->config = $config;
         $this->auth = $auth;
-        $this->paramFetcher = $paramFetcher;
+        $this->helloRequest = $helloRequest;
         $this->oidcManager = $oidcManager;
         $this->authHelper = $authHelper;
 
@@ -38,7 +38,7 @@ class Login
 
     public function generateLoginUrl(): ?string
     {
-        $params = $this->paramFetcher->fetchMultiple([
+        $params = $this->helloRequest->fetchMultiple([
             'provider_hint',
             'scope',
             'target_uri',
@@ -54,7 +54,7 @@ class Login
         }
 
         $redirectURI = $this->config->getRedirectURI();
-        $host = $this->paramFetcher->fetchHeader('Host');
+        $host = $this->helloRequest->fetchHeader('Host');
 
         if (empty($redirectURI)) {
             if (isset($this->redirectURIs[$host])) {

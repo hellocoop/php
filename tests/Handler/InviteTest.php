@@ -7,7 +7,7 @@ use HelloCoop\Lib\Auth;
 use HelloCoop\Type\Auth as AuthType;
 use PHPUnit\Framework\TestCase;
 use HelloCoop\Handler\Invite;
-use HelloCoop\RequestParamFetcher\ParamFetcherInterface;
+use HelloCoop\HelloRequest\HelloRequestInterface;
 
 class InviteTest extends TestCase
 {
@@ -20,7 +20,7 @@ class InviteTest extends TestCase
     {
         $this->configMock = $this->createMock(HelloConfig::class);
         $this->authMock = $this->createMock(Auth::class);
-        $this->mockFetcher = $this->createMock(ParamFetcherInterface::class);
+        $this->mockFetcher = $this->createMock(HelloRequestInterface::class);
         $this->invite = new Invite($this->configMock, $this->authMock, $this->mockFetcher);
     }
     public function testCanGenerateInviteUrl(): void

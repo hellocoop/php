@@ -5,32 +5,32 @@ namespace HelloCoop\Tests\Handler;
 use HelloCoop\Config\HelloConfig;
 use HelloCoop\Handler\Logout;
 use HelloCoop\Lib\Auth;
-use HelloCoop\RequestParamFetcher\ParamFetcherInterface;
+use HelloCoop\HelloRequest\HelloRequestInterface;
 use PHPUnit\Framework\TestCase;
 
 class LogoutTest extends TestCase
 {
     private $configMock;
-    private $paramFetcherMock;
+    private $helloRequestMock;
     private $authMock;
     private $logoutHandler;
 
     protected function setUp(): void
     {
         $this->configMock = $this->createMock(HelloConfig::class);
-        $this->paramFetcherMock = $this->createMock(ParamFetcherInterface::class);
+        $this->helloRequestMock = $this->createMock(HelloRequestInterface::class);
         $this->authMock = $this->createMock(Auth::class);
 
         $this->logoutHandler = new Logout(
             $this->configMock,
-            $this->paramFetcherMock,
+            $this->helloRequestMock,
             $this->authMock
         );
     }
 
     public function testGenerateLogoutUrlWithTargetUri(): void
     {
-        $this->paramFetcherMock
+        $this->helloRequestMock
             ->method('fetch')
             ->with('target_uri')
             ->willReturn('http://example.com/target');
@@ -54,7 +54,7 @@ class LogoutTest extends TestCase
 
     public function testGenerateLogoutUrlWithoutTargetUri(): void
     {
-        $this->paramFetcherMock
+        $this->helloRequestMock
             ->method('fetch')
             ->with('target_uri')
             ->willReturn(null);
@@ -78,7 +78,7 @@ class LogoutTest extends TestCase
 
     public function testGenerateLogoutUrlWithLoginSync(): void
     {
-        $this->paramFetcherMock
+        $this->helloRequestMock
             ->method('fetch')
             ->with('target_uri')
             ->willReturn(null);

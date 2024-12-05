@@ -4,24 +4,30 @@ namespace HelloCoop\Handler;
 
 use HelloCoop\Type\AuthUpdates;
 use HelloCoop\Type\Auth as AuthType;
+use HelloCoop\Lib\Auth as AuthLib;
+use HelloCoop\HelloResponse\HelloResponseInterface;
 
-class Auth{
-    //TODO: we can use a builder patter here
-    public function __construct()
+class Auth
+{
+    private AuthLib $authLib;
+    public function __construct(AuthLib $authLib)
     {
-
+        $this->authLib = $authLib;
     }
 
-    public function handleAuth(): bool 
+    public function handleAuth(HelloResponseInterface $response): ?AuthType
     {
-       return false; 
+        $response->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        $response->setHeader('Pragma', 'no-cache');
+        $response->setHeader('Expires', '0');
+        return $this->authLib->getAuthfromCookies();
     }
-    public function updateAuth(AuthUpdates $authUpdates): ?AuthType 
+    public function updateAuth(AuthUpdates $authUpdates): ?AuthType
     {
-       return null; 
+        return null;
     }
-    public function clearAuth(): bool 
+    public function clearAuth(): bool
     {
-       return false; 
+        return false;
     }
 }
