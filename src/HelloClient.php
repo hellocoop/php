@@ -7,47 +7,55 @@ use HelloCoop\Renderers\PageRendererInterface;
 use HelloCoop\Handler\Callback;
 use HelloCoop\Exception\CallbackException;
 use HelloCoop\Exception\SameSiteCallbackException;
-use HelloCoop\Handler\Redirect\SimpleRedirector;
+use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\Handler\Auth;
 
 class HelloClient
 {
     private HelloConfig $config;
     private PageRendererInterface $pageRenderer;
-    private Callback $callback;
-    private SimpleRedirector $simpleRedirector;
+    private Callback $callbackHandler;
     private Auth $authHandler;
+
+    private HelloResponseInterface $helloResponse;
+
     public function __construct(
         HelloConfig $config,
         PageRendererInterface $pageRenderer,
-        Callback $callback,
-        SimpleRedirector $simpleRedirector,
-        Auth $authHandler
+        Callback $callbackHandler,
+        Auth $authHandler,
+        HelloResponseInterface $helloResponse
     ) {
         $this->config = $config;
         $this->pageRenderer = $pageRenderer;
-        $this->callback = $callback;
-        $this->simpleRedirector = $simpleRedirector;
+        $this->callbackHandler = $callbackHandler;
         $this->authHandler = $authHandler;
+        $this->helloResponse = $helloResponse;
     }
     public function getAuth(): array
     {
-        $this->authHandler->handleAuth();
+        return $this->authHandler->handleAuth()->toArray();
     }
-    public function handleLogin()
+    private function handleLogin()
     {
     }
-    public function handleLogout()
+    private function handleLogout()
     {
     }
-    public function handleInvite()
+    private function handleInvite()
     {
     }
-
+    private function handleAuth(): void
+    {
+        $this->helloResponse->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        $this->helloResponse->setHeader('Pragma', 'no-cache');
+        $this->helloResponse->setHeader('Expires', '0');
+        echo json_encode($this->authHandler->handleAuth()->toArray());
+    }
     private function handleCallback(): void
     {
         try {
-            $this->simpleRedirector->redirect($this->callback->handleCallback());
+            $this->helloResponse->redirect($this->callbackHandler->handleCallback());
         } catch (CallbackException $e) {
             $errorDetails = $e->getErrorDetails();
             echo $this->pageRenderer->renderErrorPage(
