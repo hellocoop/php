@@ -8,6 +8,7 @@ use HelloCoop\Handler\Callback;
 use HelloCoop\Exception\CallbackException;
 use HelloCoop\Exception\SameSiteCallbackException;
 use HelloCoop\Handler\Redirect\SimpleRedirector;
+use HelloCoop\Handler\Auth;
 
 class HelloClient
 {
@@ -15,20 +16,23 @@ class HelloClient
     private PageRendererInterface $pageRenderer;
     private Callback $callback;
     private SimpleRedirector $simpleRedirector;
+    private Auth $authHandler;
     public function __construct(
         HelloConfig $config,
         PageRendererInterface $pageRenderer,
         Callback $callback,
-        SimpleRedirector $simpleRedirector
+        SimpleRedirector $simpleRedirector,
+        Auth $authHandler
     ) {
         $this->config = $config;
         $this->pageRenderer = $pageRenderer;
         $this->callback = $callback;
         $this->simpleRedirector = $simpleRedirector;
+        $this->authHandler = $authHandler;
     }
     public function getAuth(): array
     {
-        return ['isLoggedIn' => false];
+        $this->authHandler->handleAuth();
     }
     public function handleLogin()
     {

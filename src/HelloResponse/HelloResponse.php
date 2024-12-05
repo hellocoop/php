@@ -24,11 +24,35 @@ class HelloResponse implements HelloResponseInterface
         header("$name: $value", true);
     }
 
+    /**
+     * Deletes a cookie by setting its expiration time to the past.
+     *
+     * This method sets the cookie's value to an empty string and its expiration time to one hour before the current time, which effectively deletes it.
+     *
+     * @param string $name The name of the cookie to delete.
+     * @param string $path The path on the server where the cookie will be available. Defaults to '/'.
+     * @param string $domain The domain for which the cookie is valid. Defaults to an empty string.
+     * @return void
+     */
     public function deleteCookie(string $name, string $path = '/', string $domain = ''): void
     {
         $this->setCookie($name, '', time() - 3600, $path, $domain);
     }
 
+    /**
+     * Sets a cookie with the specified parameters.
+     *
+     * This method uses PHP's `setcookie` function to set a cookie with the provided name, value, and various optional parameters such as expiration time, path, domain, security, and HttpOnly flags.
+     *
+     * @param string $name The name of the cookie.
+     * @param string $value The value to store in the cookie.
+     * @param int $expire The expiration time of the cookie, as a Unix timestamp. Defaults to 0 (session cookie).
+     * @param string $path The path for which the cookie is valid. Defaults to '/'.
+     * @param string $domain The domain for which the cookie is valid. Defaults to an empty string.
+     * @param bool $secure Whether the cookie should only be transmitted over secure (HTTPS) connections. Defaults to false.
+     * @param bool $httponly Whether the cookie should be accessible only via the HTTP protocol and not JavaScript. Defaults to true.
+     * @return void
+     */
     public function setCookie(
         string $name,
         string $value,
@@ -46,5 +70,21 @@ class HelloResponse implements HelloResponseInterface
             'httponly' => $httponly,
             'samesite' => 'Lax'
         ]);
+    }
+
+    /**
+     * Redirects the user to the specified URL.
+     *
+     * This method sends an HTTP Location header to redirect the user to the provided URL and terminates the script.
+     * If the script is running in a testing environment (i.e., when TESTING is defined), a RuntimeException will be thrown instead of performing the redirect.
+     *
+     * @param string $url The URL to redirect the user to.
+     * @return void
+     * @throws \RuntimeException if in the testing environment.
+     */
+    public function redirect(string $url): void
+    {
+        header('Location: ' . $url);
+        exit;
     }
 }

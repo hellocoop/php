@@ -47,4 +47,14 @@ interface HelloResponseInterface
      * @return void
      */
     public function deleteCookie(string $name, string $path = '/', string $domain = ''): void;
+
+    /**
+     * Redirects the user to the specified URL.
+     *
+     * This method sends an HTTP Location header to redirect the user to the provided URL.
+     *
+     * @param string $url The URL to redirect the user to.
+     * @return void
+     */
+    public function redirect(string $url): void;
 }

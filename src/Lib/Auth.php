@@ -12,11 +12,8 @@ class Auth
     private string $oidcName;
     private string $authName;
     private Crypto $crypto;
-
     private HelloRequestInterface $helloRequest;
-
     private HelloResponseInterface $helloResponse;
-
     private OIDCManager $oidcManager;
 
     private ?string $cookieToken = null;
@@ -56,7 +53,7 @@ class Auth
         return false;
     }
 
-    public function getAuthfromCookies(): ?AuthType
+    public function getAuthfromCookies(): AuthType
     {
         $oidCookie = $this->helloRequest->getCookie($this->oidcName);
         if ($oidCookie) {
@@ -66,7 +63,7 @@ class Auth
         $authCookie = $this->helloRequest->getCookie($this->authName);
 
         if (!$authCookie) {
-            return null;
+            return AuthType::fromArray(['isLoggedIn' => false]);
         }
 
         try {
@@ -81,7 +78,7 @@ class Auth
             $this->clearAuthCookie();
             //TODO: log error
         }
-        return null;
+        return  AuthType::fromArray(['isLoggedIn' => false]);
     }
 
     public function clearAuthCookie(): void

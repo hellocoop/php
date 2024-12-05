@@ -91,6 +91,6 @@ class AuthTest extends TestCase
             ->with('auth_name');
 
         $auth = $this->auth->getAuthfromCookies();
-        $this->assertNull($auth);
+        $this->assertFalse($auth->isLoggedIn);
     }
 }
