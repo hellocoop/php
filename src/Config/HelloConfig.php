@@ -2,31 +2,46 @@
 
 namespace HelloCoop\Config;
 
-class HelloConfig
+class HelloConfig implements ConfigInterface
 {
     private string $apiRoute;
+    private string $authApiRoute;
+    private string $loginApiRoute;
+    private string $logoutApiRoute;
     private bool $sameSiteStrict;
+    private ?bool $cookieToken = null;
     private ?string $clientId;
-    private array $scope;
-    private array $providerHint;
-    private array $routes;
-    private $loginSync;
-    private $logoutSync;
+    private ?string $host;
     private ?string $redirectURI;
     private string $helloDomain;
     private string $helloWallet;
+    private ?string $secret = null;
+    private ?bool $logDebug = null;
+    private ?array $error = null;
+    private array $scope;
+    private array $providerHint;
+    private array $routes;
+    private array $cookies;
+    private $loginSync;
+    private $logoutSync;
+    private bool $production;
 
-    // New fields
-    private ?string $nonce;
-    private ?string $responseType;
-    private ?string $responseMode;
-    private ?string $prompt;
-    private ?string $loginHint;
-    private ?string $domainHint;
     public function __construct(
-        $apiRoute,
-        $sameSiteStrict,
+        string $apiRoute,
+        string $authApiRoute,
+        string $loginApiRoute,
+        string $logoutApiRoute,
+        bool $sameSiteStrict,
+        array $cookies = [
+            'authName' =>  'hellocoop_auth',
+            'oidcName' => 'hellocoop_oidc',
+        ],
+        bool $production = true,
         ?string $clientId = null,
+        ?string $host = null,
+        ?string $redirectURI = null,
+        string $helloDomain = 'hello.coop',
+        string $helloWallet = '',
         array $scope = ['openid', 'name', 'email', 'picture'],
         array $providerHint = ['github'],
         array $routes = [
@@ -36,46 +51,53 @@ class HelloConfig
         ],
         ?callable $loginSync = null,
         ?callable $logoutSync = null,
-        $redirectURI = null,
-        $helloWallet = '',
-        $helloDomain = 'hello.coop',
-        ?string $nonce = null,
-        ?string $responseType = null,
-        ?string $responseMode = null,
-        ?string $prompt = null,
-        ?string $loginHint = null,
-        ?string $domainHint = null
+        ?bool $cookieToken = null,
+        ?string $secret = null,
+        ?bool $logDebug = null
     ) {
         $this->apiRoute = $apiRoute;
+        $this->authApiRoute = $authApiRoute;
+        $this->loginApiRoute = $loginApiRoute;
+        $this->logoutApiRoute = $logoutApiRoute;
         $this->sameSiteStrict = $sameSiteStrict;
+        $this->cookies = $cookies;
+        $this->production = $production;
         $this->clientId = $clientId;
+        $this->host = $host;
+        $this->redirectURI = $redirectURI;
+        $this->helloDomain = $helloDomain;
+        $this->helloWallet = $helloWallet;
         $this->scope = $scope;
         $this->providerHint = $providerHint;
         $this->routes = $routes;
         $this->loginSync = $loginSync;
         $this->logoutSync = $logoutSync;
-        $this->redirectURI = $redirectURI;
-        $this->helloWallet = $helloWallet;
-        $this->helloDomain = $helloDomain;
-        $this->nonce = $nonce;
-        $this->responseType = $responseType;
-        $this->responseMode = $responseMode;
-        $this->prompt = $prompt;
-        $this->loginHint = $loginHint;
-        $this->domainHint = $domainHint;
+        $this->cookieToken = $cookieToken;
+        $this->secret = $secret;
+        $this->logDebug = $logDebug;
     }
 
-    public function getClientId(): ?string
+    public function getProduction(): bool
     {
-        return $this->clientId;
+        return $this->production;
     }
 
-    public function getScope(): array
+    public function getSameSiteStrict(): ?bool
+    {
+        return $this->sameSiteStrict;
+    }
+
+    public function getError(): ?array
+    {
+        return $this->error;
+    }
+
+    public function getScope(): ?array
     {
         return $this->scope;
     }
 
-    public function getProviderHint(): array
+    public function getProviderHint(): ?array
     {
         return $this->providerHint;
     }
@@ -83,6 +105,11 @@ class HelloConfig
     public function getRoutes(): array
     {
         return $this->routes;
+    }
+
+    public function getCookies(): array
+    {
+        return $this->cookies;
     }
 
     public function getLoginSync(): ?callable
@@ -95,6 +122,41 @@ class HelloConfig
         return $this->logoutSync;
     }
 
+    public function getCookieToken(): ?bool
+    {
+        return $this->cookieToken;
+    }
+
+    public function getApiRoute(): string
+    {
+        return $this->apiRoute;
+    }
+
+    public function getAuthApiRoute(): string
+    {
+        return $this->authApiRoute;
+    }
+
+    public function getLoginApiRoute(): string
+    {
+        return $this->loginApiRoute;
+    }
+
+    public function getLogoutApiRoute(): string
+    {
+        return $this->logoutApiRoute;
+    }
+
+    public function getClientId(): ?string
+    {
+        return $this->clientId;
+    }
+
+    public function getHost(): ?string
+    {
+        return $this->host;
+    }
+
     public function getRedirectURI(): ?string
     {
         return $this->redirectURI;
@@ -104,48 +166,19 @@ class HelloConfig
     {
         return $this->helloDomain;
     }
-    public function getSameSiteStrict(): bool
-    {
-        return $this->sameSiteStrict;
-    }
-    public function getApiRoute(): string
-    {
-        return $this->apiRoute;
-    }
 
     public function getHelloWallet(): string
     {
         return $this->helloWallet;
     }
 
-    // Getter methods for new fields
-    public function getNonce(): ?string
+    public function getSecret(): ?string
     {
-        return $this->nonce;
+        return $this->secret;
     }
 
-    public function getResponseType(): ?string
+    public function getLogDebug(): ?bool
     {
-        return $this->responseType;
-    }
-
-    public function getResponseMode(): ?string
-    {
-        return $this->responseMode;
-    }
-
-    public function getPrompt(): ?string
-    {
-        return $this->prompt;
-    }
-
-    public function getLoginHint(): ?string
-    {
-        return $this->loginHint;
-    }
-
-    public function getDomainHint(): ?string
-    {
-        return $this->domainHint;
+        return $this->logDebug;
     }
 }

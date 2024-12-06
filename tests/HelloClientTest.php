@@ -3,7 +3,7 @@
 namespace HelloCoop\Tests;
 
 use HelloCoop\HelloClient;
-use HelloCoop\Config\HelloConfig;
+use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Handler\Auth;
 use HelloCoop\Type\Auth as AuthType;
 use HelloCoop\Handler\Invite;
@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 
 class HelloClientTest extends TestCase
 {
-    private $config;
+    private ConfigInterface $config;
     private $pageRenderer;
     private $callbackHandler;
     private $authHandler;
@@ -31,7 +31,7 @@ class HelloClientTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->config = $this->createMock(HelloConfig::class);
+        $this->config = $this->createMock(ConfigInterface::class);
         $this->pageRenderer = $this->createMock(PageRendererInterface::class);
         $this->callbackHandler = $this->createMock(Callback::class);
         $this->authHandler = $this->createMock(Auth::class);

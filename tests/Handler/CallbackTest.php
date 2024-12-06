@@ -5,7 +5,7 @@ namespace HelloCoop\Tests\Handler;
 use PHPUnit\Framework\TestCase;
 use HelloCoop\Handler\Callback;
 use HelloCoop\HelloRequest\HelloRequestInterface;
-use HelloCoop\Config\HelloConfig;
+use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Lib\OIDCManager;
 use HelloCoop\Lib\Auth;
 use HelloCoop\Lib\TokenFetcher;
@@ -28,7 +28,7 @@ class CallbackTest extends TestCase
     {
         // Mock dependencies
         $this->helloRequestMock = $this->createMock(HelloRequestInterface::class);
-        $this->configMock = $this->createMock(HelloConfig::class);
+        $this->configMock = $this->createMock(ConfigInterface::class);
         $this->oidcManagerMock = $this->createMock(OIDCManager::class);
         $this->authMock = $this->createMock(Auth::class);
         $this->tokenFetcherMock = $this->createMock(TokenFetcher::class);

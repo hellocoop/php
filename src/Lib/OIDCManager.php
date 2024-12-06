@@ -2,6 +2,7 @@
 
 namespace HelloCoop\Lib;
 
+use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Type\OIDC;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\HelloResponse\HelloResponseInterface;
@@ -9,32 +10,26 @@ use Exception;
 
 class OIDCManager
 {
+    private Crypto $crypto;
+    private ConfigInterface $config;
     private HelloResponseInterface $helloResponse;
     private HelloRequestInterface $helloRequest;
-    private Crypto $crypto;
-    private string $oidcName;
-    private array $config;
-    private string $apiRoute;
 
     public function __construct(
         HelloRequestInterface $helloRequest,
         HelloResponseInterface $helloResponse,
-        Crypto $crypto,
-        string $oidcName,
-        array $config,
-        string $path = '/'
+        ConfigInterface $config,
+        Crypto $crypto
     ) {
         $this->helloRequest = $helloRequest;
         $this->helloResponse = $helloResponse;
-        $this->crypto = $crypto;
-        $this->oidcName = $oidcName;
         $this->config = $config;
-        $this->apiRoute = $path;
+        $this->crypto = $crypto;
     }
 
     public function getOidc(): ?OIDC
     {
-        $oidcCookie = $this->helloRequest->getCookie($this->oidcName);
+        $oidcCookie = $this->helloRequest->getCookie($this->config->getCookies()['oidcName']);
 
         if (!$oidcCookie) {
             return null;
@@ -59,14 +54,14 @@ class OIDCManager
             $encCookie = $this->crypto->encrypt($oidc->toArray());
 
             $this->helloResponse->setCookie(
-                $this->oidcName,
+                $this->config->getCookies()['oidcName'],
                 $encCookie,
                 time() + 5 * 60, // 5 minutes
-                $this->apiRoute,
+                $this->config->getApiRoute(),
                 '',
-                $this->config['production'],
+                $this->config->getProduction(),
                 true // HttpOnly
-            );
+            );//TODO 'samesite' can be added if we use options instead of named parameters
         } catch (Exception $e) {
             // TODO: Log error
         }
@@ -75,8 +70,8 @@ class OIDCManager
     public function clearOidcCookie(): void
     {
         $this->helloResponse->deleteCookie(
-            $this->oidcName,
-            $this->apiRoute,
+            $this->config->getCookies()['oidcName'],
+            $this->config->getApiRoute(),
             ''
         );
     }

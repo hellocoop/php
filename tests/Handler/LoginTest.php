@@ -3,7 +3,7 @@
 namespace HelloCoop\Tests\Handler;
 
 use HelloCoop\Handler\Login;
-use HelloCoop\Config\HelloConfig;
+use HelloCoop\Config\ConfigInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Lib\Auth;
 use HelloCoop\Lib\AuthHelper;
@@ -22,7 +22,7 @@ class LoginTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->configMock = $this->createMock(HelloConfig::class);
+        $this->configMock = $this->createMock(ConfigInterface::class);
         $this->authMock = $this->createMock(Auth::class);
         $this->helloRequestMock = $this->createMock(HelloRequestInterface::class);
         $this->oidcManagerMock = $this->createMock(OIDCManager::class);

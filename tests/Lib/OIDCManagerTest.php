@@ -7,34 +7,36 @@ use HelloCoop\Type\OIDC;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\Lib\Crypto;
+use HelloCoop\Config\ConfigInterface;
 use PHPUnit\Framework\TestCase;
 
 class OIDCManagerTest extends TestCase
 {
-    private $cookieManager;
-    private $crypto;
     private $helloRequestMock;
     private $helloResponseMock;
+    private $cryptoMock;
     private $oidcManager;
-    private $config;
+    private $configMock;
 
     protected function setUp(): void
     {
+        // Mock dependencies
         $this->helloRequestMock = $this->createMock(HelloRequestInterface::class);
         $this->helloResponseMock = $this->createMock(HelloResponseInterface::class);
-        $this->crypto = $this->createMock(Crypto::class);
-        $this->config = [
-            'production' => true,
-            'sameSiteStrict' => true,
-        ];
+        $this->configMock = $this->createMock(ConfigInterface::class);
+        $this->cryptoMock = $this->createMock(Crypto::class);
 
+        // Setting up mock behaviors for config
+        $this->configMock->method('getCookies')->willReturn(['oidcName' => 'oidc_cookie']);
+        $this->configMock->method('getApiRoute')->willReturn('/path');
+        $this->configMock->method('getProduction')->willReturn(true);
+
+        // Create the OIDCManager instance
         $this->oidcManager = new OIDCManager(
             $this->helloRequestMock,
             $this->helloResponseMock,
-            $this->crypto,
-            'oidc_cookie',
-            $this->config,
-            '/path'
+            $this->configMock,
+            $this->cryptoMock
         );
     }
 
@@ -47,8 +49,10 @@ class OIDCManagerTest extends TestCase
             'target_uri' => '/home',
         ];
 
+        // Mock the behavior of getCookie
         $this->helloRequestMock->method('getCookie')->with('oidc_cookie')->willReturn('encrypted_cookie');
-        $this->crypto->method('decrypt')->with('encrypted_cookie')->willReturn($oidcData);
+        // Mock the decrypt method to return valid OIDC data
+        $this->cryptoMock->method('decrypt')->with('encrypted_cookie')->willReturn($oidcData);
 
         $oidc = $this->oidcManager->getOidc();
 
@@ -58,6 +62,7 @@ class OIDCManagerTest extends TestCase
 
     public function testGetOidcInvalid(): void
     {
+        // Mock the behavior when no cookie is found
         $this->helloRequestMock->method('getCookie')->with('oidc_cookie')->willReturn(null);
 
         $oidc = $this->oidcManager->getOidc();
@@ -69,7 +74,8 @@ class OIDCManagerTest extends TestCase
     {
         $oidc = new OIDC('test_verifier', 'test_nonce', 'https://example.com/callback', '/home');
 
-        $this->crypto->method('encrypt')->with($oidc->toArray())->willReturn('encrypted_cookie');
+        // Mock the encrypt method to return a valid encrypted cookie
+        $this->cryptoMock->method('encrypt')->with($oidc->toArray())->willReturn('encrypted_cookie');
 
         $this->helloResponseMock->expects($this->once())
             ->method('setCookie')

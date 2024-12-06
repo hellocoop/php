@@ -2,7 +2,7 @@
 
 namespace HelloCoop\Tests\Handler;
 
-use HelloCoop\Config\HelloConfig;
+use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Handler\Logout;
 use HelloCoop\Lib\Auth;
 use HelloCoop\HelloRequest\HelloRequestInterface;
@@ -17,7 +17,7 @@ class LogoutTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->configMock = $this->createMock(HelloConfig::class);
+        $this->configMock = $this->createMock(ConfigInterface::class);
         $this->helloRequestMock = $this->createMock(HelloRequestInterface::class);
         $this->authMock = $this->createMock(Auth::class);
 

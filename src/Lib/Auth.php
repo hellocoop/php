@@ -4,37 +4,30 @@ namespace HelloCoop\Lib;
 
 use Exception;
 use HelloCoop\Type\Auth as AuthType;
+use HelloCoop\Config\ConfigInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\HelloResponse\HelloResponseInterface;
 
 class Auth
 {
-    private string $oidcName;
-    private string $authName;
     private Crypto $crypto;
+    private ConfigInterface $config;
     private HelloRequestInterface $helloRequest;
     private HelloResponseInterface $helloResponse;
     private OIDCManager $oidcManager;
 
-    private ?string $cookieToken = null;
-
     public function __construct(
-        string $oidcName,
-        string $authName,
         Crypto $crypto,
         HelloRequestInterface $helloRequest,
         HelloResponseInterface $helloResponse,
         OIDCManager $oidcManager,
-        ?string $cookieToken = null
+        ConfigInterface $config
     ) {
-        $this->oidcName = $oidcName;
-        $this->authName = $authName;
         $this->crypto = $crypto;
         $this->helloRequest = $helloRequest;
         $this->helloResponse = $helloResponse;
         $this->oidcManager = $oidcManager;
-
-        $this->cookieToken = $cookieToken;
+        $this->config = $config;
     }
 
     public function saveAuthCookie(AuthType $auth): bool
@@ -44,7 +37,7 @@ class Auth
             if (!$encCookie) {
                 return false;
             }
-            $this->helloResponse->setCookie($this->authName, $encCookie);
+            $this->helloResponse->setCookie($this->config->getCookies()['authName'], $encCookie);
             return true;
         } catch (Exception $e) {
             //TODO: log error
@@ -55,12 +48,12 @@ class Auth
 
     public function getAuthfromCookies(): AuthType
     {
-        $oidCookie = $this->helloRequest->getCookie($this->oidcName);
+        $oidCookie = $this->helloRequest->getCookie($this->config->getCookies()['oidcName']);
         if ($oidCookie) {
             $this->oidcManager->clearOidcCookie();
         }
 
-        $authCookie = $this->helloRequest->getCookie($this->authName);
+        $authCookie = $this->helloRequest->getCookie($this->config->getCookies()['authName']);
 
         if (!$authCookie) {
             return AuthType::fromArray(['isLoggedIn' => false]);
@@ -69,8 +62,8 @@ class Auth
         try {
             $auth = $this->crypto->decrypt($authCookie);
             if (is_array($auth)) {
-                if ($auth['isLoggedIn'] && $this->cookieToken) {
-                    $auth = array_merge($auth, ['cookieToken' => $this->cookieToken]);
+                if ($auth['isLoggedIn'] && $this->config->getCookieToken()) {
+                    $auth = array_merge($auth, ['cookieToken' => $this->config->getCookieToken()]);
                 }
                 return AuthType::fromArray($auth);
             }
@@ -83,6 +76,6 @@ class Auth
 
     public function clearAuthCookie(): void
     {
-        $this->helloResponse->deleteCookie($this->authName);
+        $this->helloResponse->deleteCookie($this->config->getCookies()['authName']);
     }
 }

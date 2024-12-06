@@ -2,7 +2,7 @@
 
 namespace HelloCoop;
 
-use HelloCoop\Config\HelloConfig;
+use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Handler\Auth;
 use HelloCoop\Handler\Invite;
 use HelloCoop\Handler\Logout;
@@ -13,11 +13,10 @@ use HelloCoop\Exception\CallbackException;
 use HelloCoop\Exception\SameSiteCallbackException;
 use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
-use HelloCoop\Tests\Utils\HelloString;
 
 class HelloClient
 {
-    private HelloConfig $config;
+    private ConfigInterface $config;
     private PageRendererInterface $pageRenderer;
     private Callback $callbackHandler;
     private Auth $authHandler;
@@ -28,7 +27,7 @@ class HelloClient
     private Login $login;
 
     public function __construct(
-        HelloConfig $config,
+        ConfigInterface $config,
         PageRendererInterface $pageRenderer,
         Callback $callbackHandler,
         Auth $authHandler,
@@ -40,6 +39,7 @@ class HelloClient
     ) {
         $this->config = $config;
         $this->pageRenderer = $pageRenderer;
+
         $this->callbackHandler = $callbackHandler;
         $this->authHandler = $authHandler;
         $this->invite = $invite;

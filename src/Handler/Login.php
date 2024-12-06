@@ -2,7 +2,7 @@
 
 namespace HelloCoop\Handler;
 
-use HelloCoop\Config\HelloConfig;
+use HelloCoop\Config\ConfigInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Lib\Auth;
 use HelloCoop\Lib\AuthHelper;
@@ -12,7 +12,7 @@ use HelloCoop\Lib\OIDCManager;
 
 class Login
 {
-    private HelloConfig $config;
+    private ConfigInterface $config;
     private Auth $auth;
     private HelloRequestInterface $helloRequest;
     private OIDCManager $oidcManager;
@@ -20,7 +20,7 @@ class Login
     private array $redirectURIs;
 
     public function __construct(
-        HelloConfig $config,
+        ConfigInterface $config,
         Auth $auth,
         HelloRequestInterface $helloRequest,
         OIDCManager $oidcManager,

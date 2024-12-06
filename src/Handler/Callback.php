@@ -3,7 +3,7 @@
 namespace HelloCoop\Handler;
 
 use HelloCoop\HelloRequest\HelloRequestInterface;
-use HelloCoop\Config\HelloConfig;
+use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Config\Constants;
 use HelloCoop\Lib\OIDCManager;
 use HelloCoop\Lib\Auth;
@@ -17,7 +17,7 @@ use Exception;
 class Callback
 {
     private HelloRequestInterface $helloRequest;
-    private HelloConfig $config;
+    private ConfigInterface $config;
     private OIDCManager $oidcManager;
     private Auth $auth;
     private TokenFetcher $tokenFetcher;
@@ -26,7 +26,7 @@ class Callback
 
     public function __construct(
         HelloRequestInterface $helloRequest,
-        HelloConfig $config,
+        ConfigInterface $config,
         OIDCManager $oidcManager,
         Auth $auth,
         TokenFetcher $tokenFetcher,

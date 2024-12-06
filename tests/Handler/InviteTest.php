@@ -2,7 +2,7 @@
 
 namespace HelloCoop\Tests\Handler;
 
-use HelloCoop\Config\HelloConfig;
+use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Lib\Auth;
 use HelloCoop\Type\Auth as AuthType;
 use PHPUnit\Framework\TestCase;
@@ -18,14 +18,14 @@ class InviteTest extends TestCase
 
     public function setUp(): void
     {
-        $this->configMock = $this->createMock(HelloConfig::class);
+        $this->configMock = $this->createMock(ConfigInterface::class);
         $this->authMock = $this->createMock(Auth::class);
         $this->mockFetcher = $this->createMock(HelloRequestInterface::class);
         $this->invite = new Invite($this->configMock, $this->authMock, $this->mockFetcher);
     }
     public function testCanGenerateInviteUrl(): void
     {
-        // Mocking the dependencies for HelloConfig
+        // Mocking the dependencies for ConfigInterface
         $this->configMock->method('getClientId')->willReturn('testClientId');
         $this->configMock->method('getRedirectURI')->willReturn('/redirect');
         $this->configMock->method('getHelloDomain')->willReturn('hello.com');

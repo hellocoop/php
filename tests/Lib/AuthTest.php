@@ -9,15 +9,16 @@ use HelloCoop\Lib\OIDCManager;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\Lib\Crypto;
+use HelloCoop\Config\ConfigInterface;
 use Exception;
 
 class AuthTest extends TestCase
 {
     private Auth $auth;
-
     private $cryptoMock;
     private $helloRequestMock;
     private $helloResponseMock;
+    private $configMock;
     private OIDCManager $oidcManager;
 
     protected function setUp(): void
@@ -25,15 +26,22 @@ class AuthTest extends TestCase
         $this->cryptoMock = $this->createMock(Crypto::class);
         $this->helloRequestMock = $this->createMock(HelloRequestInterface::class);
         $this->helloResponseMock = $this->createMock(HelloResponseInterface::class);
+        $this->configMock = $this->createMock(ConfigInterface::class);
         $this->oidcManager = $this->createMock(OIDCManager::class);
+
+        // Mock config to return cookie names and other config values
+        $this->configMock->method('getCookies')->willReturn([
+            'authName' => 'auth_name',
+            'oidcName' => 'oidc_name'
+        ]);
+        $this->configMock->method('getCookieToken')->willReturn(true);
+
         $this->auth = new Auth(
-            'oidc_name',
-            'auth_name',
             $this->cryptoMock,
             $this->helloRequestMock,
             $this->helloResponseMock,
             $this->oidcManager,
-            'some_cookie_token'
+            $this->configMock
         );
     }
 
@@ -54,7 +62,7 @@ class AuthTest extends TestCase
     public function testSaveAuthCookieEncryptionFails()
     {
         $authMock = $this->createMock(AuthType::class);
-        $this->cryptoMock->method('encrypt')->willReturn('0');
+        $this->cryptoMock->method('encrypt')->willReturn('');
 
         $this->helloResponseMock->expects($this->never())->method('setCookie');
 
@@ -64,8 +72,7 @@ class AuthTest extends TestCase
 
     public function testGetAuthFromCookiesSuccess()
     {
-        $_SERVER['HTTP_COOKIE'] = 'auth_name=encrypted_cookie';
-
+        // Simulate cookies
         $this->helloRequestMock->method('getCookie')->willReturn('encrypted_cookie');
         $this->cryptoMock->method('decrypt')->willReturn([
             'isLoggedIn' => true,
@@ -76,12 +83,12 @@ class AuthTest extends TestCase
 
         $auth = $this->auth->getAuthfromCookies();
         $this->assertInstanceOf(AuthType::class, $auth);
+        $this->assertTrue($auth->isLoggedIn);
     }
 
     public function testGetAuthFromCookiesDecryptFails()
     {
-        $_SERVER['HTTP_COOKIE'] = 'auth_name=encrypted_cookie';
-
+        // Simulate cookies
         $this->helloRequestMock->method('getCookie')->willReturn('encrypted_cookie');
         $this->cryptoMock->method('decrypt')->willThrowException(new Exception());
 

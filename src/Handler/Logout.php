@@ -2,17 +2,17 @@
 
 namespace HelloCoop\Handler;
 
-use HelloCoop\Config\HelloConfig;
+use HelloCoop\Config\ConfigInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Lib\Auth;
 
 class Logout
 {
-    private HelloConfig $config;
+    private ConfigInterface $config;
     private HelloRequestInterface $helloRequest;
     private Auth $auth;
     public function __construct(
-        HelloConfig $config,
+        ConfigInterface $config,
         HelloRequestInterface $helloRequest,
         Auth $auth
     ) {

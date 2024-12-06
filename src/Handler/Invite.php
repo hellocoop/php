@@ -2,17 +2,17 @@
 
 namespace HelloCoop\Handler;
 
-use HelloCoop\Config\HelloConfig;
+use HelloCoop\Config\ConfigInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Lib\Auth;
 
 class Invite
 {
-    private HelloConfig $config;
+    private ConfigInterface $config;
 
     private Auth $auth;
     private HelloRequestInterface $helloRequest;
-    public function __construct(HelloConfig $config, Auth $auth, HelloRequestInterface $helloRequest)
+    public function __construct(ConfigInterface $config, Auth $auth, HelloRequestInterface $helloRequest)
     {
         $this->config = $config;
         $this->auth = $auth;
