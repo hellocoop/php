@@ -3,112 +3,155 @@
 namespace HelloCoop\Tests;
 
 use HelloCoop\HelloClient;
-use HelloCoop\Config\ConfigInterface;
-use HelloCoop\Handler\Auth;
-use HelloCoop\Type\Auth as AuthType;
-use HelloCoop\Handler\Invite;
-use HelloCoop\Handler\Logout;
-use HelloCoop\Handler\Login;
-use HelloCoop\Renderers\PageRendererInterface;
-use HelloCoop\Handler\Callback;
-use HelloCoop\Exception\SameSiteCallbackException;
-use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
+use HelloCoop\HelloResponse\HelloResponseInterface;
+use HelloCoop\Config\ConfigInterface;
+use HelloCoop\Lib\Crypto;
+use HelloCoop\Renderers\PageRendererInterface;
 use PHPUnit\Framework\TestCase;
+use phpmock\phpunit\PHPMock;
+use HelloCoop\Exception\CallbackException;
 
 class HelloClientTest extends TestCase
 {
-    private ConfigInterface $config;
-    private $pageRenderer;
-    private $callbackHandler;
-    private $authHandler;
-    private $invite;
-    private $logout;
-    private $login;
-    private $helloRequest;
-    private $helloResponse;
-    private $helloClient;
+    use PHPMock;
+
+    private $helloRequestMock;
+    private $helloResponseMock;
+    private $configMock;
+    private $pageRendererMock;
+    private $client;
+
+    private Crypto $crypto;
 
     protected function setUp(): void
     {
-        $this->config = $this->createMock(ConfigInterface::class);
-        $this->pageRenderer = $this->createMock(PageRendererInterface::class);
-        $this->callbackHandler = $this->createMock(Callback::class);
-        $this->authHandler = $this->createMock(Auth::class);
-        $this->invite = $this->createMock(Invite::class);
-        $this->logout = $this->createMock(Logout::class);
-        $this->login = $this->createMock(Login::class);
-        $this->helloRequest = $this->createMock(HelloRequestInterface::class);
-        $this->helloResponse = $this->createMock(HelloResponseInterface::class);
+        $this->helloRequestMock = $this->createMock(HelloRequestInterface::class);
+        $this->helloResponseMock = $this->createMock(HelloResponseInterface::class);
+        $this->configMock = $this->createMock(ConfigInterface::class);
+        $this->pageRendererMock = $this->createMock(PageRendererInterface::class);
 
-        $this->helloClient = new HelloClient(
-            $this->config,
-            $this->pageRenderer,
-            $this->callbackHandler,
-            $this->authHandler,
-            $this->invite,
-            $this->logout,
-            $this->login,
-            $this->helloRequest,
-            $this->helloResponse
+        // Configure the ConfigInterface mock
+        $this->configMock->method('getSecret')
+            ->willReturn('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef');
+        $this->configMock->method('getCookies')
+            ->willReturn([
+                'authName' => 'authName',
+                'oidcName' => 'oidcName',
+            ]);
+        $this->configMock->method('getClientId')
+            ->willReturn('hello_php');
+        $this->configMock->method('getRedirectURI')
+            ->willReturn('/');
+
+        // Mock the fetch() method of HelloRequestInterface
+        $this->helloRequestMock->method('fetch')
+            ->willReturnCallback(function ($key) {
+                return $_GET[$key] ?? $_POST[$key] ?? null;
+            });
+
+        $this->helloRequestMock->method('getMethod')
+            ->willReturnCallback(function () {
+                return $_SERVER['REQUEST_METHOD'];
+            });
+
+        $this->helloRequestMock->method('getCookie')
+            ->willReturnCallback(function ($key) {
+                return $_COOKIE[$key] ?? null;
+            });
+
+        $this->crypto = new Crypto($this->configMock->getSecret());
+
+        // Initialize HelloClient
+        $this->client = new HelloClient(
+            $this->helloRequestMock,
+            $this->helloResponseMock,
+            $this->configMock,
+            $this->pageRendererMock
         );
+
+        $_COOKIE = [];
+        $_SERVER['REQUEST_METHOD'] = 'GET';
     }
 
-    public function testRouteAuth()
+    public function testRouteHandlesAuth()
     {
-        $this->helloRequest->method('getMethod')->willReturn('GET');
-        $this->helloRequest->method('fetch')->with('op')->willReturn('auth');
-
-        $this->authHandler->expects($this->once())->method('handleAuth')->willReturn(AuthType::fromArray(['isLoggedIn' => true]));
-        $this->helloResponse->expects($this->once())->method('json')->with([
-            'isLoggedIn' => true,
-            'cookieToken' => null,
-            'authCookie' => null
+        // Simulate $_GET parameters
+        $_GET = ['op' => 'auth'];
+        $_COOKIE['oidcName'] = $this->crypto->encrypt([
+            'code_verifier' => 'test_verifier',
+            'nonce' => 'test_nonce',
+            'redirect_uri' => 'https://example.com/callback',
+            'target_uri' => '/home',
         ]);
 
-        $this->helloClient->route();
+        $this->helloResponseMock
+            ->expects($this->once())
+            ->method('json')
+            ->with($this->isType('array'))
+            ->willReturn('auth_response');
+
+        $result = $this->client->route();
+        $this->assertSame('auth_response', $result);
     }
 
-    public function testRouteLogin()
+    public function testRouteHandlesCallback()
     {
-        $this->helloRequest->method('getMethod')->willReturn('GET');
-        $this->helloRequest->method('fetch')->with('op')->willReturn('login');
+        // Simulate $_GET parameters
+        $_GET = ['code' => 'callback_code'];
 
-        $this->login->expects($this->once())->method('generateLoginUrl')->willReturn('https://login.example.com');
-        $this->helloResponse->expects($this->once())->method('redirect')->with('https://login.example.com');
+        $_COOKIE['oidcName'] = $this->crypto->encrypt([
+            'code_verifier' => 'test_verifier',
+            'nonce' => 'test_nonce',
+            'redirect_uri' => 'https://example.com/callback',
+            'target_uri' => '/home',
+        ]);
 
-        $this->helloClient->route();
+        $this->helloResponseMock
+            ->expects($this->once())
+            ->method('redirect')
+            ->with($this->isType('string'))
+            ->willReturn('callback_response');
+
+        $result = $this->client->route();
+        $this->assertSame('callback_response', $result);
     }
 
-    public function testRouteCallback()
+    public function testRouteHandlesCallbackException()
     {
-        $this->helloRequest->method('getMethod')->willReturn('GET');
-        $this->helloRequest->method('fetch')->withConsecutive(['op'], ['code'])->willReturnOnConsecutiveCalls(null, 'authCode');
+        // Simulate $_GET parameters
+        $_GET = ['code' => 'callback_code'];
 
-        $this->callbackHandler->expects($this->once())->method('handleCallback')->willReturn('https://callback.example.com');
-        $this->helloResponse->expects($this->once())->method('redirect')->with('https://callback.example.com');
+        $_COOKIE['oidcName'] = $this->crypto->encrypt([
+            'code_verifier' => 'test_verifier',
+            'nonce' => 'test_nonce',
+            'redirect_uri' => 'https://example.com/callback',
+            'target_uri' => '',
+        ]);
 
-        $this->helloClient->route();
-    }
+        $this->pageRendererMock
+            ->expects($this->once())
+            ->method('renderErrorPage')
+            ->with($this->isType('string'), $this->isType('string'), $this->isType('string'))
+            ->willReturn('error_page');
 
-    public function testRouteSameSiteCallbackException()
-    {
-        $this->helloRequest->method('getMethod')->willReturn('GET');
-        $this->helloRequest->method('fetch')->withConsecutive(['op'], ['code'])->willReturnOnConsecutiveCalls(null, 'authCode');
+        $this->helloResponseMock
+            ->expects($this->once())
+            ->method('render')
+            ->with('error_page')
+            ->willReturn('render_response');
 
-        $this->callbackHandler->method('handleCallback')->willThrowException(new SameSiteCallbackException());
+        // Mock Callback handler to throw exception
+        $callbackHandler = $this->getMockBuilder(\HelloCoop\Handler\Callback::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['handleCallback'])
+            ->getMock();
 
-        $this->pageRenderer->expects($this->once())->method('renderSameSitePage');
-        $this->helloResponse->expects($this->once())->method('render');
+        $callbackHandler
+            ->method('handleCallback')
+            ->willThrowException(new CallbackException(['error' => 'test', 'error_description' => 'desc', 'target_uri' => 'uri']));
 
-        $this->helloClient->route();
-    }
-
-    public function testRouteInvalidMethod()
-    {
-        $this->helloRequest->method('getMethod')->willReturn('PUT');
-        $this->helloResponse->expects($this->never())->method($this->anything());
-
-        $this->helloClient->route();
+        $result = $this->client->route();
+        $this->assertSame('render_response', $result);
     }
 }

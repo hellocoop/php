@@ -2,6 +2,8 @@
 
 namespace HelloCoop;
 
+use HelloCoop\HelloRequest\HelloRequestInterface;
+use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Handler\Auth;
 use HelloCoop\Handler\Invite;
@@ -11,71 +13,109 @@ use HelloCoop\Renderers\PageRendererInterface;
 use HelloCoop\Handler\Callback;
 use HelloCoop\Exception\CallbackException;
 use HelloCoop\Exception\SameSiteCallbackException;
-use HelloCoop\HelloResponse\HelloResponseInterface;
-use HelloCoop\HelloRequest\HelloRequestInterface;
 
 class HelloClient
 {
     private ConfigInterface $config;
     private PageRendererInterface $pageRenderer;
-    private Callback $callbackHandler;
-    private Auth $authHandler;
     private HelloResponseInterface $helloResponse;
     private HelloRequestInterface $helloRequest;
+    private Callback $callbackHandler;
+    private Auth $authHandler;
     private Invite $invite;
     private Logout $logout;
     private Login $login;
 
     public function __construct(
-        ConfigInterface $config,
-        PageRendererInterface $pageRenderer,
-        Callback $callbackHandler,
-        Auth $authHandler,
-        Invite $invite,
-        Logout $logout,
-        Login $login,
         HelloRequestInterface $helloRequest,
-        HelloResponseInterface $helloResponse
+        HelloResponseInterface $helloResponse,
+        ConfigInterface $config,
+        PageRendererInterface $pageRenderer
     ) {
-        $this->config = $config;
-        $this->pageRenderer = $pageRenderer;
-
-        $this->callbackHandler = $callbackHandler;
-        $this->authHandler = $authHandler;
-        $this->invite = $invite;
-        $this->logout = $logout;
-        $this->login = $login;
-
         $this->helloRequest = $helloRequest;
         $this->helloResponse = $helloResponse;
+        $this->config = $config;
+        $this->pageRenderer = $pageRenderer;
     }
+
+    private function getCallbackHandler(): Callback
+    {
+        return $this->callbackHandler ??= new Callback(
+            $this->helloRequest,
+            $this->helloResponse,
+            $this->config
+        );
+    }
+
+    private function getAuthHandler(): Auth
+    {
+        return $this->authHandler ??= new Auth(
+            $this->helloRequest,
+            $this->helloResponse,
+            $this->config
+        );
+    }
+
+    private function getInviteHandler(): Invite
+    {
+        return $this->invite ??= new Invite(
+            $this->helloRequest,
+            $this->helloResponse,
+            $this->config
+        );
+    }
+
+    private function getLogoutHandler(): Logout
+    {
+        return $this->logout ??= new Logout(
+            $this->helloRequest,
+            $this->helloResponse,
+            $this->config
+        );
+    }
+
+    private function getLoginHandler(): Login
+    {
+        return $this->login ??= new Login(
+            $this->helloRequest,
+            $this->helloResponse,
+            $this->config,
+            []
+        );
+    }
+
     public function getAuth(): array
     {
-        return $this->authHandler->handleAuth()->toArray();
+        return $this->getAuthHandler()->handleAuth()->toArray();
     }
+
     private function handleLogin()
     {
-        return $this->helloResponse->redirect($this->login->generateLoginUrl());
+        return $this->helloResponse->redirect($this->getLoginHandler()->generateLoginUrl());
     }
+
     private function handleLogout()
     {
-        return $this->helloResponse->redirect($this->logout->generateLogoutUrl());
+        return $this->helloResponse->redirect($this->getLogoutHandler()->generateLogoutUrl());
     }
+
     private function handleInvite()
     {
-        return $this->helloResponse->redirect($this->invite->generateInviteUrl());
+        return $this->helloResponse->redirect($this->getInviteHandler()->generateInviteUrl());
     }
+
     private function handleAuth(): string
     {
         $this->helloResponse->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         $this->helloResponse->setHeader('Pragma', 'no-cache');
         $this->helloResponse->setHeader('Expires', '0');
-        return $this->helloResponse->json($this->authHandler->handleAuth()->toArray());
+        return $this->helloResponse->json($this->getAuthHandler()->handleAuth()->toArray());
     }
+
     private function handleCallback()
     {
         try {
-            return $this->helloResponse->redirect($this->callbackHandler->handleCallback());
+            return $this->helloResponse->redirect($this->getCallbackHandler()->handleCallback());
         } catch (CallbackException $e) {
             $errorDetails = $e->getErrorDetails();
             return $this->helloResponse->render($this->pageRenderer->renderErrorPage(
@@ -107,13 +147,14 @@ class HelloClient
                 case 'invite':
                     return $this->handleInvite();
                 default:
-                    return; //TODO: add 500 error here;
+                    throw new \Exception('unknown query: ' . $op);
+                    //TODO: add 500 error here;
             }
         }
-
         if ($this->helloRequest->fetch('code') || $this->helloRequest->fetch('error')) {
             return $this->handleCallback();
         }
+
         return; //TODO: add 500 error here;
     }
 }

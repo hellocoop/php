@@ -17,17 +17,17 @@ class Auth
     private OIDCManager $oidcManager;
 
     public function __construct(
-        Crypto $crypto,
         HelloRequestInterface $helloRequest,
         HelloResponseInterface $helloResponse,
+        ConfigInterface $config,
         OIDCManager $oidcManager,
-        ConfigInterface $config
+        Crypto $crypto
     ) {
-        $this->crypto = $crypto;
         $this->helloRequest = $helloRequest;
         $this->helloResponse = $helloResponse;
-        $this->oidcManager = $oidcManager;
         $this->config = $config;
+        $this->oidcManager = $oidcManager;
+        $this->crypto = $crypto;
     }
 
     public function saveAuthCookie(AuthType $auth): bool

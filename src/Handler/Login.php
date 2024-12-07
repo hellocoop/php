@@ -2,38 +2,51 @@
 
 namespace HelloCoop\Handler;
 
-use HelloCoop\Config\ConfigInterface;
+use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
-use HelloCoop\Lib\Auth;
-use HelloCoop\Lib\AuthHelper;
-use RuntimeException;
-use HelloCoop\Type\OIDC;
+use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Lib\OIDCManager;
+use HelloCoop\Type\OIDC;
+use HelloCoop\Lib\AuthHelper;
+use HelloCoop\Lib\Crypto;
+use HelloCoop\Lib\PKCE;
+use RuntimeException;
 
 class Login
 {
-    private ConfigInterface $config;
-    private Auth $auth;
+    private HelloResponseInterface $helloResponse;
     private HelloRequestInterface $helloRequest;
+    private ConfigInterface $config;
     private OIDCManager $oidcManager;
     private AuthHelper $authHelper;
+
     private array $redirectURIs;
 
     public function __construct(
-        ConfigInterface $config,
-        Auth $auth,
         HelloRequestInterface $helloRequest,
-        OIDCManager $oidcManager,
-        AuthHelper $authHelper,
+        HelloResponseInterface $helloResponse,
+        ConfigInterface $config,
         array $redirectURIs = []
     ) {
-        $this->config = $config;
-        $this->auth = $auth;
         $this->helloRequest = $helloRequest;
-        $this->oidcManager = $oidcManager;
-        $this->authHelper = $authHelper;
-
+        $this->helloResponse = $helloResponse;
+        $this->config = $config;
         $this->redirectURIs = $redirectURIs;
+    }
+
+    private function getOIDCManager(): OIDCManager
+    {
+        return $this->oidcManager ??= new OIDCManager(
+            $this->helloRequest,
+            $this->helloResponse,
+            $this->config,
+            new Crypto($this->config->getSecret())
+        );
+    }
+
+    private function getAuthHelper(): AuthHelper
+    {
+        return $this->authHelper ??= new AuthHelper(new PKCE());
     }
 
     public function generateLoginUrl(): ?string
@@ -90,9 +103,9 @@ class Login
             $request['nonce'] = $params['nonce'];
         }
 
-        $authResponse = $this->authHelper->createAuthRequest($request);
+        $authResponse = $this->getAuthHelper()->createAuthRequest($request);
 
-        $this->oidcManager->saveOidc(OIDC::fromArray([
+        $this->getOIDCManager()->saveOidc(OIDC::fromArray([
             'nonce' => $authResponse['nonce'],
             'code_verifier' => $authResponse['code_verifier'],
             'redirect_uri' => $redirectURI,

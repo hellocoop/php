@@ -2,9 +2,11 @@
 
 namespace HelloCoop\Handler;
 
+use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Config\Constants;
+use HelloCoop\Lib\Crypto;
 use HelloCoop\Lib\OIDCManager;
 use HelloCoop\Lib\Auth;
 use HelloCoop\Type\Auth as AuthType;
@@ -13,31 +15,56 @@ use HelloCoop\Exception\SameSiteCallbackException;
 use HelloCoop\Lib\TokenFetcher;
 use HelloCoop\Lib\TokenParser;
 use Exception;
+use HelloCoop\Utils\CurlWrapper;
 
 class Callback
 {
+    private HelloResponseInterface $helloResponse;
     private HelloRequestInterface $helloRequest;
     private ConfigInterface $config;
     private OIDCManager $oidcManager;
     private Auth $auth;
     private TokenFetcher $tokenFetcher;
-
     private TokenParser $tokenParser;
 
     public function __construct(
         HelloRequestInterface $helloRequest,
-        ConfigInterface $config,
-        OIDCManager $oidcManager,
-        Auth $auth,
-        TokenFetcher $tokenFetcher,
-        TokenParser $tokenParser
+        HelloResponseInterface $helloResponse,
+        ConfigInterface $config
     ) {
         $this->helloRequest = $helloRequest;
+        $this->helloResponse = $helloResponse;
         $this->config = $config;
-        $this->oidcManager = $oidcManager;
-        $this->auth = $auth;
-        $this->tokenFetcher = $tokenFetcher;
-        $this->tokenParser = $tokenParser;
+    }
+
+    private function getOIDCManager(): OIDCManager
+    {
+        return $this->oidcManager ??= new OIDCManager(
+            $this->helloRequest,
+            $this->helloResponse,
+            $this->config,
+            new Crypto($this->config->getSecret())
+        );
+    }
+
+    private function getAuth(): Auth
+    {
+        return $this->auth ??= new Auth(
+            $this->helloRequest,
+            $this->helloResponse,
+            $this->config,
+            $this->getOIDCManager(),
+            new Crypto($this->config->getSecret())
+        );
+    }
+
+    private function getTokenFetcher(): TokenFetcher
+    {
+        return $this->tokenFetcher ??= new TokenFetcher(new CurlWrapper());
+    }
+    private function getTokenParser(): TokenParser
+    {
+        return $this->tokenParser ??= new TokenParser();
     }
 
     public function handleCallback(): ?string
@@ -65,8 +92,7 @@ class Callback
                 throw new SameSiteCallbackException();
             }
 
-            $oidcState = $this->oidcManager->getOidc()->toArray();
-
+            $oidcState = $this->getOIDCManager()->getOidc()->toArray();
             if (!$oidcState) {
                 return $this->sendErrorPage([
                     'error' => 'invalid_request',
@@ -106,8 +132,8 @@ class Callback
                 ], 'Missing code_verifier in callback request.');
             }
 
-            $this->oidcManager->clearOidcCookie();
-            $token = $this->tokenFetcher->fetchToken([
+            $this->getOIDCManager()->clearOidcCookie();
+            $token = $this->getTokenFetcher()->fetchToken([
                 'code' => (string) $code,
                 'wallet' => $this->config->getHelloWallet(),
                 'code_verifier' => $codeVerifier,
@@ -115,7 +141,7 @@ class Callback
                 'client_id' => $this->config->getClientId()
             ]);
 
-            $payload = $this->tokenParser->parseToken($token)['payload'];
+            $payload = $this->getTokenParser()->parseToken($token)['payload'];
             if ($payload['aud'] != $this->config->getClientId()) {
                 return $this->sendErrorPage([
                     'error' => 'invalid_client',
@@ -214,11 +240,11 @@ class Callback
             }
 
             $targetUri = $targetUri ?: $this->config->getRoutes()['loggedIn'] ?: '/';
-            $this->auth->saveAuthCookie(AuthType::fromArray($auth));
+            $this->getAuth()->saveAuthCookie(AuthType::fromArray($auth));
             return $targetUri;
         } catch (Exception $e) {
             if (!($e instanceof SameSiteCallbackException) && !($e instanceof CallbackException)) {
-                $this->oidcManager->clearOidcCookie();
+                $this->getOIDCManager()->clearOidcCookie();
             }
             // Let it handled in HelloClient
             throw $e;

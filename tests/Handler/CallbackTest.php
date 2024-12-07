@@ -5,43 +5,30 @@ namespace HelloCoop\Tests\Handler;
 use PHPUnit\Framework\TestCase;
 use HelloCoop\Handler\Callback;
 use HelloCoop\HelloRequest\HelloRequestInterface;
+use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\Config\ConfigInterface;
-use HelloCoop\Lib\OIDCManager;
-use HelloCoop\Lib\Auth;
-use HelloCoop\Lib\TokenFetcher;
-use HelloCoop\Lib\TokenParser;
 use HelloCoop\Exception\CallbackException;
 use HelloCoop\Type\OIDC;
 
 class CallbackTest extends TestCase
 {
     private $helloRequestMock;
+    private $helloResponseMock;
     private $configMock;
-    private $oidcManagerMock;
-    private $authMock;
-    private $tokenFetcherMock;
-
-    private $tokenParserMock;
     private $callback;
 
     protected function setUp(): void
     {
         // Mock dependencies
         $this->helloRequestMock = $this->createMock(HelloRequestInterface::class);
+        $this->helloResponseMock = $this->createMock(HelloResponseInterface::class);
         $this->configMock = $this->createMock(ConfigInterface::class);
-        $this->oidcManagerMock = $this->createMock(OIDCManager::class);
-        $this->authMock = $this->createMock(Auth::class);
-        $this->tokenFetcherMock = $this->createMock(TokenFetcher::class);
-        $this->tokenParserMock = $this->createMock(TokenParser::class);
 
         // Create instance of Callback
         $this->callback = new Callback(
             $this->helloRequestMock,
-            $this->configMock,
-            $this->oidcManagerMock,
-            $this->authMock,
-            $this->tokenFetcherMock,
-            $this->tokenParserMock
+            $this->helloResponseMock,
+            $this->configMock
         );
 
         // $this->oidcManagerMock->method('getOidc')->willReturn(OIDC::fromArray([
