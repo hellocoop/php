@@ -3,64 +3,28 @@
 namespace HelloCoop\Tests;
 
 use HelloCoop\HelloClient;
-use HelloCoop\HelloRequest\HelloRequestInterface;
-use HelloCoop\HelloResponse\HelloResponseInterface;
-use HelloCoop\Config\ConfigInterface;
-use HelloCoop\Lib\Crypto;
 use HelloCoop\Renderers\PageRendererInterface;
 use PHPUnit\Framework\TestCase;
-use phpmock\phpunit\PHPMock;
 use HelloCoop\Exception\CallbackException;
+use HelloCoop\Tests\Traits\ServiceMocksTrait;
+use PHPUnit\Framework\MockObject\MockObject;
+use HelloCoop\Handler\Callback;
 
 class HelloClientTest extends TestCase
 {
-    use PHPMock;
+    use ServiceMocksTrait;
 
-    private $helloRequestMock;
-    private $helloResponseMock;
-    private $configMock;
+    /** @var MockObject|PageRendererInterface */
     private $pageRendererMock;
-    private $client;
-
-    private Crypto $crypto;
+    /** @var MockObject|Callback */
+    private $callbackMock;
+    private HelloClient $client;
 
     protected function setUp(): void
     {
-        $this->helloRequestMock = $this->createMock(HelloRequestInterface::class);
-        $this->helloResponseMock = $this->createMock(HelloResponseInterface::class);
-        $this->configMock = $this->createMock(ConfigInterface::class);
+        parent::setUp();
+        $this->setUpServiceMocks();
         $this->pageRendererMock = $this->createMock(PageRendererInterface::class);
-
-        // Configure the ConfigInterface mock
-        $this->configMock->method('getSecret')
-            ->willReturn('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef');
-        $this->configMock->method('getCookies')
-            ->willReturn([
-                'authName' => 'authName',
-                'oidcName' => 'oidcName',
-            ]);
-        $this->configMock->method('getClientId')
-            ->willReturn('hello_php');
-        $this->configMock->method('getRedirectURI')
-            ->willReturn('/');
-
-        // Mock the fetch() method of HelloRequestInterface
-        $this->helloRequestMock->method('fetch')
-            ->willReturnCallback(function ($key) {
-                return $_GET[$key] ?? $_POST[$key] ?? null;
-            });
-
-        $this->helloRequestMock->method('getMethod')
-            ->willReturnCallback(function () {
-                return $_SERVER['REQUEST_METHOD'];
-            });
-
-        $this->helloRequestMock->method('getCookie')
-            ->willReturnCallback(function ($key) {
-                return $_COOKIE[$key] ?? null;
-            });
-
-        $this->crypto = new Crypto($this->configMock->getSecret());
 
         // Initialize HelloClient
         $this->client = new HelloClient(
@@ -70,8 +34,10 @@ class HelloClientTest extends TestCase
             $this->pageRendererMock
         );
 
-        $_COOKIE = [];
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $this->callbackMock = $this->createMock(Callback::class);
+        $this->replaceLazyLoadedProperty($this->client, 'callbackHandler', $this->callbackMock);
+
+        $this->pageRendererMock->method('renderErrorPage')->willReturn("error_page");
     }
 
     public function testRouteHandlesAuth()
@@ -110,11 +76,16 @@ class HelloClientTest extends TestCase
         $this->helloResponseMock
             ->expects($this->once())
             ->method('redirect')
-            ->with($this->isType('string'))
-            ->willReturn('callback_response');
+            ->with('/dashboard')
+            ->willReturn('/dashboard');
+
+        $this->callbackMock
+            ->method('handleCallback')
+            ->willReturn('/dashboard');
+
 
         $result = $this->client->route();
-        $this->assertSame('callback_response', $result);
+        $this->assertSame('/dashboard', $result);
     }
 
     public function testRouteHandlesCallbackException()
@@ -141,13 +112,8 @@ class HelloClientTest extends TestCase
             ->with('error_page')
             ->willReturn('render_response');
 
-        // Mock Callback handler to throw exception
-        $callbackHandler = $this->getMockBuilder(\HelloCoop\Handler\Callback::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['handleCallback'])
-            ->getMock();
-
-        $callbackHandler
+        //throw exception
+        $this->callbackMock
             ->method('handleCallback')
             ->willThrowException(new CallbackException(['error' => 'test', 'error_description' => 'desc', 'target_uri' => 'uri']));
 
