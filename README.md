@@ -1,8 +1,8 @@
 # [Hellō](https://www.hello.coop/) identity provider(IdP) client in PHP
 
-| Build | Tests | Coverage |
-| :---: | :----: | :------: | 
-| [![Build Status](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions/workflows/php-tests.yml/badge.svg)](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions) | [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions) | [![Coverage](https://codecov.io/gh/UnnikrishnanBhargavakurup/hellocoop/graph/badge.svg?token=GFPX13L1TM)](https://codecov.io/gh/UnnikrishnanBhargavakurup/hellocoop) |
+|Tests | Coverage |
+| :----: | :------: | 
+| [![Test Status](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions/workflows/php-tests.yml/badge.svg)](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions) | [![Coverage](https://codecov.io/gh/UnnikrishnanBhargavakurup/hellocoop/graph/badge.svg?token=GFPX13L1TM)](https://codecov.io/gh/UnnikrishnanBhargavakurup/hellocoop) |
 
 
 
