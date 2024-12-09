@@ -22,6 +22,12 @@ class LoginTest extends TestCase
         $this->configMock->method('getSecret')
         ->willReturn('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef');
 
+        $this->configMock->method('getCookies')
+        ->willReturn([
+            'authName' => 'authName',
+            'oidcName' => 'oidcName',
+        ]);
+
         $this->login = new Login(
             $this->helloRequestMock,
             $this->helloResponseMock,

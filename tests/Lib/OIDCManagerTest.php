@@ -72,7 +72,12 @@ class OIDCManagerTest extends TestCase
 
     public function testSaveOidc(): void
     {
-        $oidc = new OIDC('test_verifier', 'test_nonce', 'https://example.com/callback', '/home');
+        $oidc = new OIDC(
+            'test_verifier',
+            'test_nonce',
+            'https://example.com/callback',
+            '/home'
+        );
 
         // Mock the encrypt method to return a valid encrypted cookie
         $this->cryptoMock->method('encrypt')->with($oidc->toArray())->willReturn('encrypted_cookie');

@@ -42,6 +42,8 @@ class OIDCManager
             }
         } catch (Exception $e) {
             $this->clearOidcCookie();
+            error_log($e->getMessage());
+            throw $e;
             // TODO: Log error
         }
 
@@ -52,17 +54,18 @@ class OIDCManager
     {
         try {
             $encCookie = $this->crypto->encrypt($oidc->toArray());
-
             $this->helloResponse->setCookie(
                 $this->config->getCookies()['oidcName'],
                 $encCookie,
                 time() + 5 * 60, // 5 minutes
                 $this->config->getApiRoute(),
-                '',
+                $this->config->getHost(), // This is required if we are behind a proxy.
                 $this->config->getProduction(),
                 true // HttpOnly
             );//TODO 'samesite' can be added if we use options instead of named parameters
         } catch (Exception $e) {
+            error_log($e->getMessage());
+            throw $e;
             // TODO: Log error
         }
     }

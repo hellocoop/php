@@ -5,8 +5,9 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use HelloCoop\Config\HelloConfig;
 use HelloCoop\HelloClient;
 
+
 define('API_ROUTE', '/api/hellocoop');
-define('HOST', 'f906-223-205-76-153.ngrok-free.app'); // add your domain name here
+define('HOST', 'f3b0-223-205-76-153.ngrok-free.app'); // add your domain name here
 
 // Step 1: Create instances of hello config class
 $config = new HelloConfig(
@@ -17,7 +18,8 @@ $config = new HelloConfig(
     false,
     'app_43tf7X1qHvsCVZIuPQtzQE8J_KQq',
     'https://' . HOST . API_ROUTE,
-    '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
+    HOST,
+    '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
 );
 
 // Step 2: Create an instance of HelloClient
@@ -48,7 +50,7 @@ if ($requestPath === API_ROUTE) {
   </div>
   <script>
     function login(event) {
-      var LOGIN_PATH = 'http://localhost:8080/api/hellocoop?op=login&target_uri=/profile&scope=profile+nickname&provider_hint=github+gitlab';
+      var LOGIN_PATH = 'https://f3b0-223-205-76-153.ngrok-free.app/api/hellocoop?op=login&target_uri=/profile&scope=profile+nickname&provider_hint=github+gitlab';
       event.target.classList.add('hello-btn-loader'); // Show spinner
       event.target.disabled = true;                  // Disable button
       window.location.href = LOGIN_PATH;             // Redirect to login endpoint
