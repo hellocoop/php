@@ -6,15 +6,13 @@ use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Lib\Auth as AuthLib;
-use HelloCoop\Lib\OIDCManager;
-use HelloCoop\Lib\Crypto;
 
 class Logout
 {
     private HelloResponseInterface $helloResponse;
     private HelloRequestInterface $helloRequest;
     private ConfigInterface $config;
-    private AuthLib $authLib;
+    private ?AuthLib $authLib = null;
     public function __construct(
         HelloRequestInterface $helloRequest,
         HelloResponseInterface $helloResponse,
@@ -27,21 +25,10 @@ class Logout
 
     private function getAuthLib(): AuthLib
     {
-        if ($this->authLib instanceof AuthLib) {
-            return $this->authLib;
-        }
-        $crypto = new Crypto($this->config->getSecret());
-        return $this->authLib = new AuthLib(
+        return $this->authLib ??= new AuthLib(
             $this->helloRequest,
             $this->helloResponse,
-            $this->config,
-            new OIDCManager(
-                $this->helloRequest,
-                $this->helloResponse,
-                $this->config,
-                $crypto
-            ),
-            $crypto
+            $this->config
         );
     }
 

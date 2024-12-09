@@ -10,7 +10,7 @@ use HelloCoop\HelloResponse\HelloResponseInterface;
 
 class Auth
 {
-    private Crypto $crypto;
+    private ?Crypto $crypto = null;
     private ConfigInterface $config;
     private HelloRequestInterface $helloRequest;
     private HelloResponseInterface $helloResponse;
@@ -19,21 +19,32 @@ class Auth
     public function __construct(
         HelloRequestInterface $helloRequest,
         HelloResponseInterface $helloResponse,
-        ConfigInterface $config,
-        OIDCManager $oidcManager,
-        Crypto $crypto
+        ConfigInterface $config
     ) {
         $this->helloRequest = $helloRequest;
         $this->helloResponse = $helloResponse;
         $this->config = $config;
-        $this->oidcManager = $oidcManager;
-        $this->crypto = $crypto;
+    }
+
+    private function getOIDCManager(): OIDCManager
+    {
+        return $this->oidcManager ??= new OIDCManager(
+            $this->helloRequest,
+            $this->helloResponse,
+            $this->config,
+            $this->getCrypto()
+        );
+    }
+
+    private function getCrypto(): Crypto
+    {
+        return $this->crypto ??= new Crypto($this->config->getSecret());
     }
 
     public function saveAuthCookie(AuthType $auth): bool
     {
         try {
-            $encCookie = $this->crypto->encrypt($auth->toArray());
+            $encCookie = $this->getCrypto()->encrypt($auth->toArray());
             if (!$encCookie) {
                 return false;
             }
@@ -50,7 +61,7 @@ class Auth
     {
         $oidCookie = $this->helloRequest->getCookie($this->config->getCookies()['oidcName']);
         if ($oidCookie) {
-            $this->oidcManager->clearOidcCookie();
+            $this->getOIDCManager()->clearOidcCookie();
         }
 
         $authCookie = $this->helloRequest->getCookie($this->config->getCookies()['authName']);
@@ -60,7 +71,7 @@ class Auth
         }
 
         try {
-            $auth = $this->crypto->decrypt($authCookie);
+            $auth = $this->getCrypto()->decrypt($authCookie);
             if (is_array($auth)) {
                 if ($auth['isLoggedIn'] && $this->config->getCookieToken()) {
                     $auth = array_merge($auth, ['cookieToken' => $this->config->getCookieToken()]);

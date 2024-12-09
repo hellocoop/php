@@ -5,12 +5,11 @@ namespace HelloCoop\Config;
 class Constants
 {
     public static string $PRODUCTION_WALLET = 'https://wallet.hello.coop';
-
+    public static string $DEFAULT_PATH = '/authorize';
     public static string $HELLO_API_ROUTE =  '/api/hellocoop';
     public static array $DEFAULT_SCOPE = ['openid', 'name', 'email', 'picture'];
     public static string $DEFAULT_RESPONSE_TYPE = 'code';
     public static string $DEFAULT_RESPONSE_MODE = 'query';
-    public static string $DEFAULT_PATH = '/authorize?';
 
     public static array $VALID_IDENTITY_STRING_CLAIMS = [
         'name', 'nickname', 'preferred_username', 'given_name', 'family_name',

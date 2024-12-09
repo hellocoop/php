@@ -52,9 +52,7 @@ class Callback
         return $this->auth ??= new Auth(
             $this->helloRequest,
             $this->helloResponse,
-            $this->config,
-            $this->getOIDCManager(),
-            new Crypto($this->config->getSecret())
+            $this->config
         );
     }
 

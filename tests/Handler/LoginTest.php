@@ -2,38 +2,30 @@
 
 namespace HelloCoop\Tests\Handler;
 
-use HelloCoop\Handler\Login;
-use HelloCoop\Config\ConfigInterface;
-use HelloCoop\HelloRequest\HelloRequestInterface;
-use HelloCoop\Lib\Auth;
-use HelloCoop\Lib\AuthHelper;
-use HelloCoop\Lib\OIDCManager;
 use PHPUnit\Framework\TestCase;
+use HelloCoop\Handler\Login;
+use HelloCoop\Tests\Traits\ServiceMocksTrait;
+use HelloCoop\Config\ConfigInterface;
 use RuntimeException;
 
 class LoginTest extends TestCase
 {
-    private $configMock;
-    private $authMock;
-    private $helloRequestMock;
-    private $oidcManagerMock;
-    private $authHelperMock;
-    private $login;
+    use ServiceMocksTrait;
 
+    private Login $login;
     protected function setUp(): void
     {
+        parent::setUp();
+        $this->setUpServiceMocks();
+
         $this->configMock = $this->createMock(ConfigInterface::class);
-        $this->authMock = $this->createMock(Auth::class);
-        $this->helloRequestMock = $this->createMock(HelloRequestInterface::class);
-        $this->oidcManagerMock = $this->createMock(OIDCManager::class);
-        $this->authHelperMock = $this->createMock(AuthHelper::class);
+        $this->configMock->method('getSecret')
+        ->willReturn('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef');
 
         $this->login = new Login(
-            $this->configMock,
-            $this->authMock,
             $this->helloRequestMock,
-            $this->oidcManagerMock,
-            $this->authHelperMock,
+            $this->helloResponseMock,
+            $this->configMock,
             ['example.com' => 'https://example.com/callback']
         );
     }
@@ -41,9 +33,7 @@ class LoginTest extends TestCase
     public function testGenerateLoginUrlSuccess()
     {
         // Setup mocks
-        $this->configMock->method('getClientId')->willReturn('client_id');
-        $this->configMock->method('getRedirectURI')->willReturn('https://example.com/callback');
-        $this->helloRequestMock->method('fetchMultiple')->willReturn([
+        $_GET = [
             'provider_hint' => 'google',
             'scope' => 'openid profile',
             'target_uri' => 'https://example.com/target',
@@ -52,31 +42,49 @@ class LoginTest extends TestCase
             'prompt' => 'consent',
             'login_hint' => 'user@example.com',
             'domain_hint' => 'example.com'
-        ]);
-        $this->helloRequestMock->method('fetchHeader')->willReturn('example.com');
-
-        // Mock the AuthHelper::createAuthRequest method
-        $authResponse = [
-            'url' => 'https://example.com/callback?client_id=client_id&redirect_uri=https://example.com/callback',
-            'nonce' => '1234',
-            'code_verifier' => 'code_verifier'
         ];
 
-        $this->authHelperMock->method('createAuthRequest')->willReturn([
-            'url' => 'https://example.com/callback?client_id=client_id&redirect_uri=https://example.com/callback',
-            'nonce' => '1234',
-            'code_verifier' => 'code_verifier',
-        ]);
+        $this->configMock
+        ->method('getClientId')
+        ->willReturn('valid_client_id');
+
+        $this->helloRequestMock->method('fetchHeader')
+        ->with('Host')
+        ->willReturn('example.com');
 
         // Test the URL generation
         $url = $this->login->generateLoginUrl();
 
-        $this->assertEquals('https://example.com/callback?client_id=client_id&redirect_uri=https://example.com/callback', $url);
+        $this->assertTrue(
+            filter_var($url, FILTER_VALIDATE_URL) !== false,
+            "The URL is not valid."
+        );
+
+        $query = parse_url($url, PHP_URL_QUERY);
+        parse_str($query, $params);
+        $this->assertEquals($params['provider_hint'], 'google');
+        $this->assertEquals($params['scope'], 'openid');
+        $this->assertEquals($params['code_challenge_method'], 'S256');
+        $this->assertEquals($params['login_hint'], 'user@example.com');
+        //$this->assertEquals('https://wallet.hello.coop/authorize?client_id=valid_client_id&redirect_uri=https%3A%2F%2Fexample.com%2Fcallback&scope=openid&response_type=code&response_mode=query&nonce=1234&prompt=consent&code_challenge=yyhvlwTA3oVJcnTpkLV70DjqXb794Ar5Sgth12qbRsM&code_challenge_method=S256&provider_hint=google&login_hint=user%40example.com&domain_hint=example.com', $url);
     }
 
     public function testGenerateLoginUrlMissingClientId()
     {
-        $this->configMock->method('getClientId')->willReturn(null);
+        $_GET = [
+            'provider_hint' => 'google',
+            'scope' => 'openid profile',
+            'target_uri' => 'https://example.com/target',
+            'redirect_uri' => 'https://example.com/callback',
+            'nonce' => '1234',
+            'prompt' => 'consent',
+            'login_hint' => 'user@example.com',
+            'domain_hint' => 'example.com'
+        ];
+
+        $this->configMock
+        ->method('getClientId')
+        ->willReturn(null);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Missing HELLO_CLIENT_ID configuration');
@@ -86,43 +94,24 @@ class LoginTest extends TestCase
 
     public function testGenerateLoginUrlMissingRedirectURI()
     {
-        $this->configMock->method('getClientId')->willReturn('client_id');
-        $this->configMock->method('getRedirectURI')->willReturn(null);
-        $this->helloRequestMock->method('fetchMultiple')->willReturn([
+        $_GET = [
             'provider_hint' => 'google',
             'scope' => 'openid profile',
             'target_uri' => 'https://example.com/target',
             'redirect_uri' => null
-        ]);
-        $this->helloRequestMock->method('fetchHeader')->willReturn('example2.com');
+        ];
+
+        $this->configMock
+        ->method('getClientId')
+        ->willReturn('valid_client_id');
+
+        $this->helloRequestMock->method('fetchHeader')
+        ->with('Host')
+        ->willReturn('example2.com');
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('RedirectURI not found');
 
         $this->login->generateLoginUrl();
-    }
-
-    private function mockStaticMethod($class, $method, $returnValue)
-    {
-        $mock = $this->getMockBuilder($class)
-            ->disableOriginalConstructor()
-            ->setMethods([$method])
-            ->getMock();
-
-        $mock->method($method)->willReturn($returnValue);
-        $this->setUpMockedStaticMethod($class, $method, $mock);
-    }
-
-    private function setUpMockedStaticMethod($class, $method, $mock)
-    {
-        $reflection = new \ReflectionClass($class);
-        $property = $reflection->getProperty('instances');
-        $property->setAccessible(true);
-        $property->setValue(null, null); // Clear previous instances to mock static methods
-
-        $instance = $reflection->newInstanceWithoutConstructor();
-        $methodRef = $reflection->getMethod($method);
-        $methodRef->setAccessible(true);
-        $methodRef->invoke($instance);
     }
 }

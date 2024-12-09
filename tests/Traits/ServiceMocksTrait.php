@@ -53,7 +53,9 @@ trait ServiceMocksTrait
         $this->configMock->method('getClientId')
             ->willReturn('valid_client_id');
         $this->configMock->method('getRedirectURI')
-            ->willReturn('/');
+            ->willReturn('https//my-domain');
+
+        $this->configMock->method('getHelloDomain')->willReturn('hello.coop');
 
         // Configure HelloRequestInterface mock
         $this->helloRequestMock->method('fetch')
@@ -83,7 +85,6 @@ trait ServiceMocksTrait
         // Instantiate the Crypto object with the secret from the config mock
         $this->crypto = new Crypto($this->configMock->getSecret());
 
-        // Replace protected methods with mocks
         $_COOKIE = [];
         $_SERVER['REQUEST_METHOD'] = 'GET';
     }

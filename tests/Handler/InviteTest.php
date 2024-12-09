@@ -2,49 +2,43 @@
 
 namespace HelloCoop\Tests\Handler;
 
-use HelloCoop\Config\ConfigInterface;
-use HelloCoop\Lib\Auth;
-use HelloCoop\Type\Auth as AuthType;
 use PHPUnit\Framework\TestCase;
 use HelloCoop\Handler\Invite;
-use HelloCoop\HelloRequest\HelloRequestInterface;
+use HelloCoop\Tests\Traits\ServiceMocksTrait;
 
 class InviteTest extends TestCase
 {
+    use ServiceMocksTrait;
+
     private Invite $invite;
-    private $configMock;
-    private $authMock;
-    private $mockFetcher;
 
     public function setUp(): void
     {
-        $this->configMock = $this->createMock(ConfigInterface::class);
-        $this->authMock = $this->createMock(Auth::class);
-        $this->mockFetcher = $this->createMock(HelloRequestInterface::class);
-        $this->invite = new Invite($this->configMock, $this->authMock, $this->mockFetcher);
+        parent::setUp();
+        $this->setUpServiceMocks();
+
+        $this->invite = new Invite(
+            $this->helloRequestMock,
+            $this->helloResponseMock,
+            $this->configMock
+        );
     }
     public function testCanGenerateInviteUrl(): void
     {
-        // Mocking the dependencies for ConfigInterface
-        $this->configMock->method('getClientId')->willReturn('testClientId');
-        $this->configMock->method('getRedirectURI')->willReturn('/redirect');
-        $this->configMock->method('getHelloDomain')->willReturn('hello.com');
-
-        $this->mockFetcher->method('fetchMultiple')
-        ->willReturn([
+        $_GET = [
             'target_uri' => 'https://example.com',
             'app_name' => 'MyApp',
             'prompt' => 'Login',
             'role' => 'Admin',
             'tenant' => 'Tenant123',
             'state' => 'state456',
-            'redirect_uri' => 'https://redirect.com'
-        ]);
+            'redirect_uri' => '/redirect'
+        ];
 
-        // Mocking the dependencies for Auth
-        $authMockData = $this->createMock(AuthType::class);
-        $authMockData->method('toArray')->willReturn(['sub' => 'user123']);
-        $this->authMock->method('getAuthfromCookies')->willReturn($authMockData);
+        $_COOKIE['authName'] = $this->crypto->encrypt([
+            'isLoggedIn' => true,
+            'authCookie' => ['sub' => 'user123', 'iat' => time()]
+        ]);
 
         // Test the URL generation
         $url = $this->invite->generateInviteUrl();
@@ -56,7 +50,7 @@ class InviteTest extends TestCase
         );
 
         // Define the expected URL
-        $expectedUrl = "https://hello.com/invite?app_name=MyApp&prompt=Login&role=Admin&tenant=Tenant123&state=state456&inviter=user123&client_id=testClientId&initiate_login_uri=%2Fredirect&return_uri=https%3A%2F%2Fexample.com";
+        $expectedUrl = "https://wallet.hello.coop/invite?app_name=MyApp&prompt=Login&role=Admin&tenant=Tenant123&state=state456&inviter=user123&client_id=valid_client_id&initiate_login_uri=https%2F%2Fmy-domain&return_uri=https%3A%2F%2Fexample.com";
 
         // Assert that the generated URL matches the expected one
         $this->assertSame($expectedUrl, $url);

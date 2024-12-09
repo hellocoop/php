@@ -2,42 +2,33 @@
 
 namespace HelloCoop\Tests\Handler;
 
-use HelloCoop\Config\ConfigInterface;
-use HelloCoop\Handler\Logout;
-use HelloCoop\Lib\Auth;
-use HelloCoop\HelloRequest\HelloRequestInterface;
 use PHPUnit\Framework\TestCase;
+use HelloCoop\Handler\Logout;
+use HelloCoop\Tests\Traits\ServiceMocksTrait;
 
 class LogoutTest extends TestCase
 {
-    private $configMock;
-    private $helloRequestMock;
-    private $authMock;
-    private $logoutHandler;
+    use ServiceMocksTrait;
+
+    private Logout $logoutHandler;
 
     protected function setUp(): void
     {
-        $this->configMock = $this->createMock(ConfigInterface::class);
-        $this->helloRequestMock = $this->createMock(HelloRequestInterface::class);
-        $this->authMock = $this->createMock(Auth::class);
+        parent::setUp();
+        $this->setUpServiceMocks();
 
         $this->logoutHandler = new Logout(
-            $this->configMock,
             $this->helloRequestMock,
-            $this->authMock
+            $this->helloResponseMock,
+            $this->configMock
         );
     }
 
     public function testGenerateLogoutUrlWithTargetUri(): void
     {
-        $this->helloRequestMock
-            ->method('fetch')
-            ->with('target_uri')
-            ->willReturn('http://example.com/target');
-
-        $this->authMock
-            ->expects($this->once())
-            ->method('clearAuthCookie');
+        $_GET = [
+            'target_uri' => 'https://example.com/target',
+        ];
 
         $this->configMock
             ->method('getLoginSync')
@@ -49,19 +40,14 @@ class LogoutTest extends TestCase
 
         $result = $this->logoutHandler->generateLogoutUrl();
 
-        $this->assertEquals('http://example.com/target', $result);
+        $this->assertEquals('https://example.com/target', $result);
     }
 
     public function testGenerateLogoutUrlWithoutTargetUri(): void
     {
-        $this->helloRequestMock
-            ->method('fetch')
-            ->with('target_uri')
-            ->willReturn(null);
-
-        $this->authMock
-            ->expects($this->once())
-            ->method('clearAuthCookie');
+        $_GET = [
+            'target_uri' => null,
+        ];
 
         $this->configMock
             ->method('getLoginSync')
@@ -78,14 +64,10 @@ class LogoutTest extends TestCase
 
     public function testGenerateLogoutUrlWithLoginSync(): void
     {
-        $this->helloRequestMock
-            ->method('fetch')
-            ->with('target_uri')
-            ->willReturn(null);
 
-        $this->authMock
-            ->expects($this->once())
-            ->method('clearAuthCookie');
+        $_GET = [
+            'target_uri' => null,
+        ];
 
         $syncCallback = $this->getMockBuilder(\stdClass::class)
             ->addMethods(['__invoke'])

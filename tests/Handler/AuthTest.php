@@ -4,62 +4,42 @@ namespace HelloCoop\Tests\Handler;
 
 use PHPUnit\Framework\TestCase;
 use HelloCoop\Handler\Auth;
-use HelloCoop\Lib\Auth as AuthLib;
-use HelloCoop\HelloRequest\HelloRequestInterface;
-use HelloCoop\HelloResponse\HelloResponseInterface;
-use HelloCoop\Config\ConfigInterface;
-use HelloCoop\Type\Auth as AuthType;
+use HelloCoop\Tests\Traits\ServiceMocksTrait;
 
 class AuthTest extends TestCase
 {
+    use ServiceMocksTrait;
+
     private Auth $auth;
-    private $authLibMock;
-    private $helloRequestMock;
-    private $helloResponseMock;
-    private $configMock;
 
     public function setUp(): void
     {
-        // Mock the dependencies
-        $this->authLibMock = $this->createMock(AuthLib::class);
-        $this->helloRequestMock = $this->createMock(HelloRequestInterface::class);
-        $this->helloResponseMock = $this->createMock(HelloResponseInterface::class);
-        $this->configMock = $this->createMock(ConfigInterface::class);
+        parent::setUp();
+        $this->setUpServiceMocks();
 
-        // Inject a mock of AuthLib directly into Auth (e.g., through a factory pattern or constructor)
         $this->auth = new Auth(
             $this->helloRequestMock,
             $this->helloResponseMock,
             $this->configMock
         );
-
-        // Use Reflection to inject the mocked AuthLib (bypassing getAuthLib)
-        $reflection = new \ReflectionClass(Auth::class);
-        $authLibProperty = $reflection->getProperty('authLib');
-        $authLibProperty->setAccessible(true);
-        $authLibProperty->setValue($this->auth, $this->authLibMock);
     }
 
     public function testCanHandleAuth(): void
     {
-        $expectedAuth = $this->createMock(AuthType::class);
-
-        $this->authLibMock
-            ->expects($this->once())
-            ->method('getAuthfromCookies')
-            ->willReturn($expectedAuth);
+        $_COOKIE['authName'] = $this->crypto->encrypt([
+            'isLoggedIn' => true,
+            'authCookie' => [
+                'sub' => 'user123',
+                'iat' => time(),
+                'name' => 'Dick Hardt',
+                'picture' => 'https://pictures.hello.coop/r/7a160eed-46bf-48e2-a909-161745535895.png',
+                'email' => 'dick.hardt@hello.coop'
+            ]
+        ]);
 
         $result = $this->auth->handleAuth();
-
-        $this->assertSame($expectedAuth, $result);
-    }
-
-    public function testCanClearAuth(): void
-    {
-        $this->authLibMock
-            ->expects($this->once())
-            ->method('clearAuthCookie');
-
-        $this->auth->clearAuth();
+        $this->assertTrue($result->toArray()['isLoggedIn']);
+        $this->assertEquals($result->toArray()['authCookie']['name'], 'Dick Hardt');
+        $this->assertEquals($result->toArray()['authCookie']['email'], 'dick.hardt@hello.coop');
     }
 }

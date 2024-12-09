@@ -29,21 +29,10 @@ class Auth
 
     private function getAuthLib(): AuthLib
     {
-        if ($this->authLib instanceof AuthLib) {
-            return $this->authLib;
-        }
-        $crypto = new Crypto($this->config->getSecret());
-        return $this->authLib = new AuthLib(
+        return $this->authLib ??= new AuthLib(
             $this->helloRequest,
             $this->helloResponse,
             $this->config,
-            new OIDCManager(
-                $this->helloRequest,
-                $this->helloResponse,
-                $this->config,
-                $crypto
-            ),
-            $crypto
         );
     }
 

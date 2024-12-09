@@ -14,7 +14,7 @@ class HelloConfig implements ConfigInterface
     private ?string $host;
     private ?string $redirectURI;
     private string $helloDomain;
-    private string $helloWallet;
+    private ?string $helloWallet = null;
     private ?string $secret = null;
     private ?bool $logDebug = null;
     private ?array $error = null;
@@ -41,7 +41,7 @@ class HelloConfig implements ConfigInterface
         ?string $host = null,
         ?string $redirectURI = null,
         string $helloDomain = 'hello.coop',
-        string $helloWallet = '',
+        ?string $helloWallet = null,
         array $scope = ['openid', 'name', 'email', 'picture'],
         array $providerHint = ['github'],
         array $routes = [
@@ -167,7 +167,7 @@ class HelloConfig implements ConfigInterface
         return $this->helloDomain;
     }
 
-    public function getHelloWallet(): string
+    public function getHelloWallet(): ?string
     {
         return $this->helloWallet;
     }
