@@ -3,13 +3,16 @@
 namespace HelloCoop;
 
 use HelloCoop\HelloRequest\HelloRequestInterface;
+use HelloCoop\HelloRequest\HelloRequest;
 use HelloCoop\HelloResponse\HelloResponseInterface;
+use HelloCoop\HelloResponse\HelloResponse;
+use HelloCoop\Renderers\PageRendererInterface;
+use HelloCoop\Renderers\DefaultPageRenderer;
 use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Handler\Auth;
 use HelloCoop\Handler\Invite;
 use HelloCoop\Handler\Logout;
 use HelloCoop\Handler\Login;
-use HelloCoop\Renderers\PageRendererInterface;
 use HelloCoop\Handler\Callback;
 use HelloCoop\Exception\CallbackException;
 use HelloCoop\Exception\SameSiteCallbackException;
@@ -17,25 +20,25 @@ use HelloCoop\Exception\SameSiteCallbackException;
 class HelloClient
 {
     private ConfigInterface $config;
-    private PageRendererInterface $pageRenderer;
-    private HelloResponseInterface $helloResponse;
-    private HelloRequestInterface $helloRequest;
-    private Callback $callbackHandler;
-    private Auth $authHandler;
-    private Invite $invite;
-    private Logout $logout;
-    private Login $login;
+    private ?HelloResponseInterface $helloResponse;
+    private ?HelloRequestInterface $helloRequest;
+    private ?PageRendererInterface $pageRenderer;
+    private ?Callback $callbackHandler = null;
+    private ?Auth $authHandler = null;
+    private ?Invite $invite = null;
+    private ?Logout $logout = null;
+    private ?Login $login = null;
 
     public function __construct(
-        HelloRequestInterface $helloRequest,
-        HelloResponseInterface $helloResponse,
         ConfigInterface $config,
-        PageRendererInterface $pageRenderer
+        HelloRequestInterface $helloRequest = null,
+        HelloResponseInterface $helloResponse = null,
+        PageRendererInterface $pageRenderer = null
     ) {
-        $this->helloRequest = $helloRequest;
-        $this->helloResponse = $helloResponse;
         $this->config = $config;
-        $this->pageRenderer = $pageRenderer;
+        $this->helloRequest = $helloRequest ??= new HelloRequest();
+        $this->helloResponse = $helloResponse  ??= new HelloResponse();
+        $this->pageRenderer = $pageRenderer ??= new DefaultPageRenderer();
     }
 
     private function getCallbackHandler(): Callback

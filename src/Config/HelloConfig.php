@@ -9,9 +9,8 @@ class HelloConfig implements ConfigInterface
     private string $loginApiRoute;
     private string $logoutApiRoute;
     private bool $sameSiteStrict;
-    private ?bool $cookieToken = null;
     private ?string $clientId;
-    private ?string $host;
+    private ?bool $cookieToken = null;
     private ?string $redirectURI;
     private string $helloDomain;
     private ?string $helloWallet = null;
@@ -32,14 +31,15 @@ class HelloConfig implements ConfigInterface
         string $loginApiRoute,
         string $logoutApiRoute,
         bool $sameSiteStrict,
+        ?string $clientId = null,
+        ?string $redirectURI = null,
+        ?string $secret = null,
         array $cookies = [
             'authName' =>  'hellocoop_auth',
             'oidcName' => 'hellocoop_oidc',
         ],
         bool $production = true,
-        ?string $clientId = null,
         ?string $host = null,
-        ?string $redirectURI = null,
         string $helloDomain = 'hello.coop',
         ?string $helloWallet = null,
         array $scope = ['openid', 'name', 'email', 'picture'],
@@ -52,7 +52,6 @@ class HelloConfig implements ConfigInterface
         ?callable $loginSync = null,
         ?callable $logoutSync = null,
         ?bool $cookieToken = null,
-        ?string $secret = null,
         ?bool $logDebug = null
     ) {
         $this->apiRoute = $apiRoute;
@@ -60,11 +59,12 @@ class HelloConfig implements ConfigInterface
         $this->loginApiRoute = $loginApiRoute;
         $this->logoutApiRoute = $logoutApiRoute;
         $this->sameSiteStrict = $sameSiteStrict;
+        $this->clientId = $clientId;
+        $this->redirectURI = $redirectURI;
+        $this->secret = $secret;
         $this->cookies = $cookies;
         $this->production = $production;
-        $this->clientId = $clientId;
         $this->host = $host;
-        $this->redirectURI = $redirectURI;
         $this->helloDomain = $helloDomain;
         $this->helloWallet = $helloWallet;
         $this->scope = $scope;
@@ -73,7 +73,6 @@ class HelloConfig implements ConfigInterface
         $this->loginSync = $loginSync;
         $this->logoutSync = $logoutSync;
         $this->cookieToken = $cookieToken;
-        $this->secret = $secret;
         $this->logDebug = $logDebug;
     }
 

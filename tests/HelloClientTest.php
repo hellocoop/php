@@ -28,9 +28,9 @@ class HelloClientTest extends TestCase
 
         // Initialize HelloClient
         $this->client = new HelloClient(
+            $this->configMock,
             $this->helloRequestMock,
             $this->helloResponseMock,
-            $this->configMock,
             $this->pageRendererMock
         );
 
