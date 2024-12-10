@@ -7,7 +7,9 @@ use HelloCoop\HelloClient;
 
 
 define('API_ROUTE', '/api/hellocoop');
-define('HOST', '58a7-223-205-76-153.ngrok-free.app'); // add your domain name here
+define('HOST', 'b46e-223-205-76-153.ngrok-free.app'); // add your domain name here
+define('APP_ID', 'app_43tf7X1qHvsCVZIuPQtzQE8J_KQq'); // app id from https://console.hello.coop/
+define('SECRET', '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'); // crate a 32 bit hex secret key
 
 // Step 1: Create instances of hello config class
 $config = new HelloConfig(
@@ -16,10 +18,10 @@ $config = new HelloConfig(
     API_ROUTE . '?op=login',             // $loginApiRoute
     API_ROUTE . '?op=logout',           // $logoutApiRoute
     false,
-    'app_43tf7X1qHvsCVZIuPQtzQE8J_KQq',
+    APP_ID,
     'https://' . HOST . API_ROUTE,
     HOST,
-    '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+    SECRET,
 );
 
 // Step 2: Create an instance of HelloClient
