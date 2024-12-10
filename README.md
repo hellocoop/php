@@ -1,10 +1,16 @@
-# [Hellō](https://www.hello.coop/) identity provider(IdP) client in PHP
+# [Hellō](https://www.hello.coop/) identity provider (IdP) client in PHP
 
-|Tests | Coverage |
+| Tests | Coverage |
 | :----: | :------: | 
 | [![Test Status](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions/workflows/php-tests.yml/badge.svg)](https://github.com/UnnikrishnanBhargavakurup/hellocoop/actions) | [![Coverage](https://codecov.io/gh/UnnikrishnanBhargavakurup/hellocoop/graph/badge.svg?token=GFPX13L1TM)](https://codecov.io/gh/UnnikrishnanBhargavakurup/hellocoop) |
 
+## Introduction
 
+### For Users
+Hellō helps users register and log in using their choice of popular social logins, email, or phone—without being tracked. Hellō is a cloud identity wallet with a mission to empower users to control their identity.
+
+### For Developers
+The easiest and quickest way to onboard and authenticate your users with popular social providers, verified email, and phone. Hellō can be integrated into your application in minutes, not hours.
 
 ### Code Quality: Pre-Commit Hook for Linting
 
@@ -29,4 +35,3 @@ This will ensure that the hook runs automatically whenever you try to commit you
 ## License
 
 [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE)
-
