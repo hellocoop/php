@@ -17,7 +17,6 @@ class CallbackTest extends TestCase
         parent::setUp();
         $this->setUpServiceMocks();
         // Create instance of Callback
-        // Instantiate the final class with its required dependencies
         $this->callback = new Callback(
             $this->helloRequestMock,
             $this->helloResponseMock,
@@ -26,7 +25,6 @@ class CallbackTest extends TestCase
 
         $this->replaceLazyLoadedProperty($this->callback, 'tokenFetcher', $this->tokenFetcherMock);
         $this->replaceLazyLoadedProperty($this->callback, 'tokenParser', $this->tokenParserMock);
-        // Configure the mocked dependencies (optional, based on test scenario)
         $this->tokenFetcherMock->method('fetchToken')->willReturn('valid_token_id');
     }
 
@@ -34,7 +32,7 @@ class CallbackTest extends TestCase
     {
         $_COOKIE['oidcName'] = $this->crypto->encrypt([
             'code_verifier' => 'test_verifier',
-            'nonce' => 'test_nonce',
+            'nonce' => 'valid_nonce',
             'redirect_uri' => 'https://example.com/callback',
             'target_uri' => '/dashboard'
         ]);
@@ -44,9 +42,7 @@ class CallbackTest extends TestCase
             'error' => null,
             'same_site' => 'Strict',
             'wildcard_domain' => 'example.com',
-            'app_name' => 'MyApp',
-            'redirect_uri' => 'http://redirect.com',
-            'nonce' => 'valid_nonce'
+            'app_name' => 'MyApp'
         ]);
 
         $this->tokenParserMock->method('parseToken')->willReturn([
@@ -69,7 +65,7 @@ class CallbackTest extends TestCase
         $result = $this->callback->handleCallback();
 
         // Assert that the result is the expected target URI
-        $this->assertEquals('http://api.example.com?uri=example.com&appName=MyApp&redirectURI=http%3A%2F%2Fredirect.com&targetURI=%2Fdashboard&wildcard_console=true', $result);
+        $this->assertEquals('http://api.example.com?uri=example.com&appName=MyApp&redirectURI=https%3A%2F%2Fexample.com%2Fcallback&targetURI=%2Fdashboard&wildcard_console=true', $result);
     }
 
     public function testHandleCallbackMissingCode()
@@ -86,9 +82,7 @@ class CallbackTest extends TestCase
             'error' => null,
             'same_site' => 'Strict',
             'wildcard_domain' => 'example.com',
-            'app_name' => 'MyApp',
-            'redirect_uri' => 'http://redirect.com',
-            'nonce' => 'valid_nonce'
+            'app_name' => 'MyApp'
         ]);
 
 
@@ -103,9 +97,7 @@ class CallbackTest extends TestCase
             'error' => null,
             'same_site' => 'Strict',
             'wildcard_domain' => 'example.com',
-            'app_name' => 'MyApp',
-            'redirect_uri' => 'http://redirect.com',
-            'nonce' => 'valid_nonce'
+            'app_name' => 'MyApp'
         ]);
 
         $_COOKIE['oidcName'] = $this->crypto->encrypt([

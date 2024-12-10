@@ -43,7 +43,7 @@ if ($requestPath === API_ROUTE) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdn.hello.coop/css/hello-btn.css" rel="stylesheet">
-  <title>Login</title>
+  <title>Hellō identity provider(IdP) client in PHP - Demo</title>
   <style>
     /* Center the button and content */
     body {
