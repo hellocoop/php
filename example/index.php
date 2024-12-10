@@ -7,7 +7,7 @@ use HelloCoop\HelloClient;
 
 
 define('API_ROUTE', '/api/hellocoop');
-define('HOST', 'f3b0-223-205-76-153.ngrok-free.app'); // add your domain name here
+define('HOST', '5a96-223-205-76-153.ngrok-free.app'); // add your domain name here
 
 // Step 1: Create instances of hello config class
 $config = new HelloConfig(
@@ -37,12 +37,44 @@ if ($requestPath === API_ROUTE) {
 // print json_encode($helloClient->getAuth());
 
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <link href="https://cdn.hello.coop/css/hello-btn.css" rel="stylesheet"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.hello.coop/css/hello-btn.css" rel="stylesheet">
+  <title>Login</title>
+  <style>
+    /* Center the button and content */
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f9f9f9; /* Optional background color */
+    }
+    pre {
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #efefef;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #333;
+      max-width: 90%;
+      overflow-x: auto;
+    }
+  </style>
 </head>
 <body>
-  <!-- ... -->  
+  <pre>
+<?php
+// Assuming $helloClient is already instantiated and configured
+echo json_encode($helloClient->getAuth(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+?>
+  </pre>
   <div class="hello-container">
     <button class="hello-btn" onclick="login(event)">
       ō&nbsp;&nbsp;&nbsp;Continue with Hellō
@@ -50,7 +82,10 @@ if ($requestPath === API_ROUTE) {
   </div>
   <script>
     function login(event) {
-      var LOGIN_PATH = 'https://f3b0-223-205-76-153.ngrok-free.app/api/hellocoop?op=login&target_uri=/profile&scope=profile+nickname&provider_hint=github+gitlab';
+      const LOGIN_PATH = 'https://' + 
+        '<?php echo htmlspecialchars(HOST, ENT_QUOTES, "UTF-8"); ?>' +
+        '/api/hellocoop?op=login&target_uri=/profile&scope=profile+nickname&provider_hint=github+gitlab';
+      
       event.target.classList.add('hello-btn-loader'); // Show spinner
       event.target.disabled = true;                  // Disable button
       window.location.href = LOGIN_PATH;             // Redirect to login endpoint
@@ -58,5 +93,7 @@ if ($requestPath === API_ROUTE) {
   </script>
 </body>
 </html>
+
+
 
 

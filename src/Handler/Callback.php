@@ -73,9 +73,7 @@ class Callback
                 'error',
                 'same_site',
                 'wildcard_domain',
-                'app_name',
-                'redirect_uri',
-                'nonce'
+                'app_name'
             ]);
 
             $code = $params['code'] ?? null;
@@ -83,8 +81,6 @@ class Callback
             $sameSite = $params['same_site'] ?? null;
             $wildcardDomain = $params['wildcard_domain'] ?? null;
             $appName = $params['app_name'] ?? null;
-            $redirectUri = $params['redirect_uri'] ?? null;
-            $nonce = $params['nonce'] ?? null;
 
             if ($this->config->getSameSiteStrict() && !$sameSite) {
                 throw new SameSiteCallbackException();
@@ -100,7 +96,9 @@ class Callback
             }
 
             $codeVerifier = $oidcState['code_verifier'] ?? null;
-            $targetUri = $oidcState['target_uri'] ?? null;
+            $targetUri    = $oidcState['target_uri'] ?? null;
+            $redirectUri  = $oidcState['redirect_uri'] ?? null;
+            $nonce        = $oidcState['nonce'] ?? null;
 
             if ($error) {
                 return $this->sendErrorPage($params, 'Callback contains an error.');
@@ -131,6 +129,7 @@ class Callback
             }
 
             $this->getOIDCManager()->clearOidcCookie();
+
             $token = $this->getTokenFetcher()->fetchToken([
                 'code' => (string) $code,
                 'wallet' => $this->config->getHelloWallet(),
@@ -140,6 +139,8 @@ class Callback
             ]);
 
             $payload = $this->getTokenParser()->parseToken($token)['payload'];
+            error_log(print_r($payload, true));
+
             if ($payload['aud'] != $this->config->getClientId()) {
                 return $this->sendErrorPage([
                     'error' => 'invalid_client',
@@ -175,14 +176,16 @@ class Callback
 
             $auth = [
                 'isLoggedIn' => true,
-                'sub' => $payload['sub'],
-                'iat' => $payload['iat']
+                'authCookie' => [
+                    'sub' => $payload['sub'],
+                    'iat' => $payload['iat']
+                ]
             ];
 
             $validClaims = Constants::getValidIdentityClaims();
             foreach ($validClaims as $claim) {
                 if (isset($payload[$claim])) {
-                    $auth[$claim] = $payload[$claim];
+                    $auth['authCookie'][$claim] = $payload[$claim];
                 }
             }
 
