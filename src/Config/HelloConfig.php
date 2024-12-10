@@ -53,7 +53,8 @@ class HelloConfig implements ConfigInterface
         ?callable $loginSync = null,
         ?callable $logoutSync = null,
         ?bool $cookieToken = null,
-        ?bool $logDebug = null
+        ?bool $logDebug = null,
+        ?array $error = null
     ) {
         $this->apiRoute = $apiRoute;
         $this->authApiRoute = $authApiRoute;
@@ -75,6 +76,7 @@ class HelloConfig implements ConfigInterface
         $this->logoutSync = $logoutSync;
         $this->cookieToken = $cookieToken;
         $this->logDebug = $logDebug;
+        $this->error = $error;
     }
 
     public function getProduction(): bool

@@ -11,7 +11,7 @@ define('HOST', '12fe-223-205-76-153.ngrok-free.app'); // add your domain name he
 
 // Step 1: Create instances of hello config class
 $config = new HelloConfig(
-    API_ROUTE,                            // $apiRoute
+    API_ROUTE,                                // $apiRoute
     API_ROUTE . '?op=auth',               // $authApiRoute
     API_ROUTE . '?op=login',             // $loginApiRoute
     API_ROUTE . '?op=logout',           // $logoutApiRoute
