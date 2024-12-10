@@ -139,7 +139,6 @@ class Callback
             ]);
 
             $payload = $this->getTokenParser()->parseToken($token)['payload'];
-            error_log(print_r($payload, true));
 
             if ($payload['aud'] != $this->config->getClientId()) {
                 return $this->sendErrorPage([

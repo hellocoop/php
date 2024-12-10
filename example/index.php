@@ -7,7 +7,7 @@ use HelloCoop\HelloClient;
 
 
 define('API_ROUTE', '/api/hellocoop');
-define('HOST', '12fe-223-205-76-153.ngrok-free.app'); // add your domain name here
+define('HOST', '58a7-223-205-76-153.ngrok-free.app'); // add your domain name here
 
 // Step 1: Create instances of hello config class
 $config = new HelloConfig(
@@ -99,7 +99,7 @@ if ($auth['isLoggedIn']) : ?>
     function login(event) {
       const LOGIN_PATH = 'https://' + 
         '<?php echo htmlspecialchars(HOST, ENT_QUOTES, "UTF-8"); ?>' +
-        '/api/hellocoop?op=login&target_uri=/profile&scope=profile+nickname&provider_hint=github+gitlab';
+        '/api/hellocoop?op=login&target_uri=/profile&scope=openid+profile+nickname&provider_hint=github+gitlab';
       
       event.target.classList.add('hello-btn-loader'); // Show spinner
       event.target.disabled = true;                  // Disable button

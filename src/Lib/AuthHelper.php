@@ -28,7 +28,7 @@ class AuthHelper
             throw new InvalidArgumentException('redirect_uri is required in the authorization request.');
         }
 
-        $scopes = $config['scopes'] ?? [];
+        $scopes = $config['scope'] ?? [];
         if ($scopes && !$this->areScopesValid($scopes)) {
             throw new InvalidArgumentException('One or more passed scopes are invalid.');
         }
@@ -70,7 +70,6 @@ class AuthHelper
         }
 
         $wallet = $config['wallet'] ?? Constants::$PRODUCTION_WALLET;
-
         $url = $wallet . Constants::$DEFAULT_PATH . '?' . http_build_query($params);
 
         return [
