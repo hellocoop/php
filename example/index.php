@@ -7,7 +7,7 @@ use HelloCoop\HelloClient;
 
 
 define('API_ROUTE', '/api/hellocoop');
-define('HOST', '5a96-223-205-76-153.ngrok-free.app'); // add your domain name here
+define('HOST', '12fe-223-205-76-153.ngrok-free.app'); // add your domain name here
 
 // Step 1: Create instances of hello config class
 $config = new HelloConfig(
@@ -66,6 +66,12 @@ if ($requestPath === API_ROUTE) {
       max-width: 90%;
       overflow-x: auto;
     }
+    .hello-container {
+      text-align: center;
+    }
+    .hello-btn {
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -79,6 +85,15 @@ echo json_encode($helloClient->getAuth(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLA
     <button class="hello-btn" onclick="login(event)">
       ō&nbsp;&nbsp;&nbsp;Continue with Hellō
     </button>
+
+<?php
+// Get authentication status
+$auth = $helloClient->getAuth();
+if ($auth['isLoggedIn']) : ?>
+    <button class="hello-btn" onclick="logout(event)">
+      ō&nbsp;&nbsp;&nbsp;Logout
+    </button>
+<?php endif; ?>
   </div>
   <script>
     function login(event) {
@@ -90,10 +105,16 @@ echo json_encode($helloClient->getAuth(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLA
       event.target.disabled = true;                  // Disable button
       window.location.href = LOGIN_PATH;             // Redirect to login endpoint
     }
+
+    function logout(event) {
+      const LOGOUT_PATH = 'https://' + 
+        '<?php echo htmlspecialchars(HOST, ENT_QUOTES, "UTF-8"); ?>' +
+        '/api/hellocoop?op=logout';
+      
+      event.target.classList.add('hello-btn-loader'); // Show spinner
+      event.target.disabled = true;                  // Disable button
+      window.location.href = LOGOUT_PATH;            // Redirect to logout endpoint
+    }
   </script>
 </body>
 </html>
-
-
-
-
