@@ -57,7 +57,7 @@ class AuthHelperTest extends TestCase
         $this->authHelper->createAuthRequest([
             'client_id' => 'test-client-id',
             'redirect_uri' => 'https://example.com/callback',
-            'scopes' => ['invalid-scope']
+            'scope' => ['invalid-scope']
         ]);
     }
 
