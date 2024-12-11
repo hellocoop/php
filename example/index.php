@@ -5,36 +5,40 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use HelloCoop\Config\HelloConfig;
 use HelloCoop\HelloClient;
 
+// Step 1: Define all required configurations
+define('API_ROUTE', '/api/hellocoop'); // Define the API route
+// App ID from https://console.hello.coop/
+define('APP_ID', 'app_43tf7X1qHvsCVZIuPQtzQE8J_KQq');
+// Add your domain name here (e.g., ngrok domain or deployed domain)
+define('HOST', 'b46e-223-205-76-153.ngrok-free.app');
+// Create a 32-byte hex secret key using the command: openssl rand -hex 32
+define('SECRET', '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef');
 
-define('API_ROUTE', '/api/hellocoop');
-define('APP_ID', 'app_43tf7X1qHvsCVZIuPQtzQE8J_KQq'); // app id from https://console.hello.coop/
-define('HOST', 'b46e-223-205-76-153.ngrok-free.app'); // add your domain name here
-define('SECRET', '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'); // crate a 32 bit hex secret key
-
-// Step 1: Create instances of hello config class
+// Step 2: Create an instance of the HelloConfig class
 $config = new HelloConfig(
-    API_ROUTE,                                // $apiRoute
-    API_ROUTE . '?op=auth',               // $authApiRoute
-    API_ROUTE . '?op=login',             // $loginApiRoute
-    API_ROUTE . '?op=logout',           // $logoutApiRoute
-    false,                              // Restricts cross-site request sharing to prevent CSRF attacks.
-    APP_ID,
-    'https://' . HOST . API_ROUTE,
-    HOST,
-    SECRET,
+    API_ROUTE,                              // $apiRoute: The base API route
+    API_ROUTE . '?op=auth',                 // $authApiRoute: The route for authentication
+    API_ROUTE . '?op=login',                // $loginApiRoute: The route for login
+    API_ROUTE . '?op=logout',               // $logoutApiRoute: The route for logout
+    false,                                  // CSRF protection (false to restrict cross-origin requests)
+    APP_ID,                                 // Application ID
+    'https://' . HOST . API_ROUTE,          // Full API URL
+    HOST,                                   // Hostname
+    SECRET                                  // Secret key for signing requests
 );
 
-// Step 2: Create an instance of HelloClient
+// Step 3: Create an instance of HelloClient
 $helloClient = new HelloClient($config);
 
-
 $requestUri = $_SERVER['REQUEST_URI'];
-$parsedUrl = parse_url($requestUri); // Extract the path and ignore query parameters
+$parsedUrl = parse_url($requestUri); // Extract the path from the request URI, ignoring query parameters
 $requestPath = $parsedUrl['path'] ?? '';
 
+// Step 4: Route Hellō API requests
 if ($requestPath === API_ROUTE) {
-    $helloClient->route();
+    $helloClient->route(); // Handle the routing of the API request
 }
+
 
 // print json_encode($helloClient->getAuth());
 
