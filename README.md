@@ -50,7 +50,7 @@ $config = new HelloConfig(
     APP_ID,                                 // Application ID
     'https://' . HOST . API_ROUTE,          // Full API URL
     HOST,                                   // Hostname
-    SECRET                                  // Secret key for encrypting cookies
+    SECRET                                  // Secret key for encryption and decryption of data
 );
 
 // Step 3: Create an instance of HelloClient
