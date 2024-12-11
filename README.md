@@ -6,8 +6,7 @@
 
 ## Introduction
 
-### For Users
-Hellō helps users register and log in using their choice of popular social logins, email, or phone—without being tracked. Hellō is a cloud identity wallet with a mission to empower users to control their identity.
+Hellō helps your users register and log in using their choice of popular social logins, email, or phone—without being tracked. Hellō is a cloud identity wallet with a mission to empower users to control their identity.
 
 ### For Developers
 The easiest and quickest way to onboard and authenticate your users with popular social providers, verified email, and phone. Hellō can be integrated into your application in minutes, not hours.
