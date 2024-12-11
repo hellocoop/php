@@ -23,6 +23,12 @@ class HelloConfigTest extends TestCase
             'https://example.com/callback',
             'example.com',
             'secret123',
+            function () {
+                return true;
+            },
+            function () {
+                return false;
+            },
             [
                 'authName' => 'custom_auth',
                 'oidcName' => 'custom_oidc',
@@ -37,12 +43,6 @@ class HelloConfigTest extends TestCase
                 'loggedOut' => '/logout',
                 'error' => '/error-page',
             ],
-            function () {
-                return true;
-            },
-            function () {
-                return false;
-            },
             true,
             true,
             ['code' => 404, 'message' => 'Not Found']

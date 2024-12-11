@@ -171,6 +171,8 @@ class HelloConfigBuilder
             $this->redirectURI,
             $this->host,
             $this->secret,
+            $this->loginSync,
+            $this->logoutSync,
             $this->cookies,
             $this->production,
             $this->helloDomain,
@@ -178,8 +180,6 @@ class HelloConfigBuilder
             $this->scope,
             $this->providerHint,
             $this->routes,
-            $this->loginSync,
-            $this->logoutSync,
             $this->cookieToken,
             $this->logDebug,
             $this->error

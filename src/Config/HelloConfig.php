@@ -36,6 +36,8 @@ class HelloConfig implements ConfigInterface
         ?string $redirectURI = null,
         string $host = '',
         ?string $secret = null,
+        ?callable $loginSync = null,
+        ?callable $logoutSync = null,
         array $cookies = [
             'authName' =>  'hellocoop_auth',
             'oidcName' => 'hellocoop_oidc',
@@ -50,8 +52,6 @@ class HelloConfig implements ConfigInterface
             'loggedOut' => '/',
             'error' => '/error',
         ],
-        ?callable $loginSync = null,
-        ?callable $logoutSync = null,
         ?bool $cookieToken = null,
         ?bool $logDebug = null,
         ?array $error = null
@@ -65,6 +65,8 @@ class HelloConfig implements ConfigInterface
         $this->redirectURI = $redirectURI;
         $this->host = $host;
         $this->secret = $secret;
+        $this->loginSync = $loginSync;
+        $this->logoutSync = $logoutSync;
         $this->cookies = $cookies;
         $this->production = $production;
         $this->helloDomain = $helloDomain;
@@ -72,8 +74,6 @@ class HelloConfig implements ConfigInterface
         $this->scope = $scope;
         $this->providerHint = $providerHint;
         $this->routes = $routes;
-        $this->loginSync = $loginSync;
-        $this->logoutSync = $logoutSync;
         $this->cookieToken = $cookieToken;
         $this->logDebug = $logDebug;
         $this->error = $error;
