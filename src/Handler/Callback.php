@@ -189,7 +189,7 @@ class Callback
             }
 
             if ($auth['isLoggedIn'] && isset($payload['org'])) {
-                $auth['org'] = $payload['org'];
+                $auth['authCookie']['org'] = $payload['org'];
             }
 
             if ($this->config->getLoginSync()) {
@@ -208,6 +208,7 @@ class Callback
                             'target_uri' => $targetUri,
                         ], 'Access denied by loginSync.');
                     } elseif ($callback['updatedAuth']) {
+                        // add or update auth data from callback function
                         $auth = array_merge($callback['updatedAuth'], $auth);
                     }
                 } catch (Exception $e) {

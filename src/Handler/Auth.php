@@ -5,8 +5,6 @@ namespace HelloCoop\Handler;
 use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Config\ConfigInterface;
-use HelloCoop\Lib\OIDCManager;
-use HelloCoop\Lib\Crypto;
 use HelloCoop\Type\AuthUpdates;
 use HelloCoop\Type\Auth as AuthType;
 use HelloCoop\Lib\Auth as AuthLib;
@@ -42,7 +40,13 @@ class Auth
     }
     public function updateAuth(AuthUpdates $authUpdates): ?AuthType
     {
-        return null;
+        $auth = $this->getAuthLib()->getAuthfromCookies();
+        if ($auth->isLoggedIn === false) {
+            return $auth;
+        }
+
+        $updatedAuth = array_merge($auth->toArray(), $authUpdates->toArray());
+        return AuthType::fromArray($updatedAuth);
     }
     public function clearAuth(): void
     {

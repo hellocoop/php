@@ -31,7 +31,7 @@ class HelloConfig implements ConfigInterface
         string $authApiRoute,
         string $loginApiRoute,
         string $logoutApiRoute,
-        bool $sameSiteStrict,
+        bool $sameSiteStrict, //Restricts cross-site request sharing to prevent CSRF attacks.
         ?string $clientId = null,
         ?string $redirectURI = null,
         string $host = '',
@@ -46,7 +46,7 @@ class HelloConfig implements ConfigInterface
         array $scope = ['openid', 'name', 'email', 'picture'],
         array $providerHint = ['github'],
         array $routes = [
-            'loggedIn' => '/',
+            'loggedIn' => '/', // after callback where we need to take the user.
             'loggedOut' => '/',
             'error' => '/error',
         ],
