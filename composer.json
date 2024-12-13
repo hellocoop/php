@@ -5,7 +5,7 @@
         "Identity Provider",
         "Authentication",
         "Authorization",
-        "Single Sign-On (SSO)",
+        "Single Sign-On",
         "Federated Identity"
     ],
     "type": "library",
