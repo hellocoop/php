@@ -21,9 +21,52 @@ on:
       - '.github/workflows/**'
 
 jobs:
+  coding-standards:
+    name: "Coding standards"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout repository"
+        uses: "actions/checkout@v4"
+
+      - name: "Install PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          php-version: "latest"
+          coverage: "none"
+
+      - name: "Install dependencies (Composer)"
+        uses: "ramsey/composer-install@v3"
+
+      - name: "Check syntax (php-parallel-lint)"
+        run: "composer lint -- --colors"
+
+      - name: "Check coding standards (PHP_CodeSniffer)"
+        run: "./vendor/bin/phpcs --colors"
+
+  static-analysis:
+    name: "Static analysis"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout repository"
+        uses: "actions/checkout@v4"
+
+      - name: "Install PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          php-version: "latest"
+          coverage: "none"
+
+      - name: "Install dependencies (Composer)"
+        uses: "ramsey/composer-install@v3"
+
+      - name: "Statically analyze code (PHPStan)"
+        run: "composer phpstan -- --ansi"
+
+      - name: "Statically analyze code (Psalm)"
+        run: "composer psalm -- --shepherd"
+
   tests:
     runs-on: ubuntu-latest
-
     steps:
       # Check out the repository
       - name: Checkout Code
