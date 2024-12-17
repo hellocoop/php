@@ -44,10 +44,10 @@ jobs:
         uses: "ramsey/composer-install@v3"
 
       - name: "Check syntax (php-parallel-lint)"
-        run: "composer lint -- --colors"
+        run: "composer lint src tests --colors"
 
       - name: "Check coding standards (PHP_CodeSniffer)"
-        run: "./vendor/bin/phpcs --colors"
+        run: "composer phpcs src tests --colors"
 
   static-analysis:
     name: "Static analysis"

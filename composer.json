@@ -42,8 +42,9 @@
         "exclude": ["examples"]
     },
     "scripts": {
-        "lint": "parallel-lint src tests",
+        "lint": "parallel-lint",
         "phpstan": "phpstan analyse --memory-limit=512M",
-        "psalm": "psalm"
+        "psalm": "psalm",
+        "phpcs": "phpcs --standard=PSR12"
     }
 }
