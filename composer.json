@@ -49,7 +49,7 @@
         "build:clean": "git clean -fX build/",
         "lint": "parallel-lint src tests",
         "lint:paths": "parallel-lint",
-        "phpcs": "phpcs --cache=build/cache/phpcs.cache",
+        "phpcs": "phpcs",
         "phpstan": [
             "phpstan analyse --no-progress --memory-limit=1G",
             "phpstan analyse -c phpstan-tests.neon --no-progress --memory-limit=1G"
