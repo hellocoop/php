@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: "composer"
+    allow:
+      - dependency-type: all
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      stable-updates:
+        update-types:
+        - "minor"
+        - "patch"
+    versioning-strategy: "increase-if-necessary"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      stable-updates:
+        update-types:
+        - "major"
+        - "minor"
+        - "patch"
