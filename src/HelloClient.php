@@ -31,9 +31,9 @@ class HelloClient
 
     public function __construct(
         ConfigInterface $config,
-        HelloRequestInterface $helloRequest = null,
-        HelloResponseInterface $helloResponse = null,
-        PageRendererInterface $pageRenderer = null
+        ?HelloRequestInterface $helloRequest = null,
+        ?HelloResponseInterface $helloResponse = null,
+        ?PageRendererInterface $pageRenderer = null
     ) {
         $this->config = $config;
         $this->helloRequest = $helloRequest ??= new HelloRequest();
