@@ -77,7 +77,7 @@ class LogoutTest extends TestCase
             ->method('__invoke');
 
         $this->configMock
-            ->method('getLoginSync')
+            ->method('getLogoutSync')
             ->willReturn($syncCallback);
 
         $this->configMock
