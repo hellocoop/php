@@ -4,20 +4,23 @@ namespace HelloCoop\Type;
 
 use InvalidArgumentException;
 
-class OIDC {
+class OIDC
+{
     public string $codeVerifier;
     public string $nonce;
     public string $redirectUri;
     public string $targetUri;
 
-    public function __construct(string $codeVerifier, string $nonce, string $redirectUri, string $targetUri) {
+    public function __construct(string $codeVerifier, string $nonce, string $redirectUri, string $targetUri)
+    {
         $this->codeVerifier = $codeVerifier;
         $this->nonce = $nonce;
         $this->redirectUri = $redirectUri;
         $this->targetUri = $targetUri;
     }
 
-    public static function fromArray(array $data): self {
+    public static function fromArray(array $data): self
+    {
         if (!isset($data['code_verifier'])) {
             throw new InvalidArgumentException('Missing code_verifier');
         }
@@ -42,7 +45,8 @@ class OIDC {
         );
     }
 
-    public function toArray(): array {
+    public function toArray(): array
+    {
         return [
             'code_verifier' => $this->codeVerifier,
             'nonce' => $this->nonce,
@@ -51,4 +55,3 @@ class OIDC {
         ];
     }
 }
-

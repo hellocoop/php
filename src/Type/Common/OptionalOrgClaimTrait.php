@@ -2,7 +2,8 @@
 
 namespace HelloCoop\Type\Common;
 
-trait OptionalOrgClaimTrait {
+trait OptionalOrgClaimTrait
+{
     /**
      * @var array{id: string, domain: string}|null
      * Optional organization claim.
