@@ -16,6 +16,7 @@ use HelloCoop\Lib\TokenFetcher;
 use HelloCoop\Lib\TokenParser;
 use Exception;
 use HelloCoop\Utils\CurlWrapper;
+use Throwable;
 
 class Callback
 {
@@ -260,13 +261,13 @@ class Callback
      *
      * @param array $error Error details including 'target_uri', 'error', and 'error_description'.
      * @param string $errorMessage A message describing the error.
-     * @param \Throwable|null $previous Previous exception for chaining (optional).
+     * @param Throwable|null $previous Previous exception for chaining (optional).
      *
      * @return string The error page URL.
      *
      * @throws CallbackException If no error URI is provided.
      */
-    private function sendErrorPage(array $error, string $errorMessage, \Throwable $previous = null): string
+    private function sendErrorPage(array $error, string $errorMessage, ?Throwable $previous = null): string
     {
         $error_uri = $error['target_uri'] ?? $this->config->getRoutes()['error'] ?? null;
         if ($error_uri) {

@@ -4,7 +4,7 @@ namespace HelloCoop\Lib;
 
 class PKCE
 {
-    const VERIFIER_LENGTH = 43;
+    public const VERIFIER_LENGTH = 43;
 
     /** Generate cryptographically strong random string
      * @param int $size The desired length of the string

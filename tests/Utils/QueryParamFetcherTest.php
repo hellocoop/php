@@ -7,6 +7,7 @@ use HelloCoop\Utils\QueryParamFetcher;
 
 class QueryParamFetcherTest extends TestCase
 {
+    protected array $originalGet;
     protected function setUp(): void
     {
         // Backup the original $_GET superglobal

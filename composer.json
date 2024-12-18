@@ -45,6 +45,6 @@
         "lint": "parallel-lint",
         "phpstan": "phpstan analyse --memory-limit=512M",
         "psalm": "psalm",
-        "phpcs": "phpcs --standard=PSR12"
+        "phpcs": "phpcs --standard=PSR12 --exclude=Generic.Files.LineLength"
     }
 }

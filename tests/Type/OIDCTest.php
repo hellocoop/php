@@ -5,8 +5,10 @@ namespace HelloCoop\Tests\Type;
 use HelloCoop\Type\OIDC;
 use PHPUnit\Framework\TestCase;
 
-class OIDCTest extends TestCase {
-    public function testFromArrayValidData(): void {
+class OIDCTest extends TestCase
+{
+    public function testFromArrayValidData(): void
+    {
         $data = [
             'code_verifier' => 'test_verifier',
             'nonce' => 'test_nonce',
@@ -23,7 +25,8 @@ class OIDCTest extends TestCase {
         $this->assertEquals('/home', $oidc->targetUri);
     }
 
-    public function testFromArrayMissingKeys(): void {
+    public function testFromArrayMissingKeys(): void
+    {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Missing code_verifier');
 
@@ -36,7 +39,8 @@ class OIDCTest extends TestCase {
         OIDC::fromArray($data);
     }
 
-    public function testToArray(): void {
+    public function testToArray(): void
+    {
         $oidc = new OIDC('test_verifier', 'test_nonce', 'https://example.com/callback', '/home');
 
         $expected = [

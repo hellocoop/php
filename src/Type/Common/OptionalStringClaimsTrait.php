@@ -1,7 +1,9 @@
 <?php
 
 namespace HelloCoop\Type\Common;
-trait OptionalStringClaimsTrait {
+
+trait OptionalStringClaimsTrait
+{
     public $name;
     public $nickname;
     public $preferred_username;
