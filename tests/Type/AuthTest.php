@@ -12,7 +12,7 @@ class AuthTest extends TestCase
     {
         $authCookie = new AuthCookie('user123', time());
         $authCookie->setExtraProperty('role', 'admin');
-        
+
         $auth = new Auth(true, $authCookie, 'token123');
 
         $this->assertTrue($auth->isLoggedIn);
