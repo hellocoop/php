@@ -24,7 +24,7 @@ class AuthTest extends TestCase
             $this->configMock,
         );
     }
-    public function testSaveAuthCookieSuccess()
+    public function testSaveAuthCookieSuccess(): void
     {
         $authMock = AuthType::fromArray([
             'isLoggedIn' => true,
