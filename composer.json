@@ -65,7 +65,7 @@
         ]
     },
     "archive": {
-        "exclude": ["examples"]
+        "exclude": ["example"]
     },
     "config": {
         "allow-plugins": {

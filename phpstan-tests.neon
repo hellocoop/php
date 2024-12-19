@@ -3,5 +3,4 @@ parameters:
     level: max
     paths:
         - ./tests
-    checkMissingIterableValueType: false
     reportUnmatchedIgnoredErrors: false
