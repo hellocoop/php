@@ -74,7 +74,7 @@ class Auth
             $auth = $this->getCrypto()->decrypt($authCookie);
             if (is_array($auth)) {
                 if ($auth['isLoggedIn'] && $this->config->getCookieToken()) {
-                    $auth = array_merge($auth, ['cookieToken' => $this->config->getCookieToken()]);
+                    $auth = array_merge($auth, ['cookieToken' => $authCookie]);
                 }
                 return AuthType::fromArray($auth);
             }
