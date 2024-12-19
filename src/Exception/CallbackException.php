@@ -13,7 +13,7 @@ class CallbackException extends Exception
         array $errorDetails,
         $message = "Callback Exception",
         $code = 0,
-        Throwable $previous = null
+        ?Throwable $previous = null
     ) {
         $this->errorDetails = $errorDetails;
         parent::__construct($message, $code, $previous);
