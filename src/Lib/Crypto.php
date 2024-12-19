@@ -11,7 +11,7 @@ class Crypto
 {
     private string $secret;
 
-    public function __construct(string $secret)
+    public function __construct(?string $secret)
     {
         if (!$this->checkSecret($secret)) {
             throw new InvalidSecretException();
