@@ -10,7 +10,7 @@ define('API_ROUTE', '/api/hellocoop'); // Define the API route
 // App ID from https://console.hello.coop/
 define('APP_ID', 'app_43tf7X1qHvsCVZIuPQtzQE8J_KQq');
 // Add your domain name here (e.g., ngrok domain or deployed domain)
-define('HOST', 'b46e-223-205-76-153.ngrok-free.app');
+define('HOST', '1c8e-92-212-9-22.ngrok-free.app');
 // Create a 32-byte hex secret key using the command: openssl rand -hex 32
 define('SECRET', '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef');
 
@@ -81,25 +81,25 @@ if ($requestPath === API_ROUTE) {
   </style>
 </head>
 <body>
-  <pre>
 <?php
-// Assuming $helloClient is already instantiated and configured
-echo json_encode($helloClient->getAuth(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+  $auth = $helloClient->getAuth();
 ?>
-  </pre>
+<pre>
+  <?php
+  // Assuming $helloClient is already instantiated and configured
+    echo json_encode($helloClient->getAuth(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    ?>
+</pre>
   <div class="hello-container">
+  <?php if (!$auth['isLoggedIn']) : ?>
     <button class="hello-btn" onclick="login(event)">
       ō&nbsp;&nbsp;&nbsp;Continue with Hellō
     </button>
-
-<?php
-// Get authentication status
-$auth = $helloClient->getAuth();
-if ($auth['isLoggedIn']) : ?>
+  <?php else : ?>
     <button class="hello-btn" onclick="logout(event)">
       ō&nbsp;&nbsp;&nbsp;Logout
     </button>
-<?php endif; ?>
+  <?php endif; ?>
   </div>
   <script>
     function login(event) {
