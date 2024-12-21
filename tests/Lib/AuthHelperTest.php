@@ -6,11 +6,13 @@ use HelloCoop\Lib\AuthHelper;
 use HelloCoop\Lib\PKCE;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class AuthHelperTest extends TestCase
 {
     private AuthHelper $authHelper;
 
+   /** @var MockObject|PKCE */
     private $pkceMock;
 
     protected function setUp(): void
@@ -19,7 +21,7 @@ class AuthHelperTest extends TestCase
         $this->authHelper = new AuthHelper($this->pkceMock);
     }
 
-    public function testCreateAuthRequestSuccess()
+    public function testCreateAuthRequestSuccess(): void
     {
         $this->pkceMock->method('generate')->willReturn([
             'code_challenge' => 'test-challenge',
@@ -39,7 +41,7 @@ class AuthHelperTest extends TestCase
         $this->assertEquals('test-verifier', $result['code_verifier']);
     }
 
-    public function testMissingClientIdThrowsException()
+    public function testMissingClientIdThrowsException(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('client_id is required in the authorization request.');
@@ -49,7 +51,7 @@ class AuthHelperTest extends TestCase
         ]);
     }
 
-    public function testInvalidScopeThrowsException()
+    public function testInvalidScopeThrowsException(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('One or more passed scopes are invalid.');
@@ -61,7 +63,7 @@ class AuthHelperTest extends TestCase
         ]);
     }
 
-    public function testAddDefaultsToScopes()
+    public function testAddDefaultsToScopes(): void
     {
         $config = [
             'client_id' => 'test-client-id',

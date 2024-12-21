@@ -9,13 +9,19 @@ use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\Lib\Crypto;
 use HelloCoop\Config\ConfigInterface;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class OIDCManagerTest extends TestCase
 {
+    /** @var MockObject|HelloRequestInterface */
     private $helloRequestMock;
+    /** @var MockObject|HelloResponseInterface */
     private $helloResponseMock;
+    /** @var MockObject|Crypto */
     private $cryptoMock;
-    private $oidcManager;
+    /** @var OIDCManager */
+    private OIDCManager $oidcManager;
+    /** @var MockObject|ConfigInterface */
     private $configMock;
 
     protected function setUp(): void
