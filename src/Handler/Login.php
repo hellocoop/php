@@ -2,6 +2,8 @@
 
 namespace HelloCoop\Handler;
 
+use HelloCoop\Exception\CryptoFailedException;
+use HelloCoop\Exception\InvalidSecretException;
 use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Config\ConfigInterface;
@@ -20,8 +22,15 @@ class Login
     private OIDCManager $oidcManager;
     private AuthHelper $authHelper;
 
+    /** @var array<string>  */
     private array $redirectURIs;
 
+    /**
+     * @param HelloRequestInterface $helloRequest
+     * @param HelloResponseInterface $helloResponse
+     * @param ConfigInterface $config
+     * @param array<string> $redirectURIs
+     */
     public function __construct(
         HelloRequestInterface $helloRequest,
         HelloResponseInterface $helloResponse,
@@ -34,6 +43,9 @@ class Login
         $this->redirectURIs = $redirectURIs;
     }
 
+    /**
+     * @throws InvalidSecretException
+     */
     private function getOIDCManager(): OIDCManager
     {
         return $this->oidcManager ??= new OIDCManager(
@@ -49,6 +61,9 @@ class Login
         return $this->authHelper ??= new AuthHelper(new PKCE());
     }
 
+    /**
+     * @throws CryptoFailedException|InvalidSecretException
+     */
     public function generateLoginUrl(): ?string
     {
         $params = $this->helloRequest->fetchMultiple([
@@ -112,6 +127,6 @@ class Login
             'target_uri' => $params['target_uri'],
         ]));
 
-        return $authResponse['url'];
+        return is_string($authResponse['url']) ? $authResponse['url'] : null;
     }
 }
