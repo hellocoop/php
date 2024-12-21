@@ -15,6 +15,7 @@ class Auth
     private HelloRequestInterface $helloRequest;
     private ConfigInterface $config;
     private ?AuthLib $authLib = null;
+
     public function __construct(
         HelloRequestInterface $helloRequest,
         HelloResponseInterface $helloResponse,
@@ -38,6 +39,7 @@ class Auth
     {
         return $this->getAuthLib()->getAuthfromCookies();
     }
+
     public function updateAuth(AuthUpdates $authUpdates): ?AuthType
     {
         $auth = $this->getAuthLib()->getAuthfromCookies();
@@ -48,6 +50,7 @@ class Auth
         $updatedAuth = array_merge($auth->toArray(), $authUpdates->toArray());
         return AuthType::fromArray($updatedAuth);
     }
+
     public function clearAuth(): void
     {
         $this->getAuthLib()->clearAuthCookie();
