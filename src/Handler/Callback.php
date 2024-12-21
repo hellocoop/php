@@ -65,6 +65,7 @@ class Callback
     {
         return $this->tokenFetcher ??= new TokenFetcher(new CurlWrapper());
     }
+
     private function getTokenParser(): TokenParser
     {
         return $this->tokenParser ??= new TokenParser();
@@ -137,7 +138,7 @@ class Callback
             $this->getOIDCManager()->clearOidcCookie();
 
             $token = $this->getTokenFetcher()->fetchToken([
-                'code' => (string) $code,
+                'code' => $code,
                 'wallet' => $this->config->getHelloWallet(),
                 'code_verifier' => $codeVerifier,
                 'redirect_uri' => $redirectUri,
@@ -264,7 +265,7 @@ class Callback
      * Uses the target URI from error details or a fallback error route. Updates the query
      * string with error information. Throws an exception if no error URI is available.
      *
-     * @param array<string, int|string> $error Error details including 'target_uri', 'error', and 'error_description'.
+     * @param array<string, int|string|null> $error Error details including 'target_uri', 'error', and 'error_description'.
      * @param string $errorMessage A message describing the error.
      * @param Throwable|null $previous Previous exception for chaining (optional).
      *

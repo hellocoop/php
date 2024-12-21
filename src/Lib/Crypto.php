@@ -14,9 +14,9 @@ class Crypto
     /**
      * @throws InvalidSecretException
      */
-    public function __construct(?string $secret)
+    public function __construct(string $secret)
     {
-        if (is_null($secret) || !$this->checkSecret($secret)) {
+        if (!$this->checkSecret($secret)) {
             throw new InvalidSecretException();
         }
         $bin = hex2bin($secret);

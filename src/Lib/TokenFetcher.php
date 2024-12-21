@@ -17,7 +17,7 @@ class TokenFetcher
     }
 
     /**
-     * @param array<string, string> $config
+     * @param array<string, string|null> $config
      * @return string
      * @throws Exception
      */

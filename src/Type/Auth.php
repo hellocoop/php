@@ -30,7 +30,7 @@ class Auth
     }
 
     /** Create an instance from an array of key-value pairs.
-     * @param array<string, bool|string|array<string>|null>|null $data
+     * @param array<string, bool|string|array<string>|mixed|null>|null $data
      * @return Auth
      */
     public static function fromArray(?array $data): self

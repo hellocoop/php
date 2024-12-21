@@ -2,6 +2,9 @@
 
 namespace HelloCoop;
 
+use Exception;
+use HelloCoop\Exception\CryptoFailedException;
+use HelloCoop\Exception\InvalidSecretException;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\HelloRequest\HelloRequest;
 use HelloCoop\HelloResponse\HelloResponseInterface;
@@ -20,9 +23,9 @@ use HelloCoop\Exception\SameSiteCallbackException;
 class HelloClient
 {
     private ConfigInterface $config;
-    private ?HelloResponseInterface $helloResponse;
-    private ?HelloRequestInterface $helloRequest;
-    private ?PageRendererInterface $pageRenderer;
+    private HelloResponseInterface $helloResponse;
+    private HelloRequestInterface $helloRequest;
+    private PageRendererInterface $pageRenderer;
     private ?Callback $callbackHandler = null;
     private ?Auth $authHandler = null;
     private ?Invite $invite = null;
@@ -87,11 +90,18 @@ class HelloClient
         );
     }
 
+    /**
+     * @return array<string, bool|string|array<string, mixed>|null>
+     */
     public function getAuth(): array
     {
-        return $this->getAuthHandler()->handleAuth()->toArray();
+        return $this->getAuthHandler()->handleAuth() ? $this->getAuthHandler()->handleAuth()->toArray() : [];
     }
 
+    /**
+     * @throws InvalidSecretException
+     * @throws CryptoFailedException
+     */
     private function handleLogin()
     {
         return $this->helloResponse->redirect($this->getLoginHandler()->generateLoginUrl());
@@ -102,6 +112,9 @@ class HelloClient
         return $this->helloResponse->redirect($this->getLogoutHandler()->generateLogoutUrl());
     }
 
+    /**
+     * @throws Exception
+     */
     private function handleInvite()
     {
         return $this->helloResponse->redirect($this->getInviteHandler()->generateInviteUrl());
@@ -150,7 +163,7 @@ class HelloClient
                 case 'invite':
                     return $this->handleInvite();
                 default:
-                    throw new \Exception('unknown query: ' . $op);
+                    throw new Exception('unknown query: ' . $op);
                     //TODO: add 500 error here;
             }
         }

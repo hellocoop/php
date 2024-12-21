@@ -16,8 +16,8 @@ class AuthHelper
     }
 
     /**
-     * @param array<string, string> $config
-     * @return array<string, string>
+     * @param array<string, mixed> $config
+     * @return array<string, mixed>
      */
     public function createAuthRequest(array $config): array
     {

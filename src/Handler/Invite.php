@@ -2,6 +2,7 @@
 
 namespace HelloCoop\Handler;
 
+use Exception;
 use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Config\ConfigInterface;
@@ -13,6 +14,7 @@ class Invite
     private HelloRequestInterface $helloRequest;
     private ConfigInterface $config;
     private ?AuthLib $authLib = null;
+
     public function __construct(
         HelloRequestInterface $helloRequest,
         HelloResponseInterface $helloResponse,
@@ -32,6 +34,9 @@ class Invite
         );
     }
 
+    /**
+     * @throws Exception
+     */
     public function generateInviteUrl(): string
     {
         $params = $this->helloRequest->fetchMultiple([
@@ -46,7 +51,11 @@ class Invite
 
         $auth = $this->getAuthLib()->getAuthfromCookies();
         if (empty($auth->toArray()['authCookie'])) {
-            throw new \Exception("User not logged in");
+            throw new Exception("User not logged in");
+        }
+
+        if (empty($auth->toArray()['authCookie']['sub'])) {
+            throw new Exception("User coookie missing");
         }
 
         $request = [
@@ -62,7 +71,6 @@ class Invite
         ];
 
         $queryString = http_build_query($request);
-        $url = "https://wallet.{$this->config->getHelloDomain()}/invite?" . $queryString;
-        return $url;
+        return "https://wallet.{$this->config->getHelloDomain()}/invite?" . $queryString;
     }
 }
