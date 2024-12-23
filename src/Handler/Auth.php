@@ -35,12 +35,12 @@ class Auth
         );
     }
 
-    public function handleAuth(): ?AuthType
+    public function handleAuth(): AuthType
     {
         return $this->getAuthLib()->getAuthfromCookies();
     }
 
-    public function updateAuth(AuthUpdates $authUpdates): ?AuthType
+    public function updateAuth(AuthUpdates $authUpdates): AuthType
     {
         $auth = $this->getAuthLib()->getAuthfromCookies();
         if ($auth->isLoggedIn === false) {

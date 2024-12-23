@@ -15,7 +15,7 @@ class HelloConfig implements ConfigInterface
     private string $helloDomain;
     private ?string $helloWallet = null;
     private string $host;
-    private ?string $secret = null;
+    private string $secret;
     private ?bool $logDebug = null;
     /** @var array<string, int|string>|null */
     private ?array $error = null;
@@ -42,7 +42,7 @@ class HelloConfig implements ConfigInterface
      * @param string|null $clientId
      * @param string|null $redirectURI
      * @param string $host
-     * @param string|null $secret
+     * @param string $secret
      * @param callable|null $loginSync
      * @param callable|null $logoutSync
      * @param array<string, string> $cookies
@@ -65,7 +65,7 @@ class HelloConfig implements ConfigInterface
         ?string $clientId = null,
         ?string $redirectURI = null,
         string $host = '',
-        ?string $secret = null,
+        string $secret = '',
         ?callable $loginSync = null,
         ?callable $logoutSync = null,
         array $cookies = [
@@ -219,7 +219,7 @@ class HelloConfig implements ConfigInterface
         return $this->helloWallet;
     }
 
-    public function getSecret(): ?string
+    public function getSecret(): string
     {
         return $this->secret;
     }

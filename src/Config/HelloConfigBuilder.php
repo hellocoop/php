@@ -12,7 +12,7 @@ class HelloConfigBuilder
     private ?string $clientId = null;
     private ?string $redirectURI = null;
     private string $host = '';
-    private ?string $secret = null;
+    private string $secret = '';
     /**  @var array<string, string> */
     private array $cookies = [
         'authName' => 'hellocoop_auth',
@@ -88,7 +88,7 @@ class HelloConfigBuilder
         return $this;
     }
 
-    public function setSecret(?string $secret): self
+    public function setSecret(string $secret): self
     {
         $this->secret = $secret;
         return $this;

@@ -17,7 +17,7 @@ class AuthHelper
 
     /**
      * @param array<string, mixed> $config
-     * @return array<string, mixed>
+     * @return array<string, string>
      */
     public function createAuthRequest(array $config): array
     {
@@ -43,6 +43,7 @@ class AuthHelper
             $scopes = implode(' ', array_unique(array_merge($scopes, ['openid'])));
         }
 
+        /** @var string $nonce */
         $nonce = $config['nonce'] ?? $this->generateUuid();
         // Prepare parameters
         $params = [

@@ -42,14 +42,20 @@ class TokenFetcher
 
         try {
             $ch = $this->curl->init($tokenEndpoint);
+            if (!$ch) {
+                throw new \Exception('Curl error: initializing ' . $tokenEndpoint);
+            }
+
             $this->curl->setOpt($ch, CURLOPT_POST, true);
             $this->curl->setOpt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
             $this->curl->setOpt($ch, CURLOPT_POSTFIELDS, $body);
             $this->curl->setOpt($ch, CURLOPT_RETURNTRANSFER, true);
 
+            /** @var string $response */
             $response = $this->curl->exec($ch);
-            $httpCode = $this->curl->getInfo($ch, CURLINFO_HTTP_CODE);
 
+            /** @var int $httpCode */
+            $httpCode = $this->curl->getInfo($ch, CURLINFO_HTTP_CODE);
             if ($this->curl->error($ch)) {
                 throw new \Exception('Curl error: ' . $this->curl->error($ch));
             }
