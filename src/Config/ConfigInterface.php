@@ -28,6 +28,6 @@ interface ConfigInterface
     public function getRedirectURI(): ?string;
     public function getHelloDomain(): string;
     public function getHelloWallet(): ?string;
-    public function getSecret(): ?string;
+    public function getSecret(): string;
     public function getLogDebug(): ?bool;
 }

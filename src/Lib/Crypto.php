@@ -47,7 +47,7 @@ class Crypto
     }
 
     /**
-     * @return array<string, mixed>|null
+     * @return array<string, string>|null
      * @throws DecryptionFailedException
      */
     public function decrypt(string $encryptedStr): ?array
@@ -65,7 +65,7 @@ class Crypto
                 throw new DecryptionFailedException();
             }
 
-            /** @var array<string, mixed>|null $jsonData */
+            /** @var array<string, string>|null $jsonData */
             $jsonData = json_decode($decryptedData, true);
             return $jsonData;
         } catch (Exception $e) {

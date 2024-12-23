@@ -33,6 +33,7 @@ class TokenFetcherTest extends TestCase
     public function testFetchTokenErrorResponse(): void
     {
         $curlMock = $this->createMock(CurlWrapper::class);
+        $curlMock->method('init')->willReturn(json_encode(['error' => 'mock_error']));
         $curlMock->method('exec')->willReturn(json_encode(['error' => 'mock_error']));
         $curlMock->method('getInfo')->willReturn(400);
 

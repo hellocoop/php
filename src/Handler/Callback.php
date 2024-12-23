@@ -145,6 +145,7 @@ class Callback
                 'client_id' => $this->config->getClientId()
             ]);
 
+            /** @var array<string, string> $payload */
             $payload = $this->getTokenParser()->parseToken($token)['payload'];
 
             if ($payload['aud'] != $this->config->getClientId()) {

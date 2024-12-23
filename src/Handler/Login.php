@@ -127,6 +127,6 @@ class Login
             'target_uri' => $params['target_uri'],
         ]));
 
-        return is_string($authResponse['url']) ? $authResponse['url'] : null;
+        return $authResponse['url'];
     }
 }
