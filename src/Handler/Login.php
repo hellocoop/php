@@ -64,7 +64,7 @@ class Login
     /**
      * @throws CryptoFailedException|InvalidSecretException
      */
-    public function generateLoginUrl(): ?string
+    public function generateLoginUrl(): string
     {
         $params = $this->helloRequest->fetchMultiple([
             'provider_hint',

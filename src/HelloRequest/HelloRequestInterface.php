@@ -11,7 +11,7 @@ interface HelloRequestInterface
      * @param string|null $default Default value if the key is not found.
      * @return string|null The value of the parameter or default.
      */
-    public function fetch(string $key, string $default = null): ?string;
+    public function fetch(string $key, ?string $default = null): ?string;
 
     /**
      * Fetch multiple parameters by keys from either GET or POST data.
@@ -28,7 +28,7 @@ interface HelloRequestInterface
      * @param string|null $default Default value if the key is not found.
      * @return string|null The value of the header or default.
      */
-    public function fetchHeader(string $key, string $default = null): ?string;
+    public function fetchHeader(string $key, ?string $default = null): ?string;
 
     /**
      * Fetch a cookie value by name.

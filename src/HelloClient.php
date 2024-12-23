@@ -95,24 +95,28 @@ class HelloClient
      */
     public function getAuth(): array
     {
-        return $this->getAuthHandler()->handleAuth() ? $this->getAuthHandler()->handleAuth()->toArray() : [];
+        return$this->getAuthHandler()->handleAuth()->toArray();
     }
 
     /**
-     * @throws InvalidSecretException
-     * @throws CryptoFailedException
+     * @return mixed|null
+     * @throws CryptoFailedException | InvalidSecretException
      */
     private function handleLogin()
     {
         return $this->helloResponse->redirect($this->getLoginHandler()->generateLoginUrl());
     }
 
+    /**
+     * @return mixed|null
+     */
     private function handleLogout()
     {
         return $this->helloResponse->redirect($this->getLogoutHandler()->generateLogoutUrl());
     }
 
     /**
+     * @return mixed|null
      * @throws Exception
      */
     private function handleInvite()
@@ -128,6 +132,9 @@ class HelloClient
         return $this->helloResponse->json($this->getAuthHandler()->handleAuth()->toArray());
     }
 
+    /**
+     * @return mixed|string|null
+     */
     private function handleCallback()
     {
         try {
@@ -144,6 +151,10 @@ class HelloClient
         }
     }
 
+    /**
+     * @return mixed|string|void|null
+     * @throws CryptoFailedException | InvalidSecretException
+     */
     public function route()
     {
         if (in_array($this->helloRequest->getMethod(), ["POST", "GET"]) === false) {

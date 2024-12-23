@@ -7,11 +7,11 @@ use Exception;
 
 class CallbackException extends Exception
 {
-    /** @var array<string, int|string> */
+    /** @var array<string, string> */
     private array $errorDetails;
 
     /**
-     * @param array<string, int|string> $errorDetails
+     * @param array<string, string> $errorDetails
      * @param string $message
      * @param int $code
      * @param Throwable|null $previous
@@ -27,7 +27,7 @@ class CallbackException extends Exception
     }
 
     /**
-     * @return array<string, int|string>
+     * @return array<string, string>
      */
     public function getErrorDetails(): array
     {

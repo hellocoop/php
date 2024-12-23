@@ -13,7 +13,7 @@ class HelloRequest implements HelloRequestInterface
      * @param string|null $default Default value if the key is not found.
      * @return string|null The value of the parameter or default.
      */
-    public function fetch(string $key, string $default = null): ?string
+    public function fetch(string $key, ?string $default = null): ?string
     {
         // First check GET, then POST if not found.
         return $_GET[$key] ?? $_POST[$key] ?? $default;
@@ -41,7 +41,7 @@ class HelloRequest implements HelloRequestInterface
      * @param string|null $default Default value if the key is not found.
      * @return string|null The value of the header or default.
      */
-    public function fetchHeader(string $key, string $default = null): ?string
+    public function fetchHeader(string $key, ?string $default = null): ?string
     {
         $headers = $this->getAllHeaders();
         $normalizedKey = strtolower($key);
