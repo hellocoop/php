@@ -60,7 +60,7 @@
         ],
         "phpunit": "phpunit --verbose --colors=always",
         "phpunit-coverage": "phpunit --verbose --colors=always --coverage-html build/coverage",
-        "psalm": "psalm --show-info=false --config=psalm.xml",
+        "psalm": "psalm --show-info=false --config=psalm.xml --no-cache",
         "test": [
             "@lint",
             "@phpstan",
