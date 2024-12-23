@@ -12,7 +12,7 @@ class AuthHelperTest extends TestCase
 {
     private AuthHelper $authHelper;
 
-   /** @var MockObject|PKCE */
+   /** @var MockObject & PKCE */
     private $pkceMock;
 
     protected function setUp(): void
@@ -77,19 +77,5 @@ class AuthHelperTest extends TestCase
 
         $result = $this->authHelper->createAuthRequest($config);
         $this->assertStringContainsString('openid', $result['url']);
-    }
-
-    private function mockStaticMethod($class, $method, $returnValue): void
-    {
-        $mock = $this->getMockBuilder($class)
-            ->disableOriginalConstructor()
-            ->onlyMethods([$method])
-            ->getMock();
-
-        $mock->method($method)->willReturn($returnValue);
-
-        $refClass = new \ReflectionClass($class);
-        $method = $refClass->getMethod('setMocked');
-        $method->setAccessible(true);
     }
 }
