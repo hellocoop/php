@@ -13,15 +13,15 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 class OIDCManagerTest extends TestCase
 {
-    /** @var MockObject|HelloRequestInterface */
+    /** @var MockObject & HelloRequestInterface */
     private $helloRequestMock;
-    /** @var MockObject|HelloResponseInterface */
+    /** @var MockObject & HelloResponseInterface */
     private $helloResponseMock;
-    /** @var MockObject|Crypto */
+    /** @var MockObject & Crypto */
     private $cryptoMock;
     /** @var OIDCManager */
     private OIDCManager $oidcManager;
-    /** @var MockObject|ConfigInterface */
+    /** @var MockObject & ConfigInterface */
     private $configMock;
 
     protected function setUp(): void

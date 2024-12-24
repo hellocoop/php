@@ -5,7 +5,7 @@ namespace HelloCoop\Utils;
 class QueryParamFetcher
 {
     /**
-     * @param array<string, mixed> $keys
+     * @param array<int, string> $keys
      * @return array<string, mixed>
      */
     public static function fetch(array $keys): array

@@ -141,10 +141,16 @@ class HelloClient
             return $this->helloResponse->redirect($this->getCallbackHandler()->handleCallback());
         } catch (CallbackException $e) {
             $errorDetails = $e->getErrorDetails();
+            /** @var string $error */
+            $error =  $errorDetails['error'];
+            /** @var string $errorDescription */
+            $errorDescription =  $errorDetails['error_description'];
+            /** @var string $targetUri */
+            $targetUri =  $errorDetails['target_uri'];
             return $this->helloResponse->render($this->pageRenderer->renderErrorPage(
-                $errorDetails['error'],
-                $errorDetails['error_description'],
-                $errorDetails['target_uri']
+                $error,
+                $errorDescription,
+                $targetUri
             ));
         } catch (SameSiteCallbackException $e) {
             return $this->helloResponse->render($this->pageRenderer->renderSameSitePage());
@@ -153,7 +159,7 @@ class HelloClient
 
     /**
      * @return mixed|string|void|null
-     * @throws CryptoFailedException | InvalidSecretException
+     * @throws CryptoFailedException | InvalidSecretException | Exception
      */
     public function route()
     {

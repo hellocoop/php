@@ -82,13 +82,16 @@ class Login
         }
 
         $redirectURI = $this->config->getRedirectURI();
+        /** @var string $host */
         $host = $this->helloRequest->fetchHeader('Host');
 
         if (empty($redirectURI)) {
             if (isset($this->redirectURIs[$host])) {
                 $redirectURI = $this->redirectURIs[$host];
             } elseif (!empty($params['redirect_uri'])) {
-                $this->redirectURIs[$host] = $redirectURI = $params['redirect_uri'];
+                /** @var string $redirectURI */
+                $redirectURI = $params['redirect_uri'];
+                $this->redirectURIs[$host] = $redirectURI;
                 error_log("Hello: RedirectURI for $host => $redirectURI");
             } else {
                 error_log('Hello: Discovering API RedirectURI route ...');
@@ -97,9 +100,11 @@ class Login
             }
         }
 
+        /** @var string $providerHintString */
         $providerHintString = $params['provider_hint'];
         $providerHint = $providerHintString ? array_map('trim', explode(' ', $providerHintString)) : null;
 
+        /** @var string $scopeString */
         $scopeString = $params['scope'];
         $scope = $scopeString ? array_map('trim', explode(' ', $scopeString)) : null;
 
@@ -120,11 +125,14 @@ class Login
 
         $authResponse = $this->getAuthHelper()->createAuthRequest($request);
 
+        /** @var string $targetUri */
+        $targetUri = $params['target_uri'];
+
         $this->getOIDCManager()->saveOidc(OIDC::fromArray([
             'nonce' => $authResponse['nonce'],
             'code_verifier' => $authResponse['code_verifier'],
             'redirect_uri' => $redirectURI,
-            'target_uri' => $params['target_uri'],
+            'target_uri' => $targetUri,
         ]));
 
         return $authResponse['url'];
