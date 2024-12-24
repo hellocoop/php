@@ -8,7 +8,7 @@ interface ConfigInterface
     public function getSameSiteStrict(): ?bool;
     /**  @return array<string, int|string>|null */
     public function getError(): ?array;
-    /**  @return array<string, string>|null */
+    /**  @return array<string>|null */
     public function getScope(): ?array;
     /**  @return array<string>|null */
     public function getProviderHint(): ?array;

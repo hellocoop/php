@@ -6,7 +6,7 @@ class QueryParamFetcher
 {
     /**
      * @param array<int, string> $keys
-     * @return array<string, string>
+     * @return array<string, mixed>
      */
     public static function fetch(array $keys): array
     {

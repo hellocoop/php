@@ -262,7 +262,7 @@ class Callback
      * Uses the target URI from error details or a fallback error route. Updates the query
      * string with error information. Throws an exception if no error URI is available.
      *
-     * @param array<string, string> $error Error details including 'target_uri', 'error', and 'error_description'.
+     * @param array<string, mixed> $error Error details including 'target_uri', 'error', and 'error_description'.
      * @param string $errorMessage A message describing the error.
      * @param Throwable|null $previous Previous exception for chaining (optional).
      *
@@ -272,6 +272,7 @@ class Callback
      */
     private function sendErrorPage(array $error, string $errorMessage, ?Throwable $previous = null): string
     {
+        /** @var string $error_uri */
         $error_uri = $error['target_uri'] ?? $this->config->getRoutes()['error'] ?? null;
         if ($error_uri) {
             list($pathString, $queryString) = array_pad(explode('?', (string) $error_uri, 2), 2, '');
