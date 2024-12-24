@@ -39,8 +39,8 @@ dist/
 *.bak
 *.swp
 
-# PHPUnit Coverage files
-coverage-*.xml
+# PHP CodeSniffer fixer
+.php-cs-fixer.cache
 
 # Ignore lock files
 composer.lock
@@ -48,3 +48,4 @@ composer.lock
 # Ignore PHPUnit XML cache
 phpunit.xml.cache
 coverage.xml
+coverage-*.xml
