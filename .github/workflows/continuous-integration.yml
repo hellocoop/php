@@ -1,0 +1,164 @@
+name: "Continuous Integration"
+
+on:
+  push:
+    branches:
+      - "master"
+      - "*.x"
+    tags:
+      - "*"
+  pull_request:
+    branches:
+      - "*.x"
+      - "master"
+
+# Cancels all previous workflow runs for the same branch that have not yet completed.
+concurrency:
+  # The concurrency group contains the workflow name and the branch name.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coding-standards:
+    name: "Coding standards"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout repository"
+        uses: "actions/checkout@v4"
+
+      - name: "Install PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          # Use PHP 8.3 until psalm resolves issues with 8.4
+          # https://github.com/vimeo/psalm/issues/11107
+          php-version: "8.3"
+          coverage: "none"
+
+      - name: "Install dependencies (Composer)"
+        uses: "ramsey/composer-install@v3"
+
+      - name: "Check syntax (php-parallel-lint)"
+        run: "composer lint src tests --colors"
+
+      - name: "Check coding standards (PHP_CodeSniffer)"
+        run: "composer phpcs src tests --colors"
+
+  static-analysis:
+    name: "Static analysis"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout repository"
+        uses: "actions/checkout@v4"
+
+      - name: "Install PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          # Use PHP 8.3 until psalm resolves issues with 8.4
+          # https://github.com/vimeo/psalm/issues/11107
+          php-version: "8.3"
+          coverage: "none"
+
+      - name: "Install dependencies (Composer)"
+        uses: "ramsey/composer-install@v3"
+
+      - name: "Statically analyze code (PHPStan)"
+        run: "composer phpstan src tests -- --ansi"
+
+      - name: "Statically analyze code (Psalm)"
+        run: "composer psalm -- --shepherd"
+
+
+  code-coverage:
+    name: "Code coverage"
+    needs: ["coding-standards", "static-analysis"]
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout repository"
+        uses: "actions/checkout@v4"
+
+      - name: "Install dependencies (apt)"
+        run: |
+          sudo apt-get update
+
+      - name: "Install PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          # Use PHP 8.3 until psalm resolves issues with 8.4
+          # https://github.com/vimeo/psalm/issues/11107
+          php-version: "8.3"
+          extensions: bcmath, gmp, sodium, uuid
+          coverage: "xdebug" # Enable Xdebug for code coverage
+          ini-values: "memory_limit=-1"
+
+      - name: "Install dependencies (Composer)"
+        uses: "ramsey/composer-install@v3"
+        with:
+          dependency-versions: "${{ matrix.dependencies }}"
+
+      - name: "Run unit tests (PHPUnit)"
+        run: "./vendor/bin/phpunit --verbose --colors=always --coverage-text --coverage-clover build/logs/clover.xml"
+
+      - name: "Publish coverage report to Codecov"
+        uses: "codecov/codecov-action@v5"
+        with:
+          token: "${{ secrets.CODECOV_TOKEN }}"
+
+  unit-tests:
+    name: "Unit Tests"
+    needs: ["code-coverage"]
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - "7.4"
+          - "8.0"
+          - "8.1"
+          - "8.2"
+          - "8.3"
+#          - "8.4"
+        operating-system:
+          - "ubuntu-latest"
+          - "windows-latest"
+          - "macos-latest"
+        include:
+          # Keep the locked version by default
+          - dependency-versions: "locked"
+          # For PHP 8.0, installing with --prefer-highest to use latest libraries.
+          - php-version: "8.0"
+            dependency-versions: "highest"
+
+    steps:
+      - name: "Configure Git (for Windows)"
+        if: ${{ matrix.operating-system == 'windows-latest' }}
+        run: |
+          git config --system core.autocrlf false
+          git config --system core.eol lf
+
+      # Check out the repository
+      - name: "Checkout Code"
+        uses: "actions/checkout@v4"
+
+      - name: "Install dependencies (apt)"
+        if: ${{ matrix.operating-system == 'ubuntu-latest' }}
+        run: |
+          sudo apt-get update
+
+      # Set up PHP
+      - name: "Setup PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          php-version: "${{ matrix.php-version }}"
+          extensions: mbstring, pdo, json, tokenizer, xml # Add required PHP extensions
+          coverage: "none"
+
+      # Install Composer dependencies
+      - name: "Install dependencies (Composer)"
+        uses: "ramsey/composer-install@v3"
+        with:
+          dependency-versions: "${{ matrix.dependency-versions }}"
+
+      # Run Tests
+      - name: "Run unit tests (PHPUnit)"
+        run: "./vendor/bin/phpunit --verbose --colors=always --no-coverage"
+
