@@ -59,6 +59,8 @@ jobs:
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"
         with:
+          # Use PHP 8.3 until psalm resolves issues with 8.4
+          # https://github.com/vimeo/psalm/issues/11107
           php-version: "8.3"
           coverage: "none"
 
