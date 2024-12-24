@@ -8,7 +8,7 @@ interface ConfigInterface
     public function getSameSiteStrict(): ?bool;
     /**  @return array<string, int|string>|null */
     public function getError(): ?array;
-    /**  @return array<string, string>|null */
+    /**  @return array<string>|null */
     public function getScope(): ?array;
     /**  @return array<string>|null */
     public function getProviderHint(): ?array;
@@ -28,6 +28,6 @@ interface ConfigInterface
     public function getRedirectURI(): ?string;
     public function getHelloDomain(): string;
     public function getHelloWallet(): ?string;
-    public function getSecret(): ?string;
+    public function getSecret(): string;
     public function getLogDebug(): ?bool;
 }

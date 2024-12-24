@@ -36,7 +36,7 @@ class LoginTest extends TestCase
         );
     }
 
-    public function testGenerateLoginUrlSuccess()
+    public function testGenerateLoginUrlSuccess(): void
     {
         // Setup mocks
         $_GET = [
@@ -67,15 +67,16 @@ class LoginTest extends TestCase
         );
 
         $query = parse_url($url, PHP_URL_QUERY);
+        $this->assertIsString($query);
         parse_str($query, $params);
-        $this->assertEquals($params['provider_hint'], 'google');
-        $this->assertEquals($params['scope'], 'openid profile');
-        $this->assertEquals($params['code_challenge_method'], 'S256');
-        $this->assertEquals($params['login_hint'], 'user@example.com');
+        $this->assertEquals('google', $params['provider_hint']);
+        $this->assertEquals('openid profile', $params['scope']);
+        $this->assertEquals('S256', $params['code_challenge_method']);
+        $this->assertEquals('user@example.com', $params['login_hint']);
         //$this->assertEquals('https://wallet.hello.coop/authorize?client_id=valid_client_id&redirect_uri=https%3A%2F%2Fexample.com%2Fcallback&scope=openid&response_type=code&response_mode=query&nonce=1234&prompt=consent&code_challenge=yyhvlwTA3oVJcnTpkLV70DjqXb794Ar5Sgth12qbRsM&code_challenge_method=S256&provider_hint=google&login_hint=user%40example.com&domain_hint=example.com', $url);
     }
 
-    public function testGenerateLoginUrlMissingClientId()
+    public function testGenerateLoginUrlMissingClientId(): void
     {
         $_GET = [
             'provider_hint' => 'google',
@@ -98,7 +99,7 @@ class LoginTest extends TestCase
         $this->login->generateLoginUrl();
     }
 
-    public function testGenerateLoginUrlMissingRedirectURI()
+    public function testGenerateLoginUrlMissingRedirectURI(): void
     {
         $_GET = [
             'provider_hint' => 'google',

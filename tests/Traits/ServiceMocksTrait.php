@@ -12,22 +12,22 @@ use HelloCoop\Lib\TokenParser;
 
 trait ServiceMocksTrait
 {
-    /** @var MockObject|HelloRequestInterface */
+    /** @var MockObject & HelloRequestInterface */
     protected $helloRequestMock;
 
-    /** @var MockObject|HelloResponseInterface */
+    /** @var MockObject & HelloResponseInterface */
     protected $helloResponseMock;
 
-    /** @var MockObject|ConfigInterface */
+    /** @var MockObject & ConfigInterface */
     protected $configMock;
 
     /** @var Crypto */
     protected Crypto $crypto;
 
-    /** @var MockObject|TokenFetcher */
+    /** @var MockObject & TokenFetcher */
     protected $tokenFetcherMock;
 
-    /** @var MockObject|TokenParser */
+    /** @var MockObject & TokenParser */
     protected $tokenParserMock;
 
     /**
@@ -89,6 +89,12 @@ trait ServiceMocksTrait
         $_SERVER['REQUEST_METHOD'] = 'GET';
     }
 
+    /**
+     * @param object $object
+     * @param string $propertyName
+     * @param mixed $mock
+     * @return void
+     */
     private function replaceLazyLoadedProperty(object $object, string $propertyName, $mock): void
     {
         $reflection = new \ReflectionClass($object);

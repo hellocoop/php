@@ -55,6 +55,7 @@ class Logout
      */
     public function generateLogoutUrl(): string
     {
+        /** @var string|null $targetUri */
         $targetUri = $this->helloRequest->fetch('target_uri');
         $this->getAuthLib()->clearAuthCookie();
         if ($this->config->getLogoutSync()) {

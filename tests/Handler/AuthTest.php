@@ -38,8 +38,16 @@ class AuthTest extends TestCase
         ]);
 
         $result = $this->auth->handleAuth();
+        /** @var string $actual_name */
+        $actual_name = isset($result->toArray()['authCookie']['name'])
+            ? $result->toArray()['authCookie']['name']
+            : '';
+        /** @var string $actual_email */
+        $actual_email = isset($result->toArray()['authCookie']['name'])
+            ? $result->toArray()['authCookie']['email']
+            : '';
         $this->assertTrue($result->toArray()['isLoggedIn']);
-        $this->assertEquals($result->toArray()['authCookie']['name'], 'Dick Hardt');
-        $this->assertEquals($result->toArray()['authCookie']['email'], 'dick.hardt@hello.coop');
+        $this->assertEquals('Dick Hardt', $actual_name);
+        $this->assertEquals('dick.hardt@hello.coop', $actual_email);
     }
 }

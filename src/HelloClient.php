@@ -95,24 +95,28 @@ class HelloClient
      */
     public function getAuth(): array
     {
-        return $this->getAuthHandler()->handleAuth() ? $this->getAuthHandler()->handleAuth()->toArray() : [];
+        return$this->getAuthHandler()->handleAuth()->toArray();
     }
 
     /**
-     * @throws InvalidSecretException
-     * @throws CryptoFailedException
+     * @return mixed|null
+     * @throws CryptoFailedException | InvalidSecretException
      */
     private function handleLogin()
     {
         return $this->helloResponse->redirect($this->getLoginHandler()->generateLoginUrl());
     }
 
+    /**
+     * @return mixed|null
+     */
     private function handleLogout()
     {
         return $this->helloResponse->redirect($this->getLogoutHandler()->generateLogoutUrl());
     }
 
     /**
+     * @return mixed|null
      * @throws Exception
      */
     private function handleInvite()
@@ -128,22 +132,35 @@ class HelloClient
         return $this->helloResponse->json($this->getAuthHandler()->handleAuth()->toArray());
     }
 
+    /**
+     * @return mixed|string|null
+     */
     private function handleCallback()
     {
         try {
             return $this->helloResponse->redirect($this->getCallbackHandler()->handleCallback());
         } catch (CallbackException $e) {
             $errorDetails = $e->getErrorDetails();
+            /** @var string $error */
+            $error =  $errorDetails['error'];
+            /** @var string $errorDescription */
+            $errorDescription =  $errorDetails['error_description'];
+            /** @var string $targetUri */
+            $targetUri =  $errorDetails['target_uri'];
             return $this->helloResponse->render($this->pageRenderer->renderErrorPage(
-                $errorDetails['error'],
-                $errorDetails['error_description'],
-                $errorDetails['target_uri']
+                $error,
+                $errorDescription,
+                $targetUri
             ));
         } catch (SameSiteCallbackException $e) {
             return $this->helloResponse->render($this->pageRenderer->renderSameSitePage());
         }
     }
 
+    /**
+     * @return mixed|string|void|null
+     * @throws CryptoFailedException | InvalidSecretException | Exception
+     */
     public function route()
     {
         if (in_array($this->helloRequest->getMethod(), ["POST", "GET"]) === false) {

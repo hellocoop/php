@@ -36,6 +36,8 @@ class AuthTest extends TestCase
 
         $auth = new Auth(true, $authCookie);
 
+        $this->assertNotNull($auth->authCookie);
+        $this->assertNotNull($auth->authCookie->sub);
         $this->assertSame('user123', $auth->authCookie->sub);
         $this->assertSame('admin', $auth->authCookie->getExtraProperty('role'));
     }
