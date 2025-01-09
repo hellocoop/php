@@ -83,7 +83,6 @@ class HelloClientTest extends TestCase
             ->method('handleCallback')
             ->willReturn('/dashboard');
 
-
         $result = $this->client->route();
         $this->assertSame('/dashboard', $result);
     }
@@ -112,10 +111,43 @@ class HelloClientTest extends TestCase
             ->with('error_page')
             ->willReturn('render_response');
 
-        //throw exception
+        // Throw exception
         $this->callbackMock
             ->method('handleCallback')
             ->willThrowException(new CallbackException(['error' => 'test', 'error_description' => 'desc', 'target_uri' => 'uri']));
+
+        $result = $this->client->route();
+        $this->assertSame('render_response', $result);
+    }
+
+    public function testRouteHandlesWildcardConsole(): void
+    {
+        // Simulate $_GET parameters
+        $_GET = ['wildcard_console' => 'true'];
+
+        $_GET += [
+            'uri' => 'https://example.com/wildcard',
+            'target_uri' => '/target',
+            'app_name' => 'TestApp',
+            'redirect_uri' => '',
+        ];
+
+        $this->pageRendererMock
+            ->expects($this->once())
+            ->method('renderWildcardConsole')
+            ->with(
+                'https://example.com/wildcard',
+                '/target',
+                'TestApp',
+                ''
+            )
+            ->willReturn('wildcard_console_page');
+
+        $this->helloResponseMock
+            ->expects($this->once())
+            ->method('render')
+            ->with('wildcard_console_page')
+            ->willReturn('render_response');
 
         $result = $this->client->route();
         $this->assertSame('render_response', $result);
