@@ -193,10 +193,10 @@ class HelloClient
             empty($this->helloRequest->fetch('redirect_uri'))
         ) {
             return $this->helloResponse->render($this->pageRenderer->renderWildcardConsole(
-                $this->helloRequest->fetch('uri'),
-                $this->helloRequest->fetch('target_uri'),
-                $this->helloRequest->fetch('app_name'),
-                $this->helloRequest->fetch('redirect_uri')
+                (string)$this->helloRequest->fetch('uri'),
+                (string)$this->helloRequest->fetch('target_uri'),
+                (string)$this->helloRequest->fetch('app_name'),
+                (string)$this->helloRequest->fetch('redirect_uri')
             ));
         }
 
