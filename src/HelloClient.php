@@ -192,10 +192,12 @@ class HelloClient
             $this->helloRequest->fetch('wildcard_console') &&
             empty($this->helloRequest->fetch('redirect_uri'))
         ) {
-            /** @phpstan-ignore-next-line */
             return $this->helloResponse->render($this->pageRenderer->renderWildcardConsole(
+                /** @phpstan-ignore-next-line */
                 strval($this->helloRequest->fetch('uri')),
+                /** @phpstan-ignore-next-line */
                 strval($this->helloRequest->fetch('target_uri')),
+                /** @phpstan-ignore-next-line */
                 strval($this->helloRequest->fetch('app_name')),
                 ""
             ));
