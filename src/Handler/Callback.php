@@ -206,13 +206,13 @@ class Callback
                     ]);
 
                     $targetUri = $callback['target_uri'] ?? $targetUri;
-                    if ($callback['accessDenied']) {
+                    if (isset($callback['accessDenied'])) {
                         return $this->sendErrorPage([
                             'error' => 'access_denied',
                             'error_description' => 'loginSync denied access',
                             'target_uri' => $targetUri,
                         ], 'Access denied by loginSync.');
-                    } elseif ($callback['updatedAuth']) {
+                    } elseif (isset($callback['updatedAuth'])) {
                         // add or update auth data from callback function
                         $auth = array_merge($callback['updatedAuth'], $auth);
                     }
