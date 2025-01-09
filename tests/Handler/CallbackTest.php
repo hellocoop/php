@@ -132,4 +132,44 @@ class CallbackTest extends TestCase
         // Call the method under test
         $this->callback->handleCallback();
     }
+    public function testHandleCallbackLoginSync(): void
+    {
+        $_COOKIE['oidcName'] = $this->crypto->encrypt([
+            'code_verifier' => 'test_verifier',
+            'nonce' => 'valid_nonce',
+            'redirect_uri' => 'https://example.com/callback',
+            'target_uri' => '/'
+        ]);
+
+        $_GET = array_merge($_GET, [
+            'code' => 'hello',  // Missing code
+            'error' => null,
+            'same_site' => 'Strict',
+            'wildcard_domain' => 'example.com',
+            'app_name' => 'MyApp'
+        ]);
+
+        $this->tokenParserMock->method('parseToken')->willReturn([
+            'payload' => [
+                'aud' => 'valid_client_id',
+                'nonce' => 'valid_nonce',
+                'sub' => 'user_sub',
+                'iat' => time(),
+                'exp' => time() + 3600
+            ]
+        ]);
+
+        // Set up mock behaviors
+        $this->configMock->method('getLoginSync')->willReturn(function () {
+            return [
+                'accessDenied' => true
+            ];
+        });
+
+        // Call the method under test
+        $result = $this->callback->handleCallback();
+
+        // Assert that the result is the expected target URI
+        $this->assertEquals('/?error=access_denied&error_description=loginSync+denied+access', $result);
+    }
 }
