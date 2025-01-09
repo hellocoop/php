@@ -187,6 +187,21 @@ class HelloClient
         if ($this->helloRequest->fetch('code') || $this->helloRequest->fetch('error')) {
             return $this->handleCallback();
         }
+        // If the Redirect URI is not configured in Hello Wallet, we will prompt the user to add it.
+        if (
+            $this->helloRequest->fetch('wildcard_console') &&
+            empty($this->helloRequest->fetch('redirect_uri'))
+        ) {
+            return $this->helloResponse->render($this->pageRenderer->renderWildcardConsole(
+                /** @phpstan-ignore-next-line */
+                strval($this->helloRequest->fetch('uri')),
+                /** @phpstan-ignore-next-line */
+                strval($this->helloRequest->fetch('target_uri')),
+                /** @phpstan-ignore-next-line */
+                strval($this->helloRequest->fetch('app_name')),
+                ""
+            ));
+        }
 
         return; //TODO: add 500 error here;
     }
