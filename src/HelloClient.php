@@ -32,7 +32,7 @@ class HelloClient
     private ?Invite $invite = null;
     private ?Logout $logout = null;
     private ?Login $login = null;
-    private ?Command $command = null;
+    private ?Command $commandHandler = null;
 
     public function __construct(
         ConfigInterface $config,
@@ -58,6 +58,15 @@ class HelloClient
     private function getAuthHandler(): Auth
     {
         return $this->authHandler ??= new Auth(
+            $this->helloRequest,
+            $this->helloResponse,
+            $this->config
+        );
+    }
+
+    private function getCommandHandler(): Command
+    {
+        return $this->commandHandler ??= new Command(
             $this->helloRequest,
             $this->helloResponse,
             $this->config
@@ -126,7 +135,7 @@ class HelloClient
         $this->helloResponse->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         $this->helloResponse->setHeader('Pragma', 'no-cache');
         $this->helloResponse->setHeader('Expires', '0');
-        return $this->helloResponse->send();
+        return $this->commandHandler->handleCommand();
     }
 
     /**

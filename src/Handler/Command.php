@@ -104,14 +104,11 @@ class Command
         $this->helloResponse->json($metadataResponse->toArray());
     }
 
-    /**
-     * @param array<string, mixed> $params
-     */
-    public function handleCommand(array $params): void
+    public function handleCommand(): mixed
     {
         if ($this->helloRequest->has('command_token') === false) {
             $this->helloResponse->setStatusCode(500);
-            return;
+            return $this->helloResponse->send();
         }
 
         $commandToken = $this->helloRequest->fetch('command_token');
@@ -125,14 +122,13 @@ class Command
                 'error' => 'invalid_request',
                 'error_description' => 'invalid command token',
             ]);
-            return;
+            return $this->helloResponse->send();
         }
 
         $command = CommandEnum::tryFrom((string) $claims['command']) ?? null;
         if (!$command) {
             $this->helloResponse->setStatusCode(400);
-            $this->helloResponse->json(['error' => 'unsupported_command']);
-            return;
+            return $this->helloResponse->json(['error' => 'unsupported_command']);
         }
 
         $commandClaims = new CommandClaims(
@@ -146,13 +142,11 @@ class Command
         $handler = $this->config->getCommandHandler();
 
         if ($handler instanceof CommandHandlerInterface) {
-            $handler->handleCommand($commandClaims);
-            return;
+            return $handler->handleCommand($commandClaims);
         }
 
         if ($commandClaims->command === CommandEnum::METADATA) {
-            $this->handleMetadata($commandClaims);
-            return;
+            return $this->handleMetadata($commandClaims);
         }
 
         $this->helloResponse->setStatusCode(400);
