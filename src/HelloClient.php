@@ -181,7 +181,7 @@ class HelloClient
             return;//TODO: add 500 error here;
         }
 
-        if($this->helloRequest->getMethod() === "POST" && $this->helloRequest->has('command_token')) {
+        if ($this->helloRequest->getMethod() === "POST" && $this->helloRequest->has('command_token')) {
             return $this->handleCommand();
         }
 

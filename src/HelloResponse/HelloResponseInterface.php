@@ -17,6 +17,21 @@ interface HelloResponseInterface
     public function setHeader(string $name, $value): void;
 
     /**
+     * Set the HTTP status code.
+     *
+     * @param int $code HTTP status code.
+     * @return void
+     */
+    public function setStatusCode(int $code): void;
+
+    /**
+     * Sends an empty HTTP response with the previously set headers.
+     *
+     * @return void
+     */
+    public function send(): void;
+
+    /**
      * Set a cookie.
      *
      * @param string $name The name of the cookie.
