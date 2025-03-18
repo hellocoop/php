@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace HelloCoop\Lib;
 
-
 final class IssuerRegistry
 {
+    /**
+     * @return array<string, OpenIDProviderMetadata>
+     */
     public static function getIssuers(): array
     {
         return [
@@ -25,3 +27,4 @@ final class IssuerRegistry
         ];
     }
 }
+

@@ -32,6 +32,9 @@ class Command
         $this->config = $config;
     }
 
+    /**
+     * @return array<string, mixed>|false
+     */
     public function verifyCommandToken(string $commandToken): array|false
     {
         $issuers = IssuerRegistry::getIssuers();
@@ -43,13 +46,24 @@ class Command
 
         try {
             $payloadJson = base64_decode($parts[1], true);
+            if ($payloadJson === false) {
+                error_log('commands.verifyCommandToken: invalid base64 encoding');
+                return false;
+            }
+
             $payload = json_decode($payloadJson, true);
+            if ($payload === null) {
+                error_log('commands.verifyCommandToken: invalid JSON decoding');
+                return false;
+            }
+
             if (!isset($payload['iss'])) {
                 error_log('commands.verifyCommandToken: missing issuer');
                 return false;
             }
 
-            $iss = $payload['iss'];
+            $iss = (string) $payload['iss'];
+
             if (!isset($issuers[$iss])) {
                 error_log("commands.verifyCommandToken: unknown issuer - $iss");
                 return false;
@@ -90,9 +104,11 @@ class Command
         $this->helloResponse->json($metadataResponse->toArray());
     }
 
+    /**
+     * @param array<string, mixed> $params
+     */
     public function handleCommand(array $params): void
     {
-
         if ($this->helloRequest->has('command_token') === false) {
             $this->helloResponse->setStatusCode(500);
             return;

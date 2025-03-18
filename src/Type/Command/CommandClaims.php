@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HelloCoop\Type\Command;
+
+use InvalidArgumentException;
 
 enum Command: string
 {
@@ -21,6 +25,9 @@ enum Command: string
 
 final class CommandClaims
 {
+    /**
+     * @param array<string>|null $groups
+     */
     public function __construct(
         public readonly string $iss,
         public readonly string $sub,
@@ -30,7 +37,8 @@ final class CommandClaims
     ) {}
 
     /**
-     * Create an instance from an array.
+     * @param array<string, mixed> $data
+     * @return self
      */
     public static function fromArray(array $data): self
     {
@@ -44,7 +52,7 @@ final class CommandClaims
     }
 
     /**
-     * Convert the object to an array.
+     * @return array<string, mixed>
      */
     public function toArray(): array
     {
@@ -57,3 +65,4 @@ final class CommandClaims
         ];
     }
 }
+

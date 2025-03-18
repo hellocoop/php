@@ -1,9 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HelloCoop\Type\Command;
 
 final class MetadataResponse
 {
+    /**
+     * @param array<string, mixed> $context
+     * @param array<Command> $commands_supported
+     */
     public function __construct(
         public readonly array $context,
         public readonly string $commands_uri,
@@ -12,6 +18,9 @@ final class MetadataResponse
         public readonly string $client_id
     ) {}
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
