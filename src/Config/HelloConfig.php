@@ -2,6 +2,8 @@
 
 namespace HelloCoop\Config;
 
+use HelloCoop\Handler\CommandHandlerInterface;
+
 class HelloConfig implements ConfigInterface
 {
     private string $apiRoute;
@@ -32,6 +34,8 @@ class HelloConfig implements ConfigInterface
     /** @var callable|null */
     private $logoutSync;
     private bool $production;
+
+    private ?CommandHandlerInterface $commandHandler = null;
 
     /**
      * @param string $apiRoute
@@ -227,5 +231,15 @@ class HelloConfig implements ConfigInterface
     public function getLogDebug(): ?bool
     {
         return $this->logDebug;
+    }
+
+    public function setCommandHandler(CommandHandlerInterface $handler): void
+    {
+        $this->commandHandler = $handler;
+    }
+
+    public function getCommandHandler(): ?CommandHandlerInterface
+    {
+        return $this->commandHandler;
     }
 }

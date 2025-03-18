@@ -7,6 +7,17 @@ use HelloCoop\HelloRequest\HelloRequestInterface;
 class HelloRequest implements HelloRequestInterface
 {
     /**
+     * Check if a parameter exists in either GET or POST data.
+     *
+     * @param string $key The key of the parameter to check.
+     * @return bool True if the key exists, false otherwise.
+     */
+    public function has(string $key): bool
+    {
+        return isset($_GET[$key]) || isset($_POST[$key]);
+    }
+
+    /**
      * Fetch a parameter by key from either GET or POST data.
      *
      * @param string $key The key of the parameter to fetch.

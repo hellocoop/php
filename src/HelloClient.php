@@ -17,6 +17,7 @@ use HelloCoop\Handler\Invite;
 use HelloCoop\Handler\Logout;
 use HelloCoop\Handler\Login;
 use HelloCoop\Handler\Callback;
+use HelloCoop\Handler\Command;
 use HelloCoop\Exception\CallbackException;
 use HelloCoop\Exception\SameSiteCallbackException;
 
@@ -31,6 +32,7 @@ class HelloClient
     private ?Invite $invite = null;
     private ?Logout $logout = null;
     private ?Login $login = null;
+    private ?Command $command = null;
 
     public function __construct(
         ConfigInterface $config,
@@ -119,6 +121,18 @@ class HelloClient
      * @return mixed|null
      * @throws Exception
      */
+    private function handleCommand()
+    {
+        $this->helloResponse->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        $this->helloResponse->setHeader('Pragma', 'no-cache');
+        $this->helloResponse->setHeader('Expires', '0');
+        return $this->helloResponse->send();
+    }
+
+    /**
+     * @return mixed|null
+     * @throws Exception
+     */
     private function handleInvite()
     {
         return $this->helloResponse->redirect($this->getInviteHandler()->generateInviteUrl());
@@ -165,6 +179,10 @@ class HelloClient
     {
         if (in_array($this->helloRequest->getMethod(), ["POST", "GET"]) === false) {
             return;//TODO: add 500 error here;
+        }
+
+        if($this->helloRequest->getMethod() === "POST" && $this->helloRequest->has('command_token')) {
+            return $this->handleCommand();
         }
 
         $op = $this->helloRequest->fetch('op');

@@ -2,6 +2,8 @@
 
 namespace HelloCoop\Config;
 
+use HelloCoop\Handler\CommandHandlerInterface;
+
 interface ConfigInterface
 {
     public function getProduction(): bool;
@@ -30,4 +32,6 @@ interface ConfigInterface
     public function getHelloWallet(): ?string;
     public function getSecret(): string;
     public function getLogDebug(): ?bool;
+    public function setCommandHandler(CommandHandlerInterface $handler): void;
+    public function getCommandHandler(): ?CommandHandlerInterface;
 }
