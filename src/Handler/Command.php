@@ -35,7 +35,7 @@ class Command
     /**
      * @return array<string, mixed>|false
      */
-    public function verifyCommandToken(string $commandToken): array|false
+    public function verifyCommandToken(string $commandToken): array|string|false
     {
         $issuers = IssuerRegistry::getIssuers();
 
@@ -116,7 +116,9 @@ class Command
 
         $commandToken = $this->helloRequest->fetch('command_token');
         $claims = $this->verifyCommandToken($commandToken);
-        if (!$claims) {
+        
+        // Ensure claims is an array before accessing its keys
+        if (!$claims || !is_array($claims)) {
             $this->helloResponse->setStatusCode(400);
             error_log('invalid command token');
             $this->helloResponse->json([
@@ -126,7 +128,7 @@ class Command
             return;
         }
 
-        $command = CommandEnum::tryFrom($claims['command']) ?? null;
+        $command = CommandEnum::tryFrom((string) $claims['command']) ?? null;
         if (!$command) {
             $this->helloResponse->setStatusCode(400);
             $this->helloResponse->json(['error' => 'unsupported_command']);
@@ -134,11 +136,11 @@ class Command
         }
 
         $commandClaims = new CommandClaims(
-            iss: $claims['iss'],
-            sub: $claims['sub'],
+            iss: (string) $claims['iss'],
+            sub: (string) $claims['sub'],
             command: $command,
-            tenant: $claims['tenant'] ?? null,
-            groups: $claims['groups'] ?? null
+            tenant: isset($claims['tenant']) ? (string) $claims['tenant'] : null,
+            groups: isset($claims['groups']) ? (array) $claims['groups'] : null
         );
 
         $handler = $this->config->getCommandHandler();

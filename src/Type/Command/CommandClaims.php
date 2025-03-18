@@ -25,12 +25,19 @@ final class CommandClaims
      */
     public static function fromArray(array $data): self
     {
+        $iss = isset($data['iss']) ? (string) $data['iss'] : '';
+        $sub = isset($data['sub']) ? (string) $data['sub'] : '';
+        $commandValue = isset($data['command']) ? (string) $data['command'] : '';
+        $command = Command::tryFrom($commandValue) ?? throw new InvalidArgumentException('Invalid command');
+        $tenant = isset($data['tenant']) ? (string) $data['tenant'] : null;
+        $groups = isset($data['groups']) ? (array) $data['groups'] : null;
+
         return new self(
-            iss: $data['iss'] ?? '',
-            sub: $data['sub'] ?? '',
-            command: Command::tryFrom($data['command']) ?? throw new InvalidArgumentException('Invalid command'),
-            tenant: $data['tenant'] ?? null,
-            groups: $data['groups'] ?? null
+            iss: $iss,
+            sub: $sub,
+            command: $command,
+            tenant: $tenant,
+            groups: $groups
         );
     }
 
