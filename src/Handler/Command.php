@@ -35,7 +35,7 @@ class Command
     /**
      * @return array<string, mixed>|false
      */
-    public function verifyCommandToken(string $commandToken): array|string|false
+    public function verifyCommandToken(string $commandToken): array|false
     {
         $issuers = IssuerRegistry::getIssuers();
 
