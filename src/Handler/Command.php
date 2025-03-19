@@ -52,6 +52,9 @@ class Command
                 return false;
             }
 
+            /**
+             * @var array<string, mixed> $payload
+             */
             $payload = json_decode($payloadJson, true);
             if ($payload === null) {
                 error_log('commands.verifyCommandToken: invalid JSON decoding');
