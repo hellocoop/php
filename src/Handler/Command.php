@@ -41,6 +41,7 @@ class Command
 
         $parts = explode('.', $commandToken);
         if (count($parts) !== 3) {
+            error_log('Invalid token format');
             return false;
         }
 

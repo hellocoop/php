@@ -64,17 +64,17 @@ class LogoutTest extends TestCase
 
     public function testGenerateLogoutUrlWithLoginSync(): void
     {
-
         $_GET = [
             'target_uri' => null,
         ];
 
-        $syncCallback = $this->getMockBuilder(\stdClass::class)
-            ->addMethods(['__invoke'])
-            ->getMock();
-
-        $syncCallback->expects($this->once())
-            ->method('__invoke');
+        // Use an anonymous class to define the __invoke method
+        $syncCallback = new class {
+            public function __invoke()
+            {
+                // Simulate callable behavior
+            }
+        };
 
         $this->configMock
             ->method('getLogoutSync')
