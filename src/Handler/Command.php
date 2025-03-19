@@ -85,7 +85,7 @@ class Command
         }
     }
 
-    public function handleMetadata(CommandClaims $claims): void
+    public function handleMetadata(CommandClaims $claims): string
     {
         $metadata = PackageMetadata::getMetadata();
 
@@ -102,10 +102,10 @@ class Command
             client_id: $this->config->getClientId() ?? 'unknown'
         );
 
-        $this->helloResponse->json($metadataResponse->toArray());
+        return $this->helloResponse->json($metadataResponse->toArray());
     }
 
-    public function handleCommand(): mixed
+    public function handleCommand(): string
     {
         if ($this->helloRequest->has('command_token') === false) {
             $this->helloResponse->setStatusCode(500);

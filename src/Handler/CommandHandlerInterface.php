@@ -8,5 +8,5 @@ use HelloCoop\Type\Command\CommandClaims;
 
 interface CommandHandlerInterface
 {
-    public function handleCommand(CommandClaims $commandClaims): void;
+    public function handleCommand(CommandClaims $commandClaims): string;
 }

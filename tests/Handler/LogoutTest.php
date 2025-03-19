@@ -70,7 +70,7 @@ class LogoutTest extends TestCase
 
         // Use an anonymous class to define the __invoke method
         $syncCallback = new class {
-            public function __invoke()
+            public function __invoke(): void
             {
                 // Simulate callable behavior
             }
