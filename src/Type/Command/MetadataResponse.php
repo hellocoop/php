@@ -16,7 +16,8 @@ final class MetadataResponse
         public readonly array $commands_supported,
         public readonly int $commands_ttl,
         public readonly string $client_id
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<string, mixed>

@@ -17,7 +17,8 @@ final class CommandClaims
         public readonly Command $command,
         public readonly ?string $tenant = null,
         public readonly ?array $groups = null
-    ) {}
+    ) {
+    }
 
     /**
      * @param array<string, mixed> $data

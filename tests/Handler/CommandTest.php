@@ -24,13 +24,13 @@ class CommandTest extends TestCase
     private $helloRequest;
     private $helloResponse;
     private $config;
-    
+
     protected function setUp(): void
     {
         $this->helloRequest = $this->createMock(HelloRequestInterface::class);
         $this->helloResponse = $this->createMock(HelloResponseInterface::class);
         $this->config = $this->createMock(ConfigInterface::class);
-        
+
         $this->command = new Command(
             $this->helloRequest,
             $this->helloResponse,
@@ -38,16 +38,16 @@ class CommandTest extends TestCase
         );
     }
 
-    // public function testVerifyCommandTokenWithInvalidToken(): void
-    // {
-    //     $this->assertFalse($this->command->verifyCommandToken('invalid.token.format'));
-    // }
+    public function testVerifyCommandTokenWithInvalidToken(): void
+    {
+        $this->assertFalse($this->command->verifyCommandToken('invalid.token.format'));
+    }
 
     public function testVerifyCommandTokenWithValidToken(): void
     {
         $tokenPayload = base64_encode(json_encode(['iss' => 'https://issuer.hello.coop']));
         $commandToken = 'header.' . $tokenPayload . '.signature';
-        
+
         $mockClient = $this->createMock(Client::class);
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockStream = $this->createMock(StreamInterface::class);
@@ -59,21 +59,21 @@ class CommandTest extends TestCase
         $this->assertIsArray($this->command->verifyCommandToken($commandToken));
     }
 
-    // public function testHandleCommandWithoutToken(): void
-    // {
-    //     $this->helloRequest->method('has')->with('command_token')->willReturn(false);
-    //     $this->helloResponse->expects($this->once())->method('setStatusCode')->with(500);
-        
-    //     $this->command->handleCommand();
-    // }
+    public function testHandleCommandWithoutToken(): void
+    {
+        $this->helloRequest->method('has')->with('command_token')->willReturn(false);
+        $this->helloResponse->expects($this->once())->method('setStatusCode')->with(500);
 
-    // public function testHandleCommandWithInvalidToken(): void
-    // {
-    //     $this->helloRequest->method('has')->with('command_token')->willReturn(true);
-    //     $this->helloRequest->method('fetch')->with('command_token')->willReturn('invalid.token.format');
-        
-    //     $this->helloResponse->expects($this->once())->method('setStatusCode')->with(400);
-        
-    //     $this->command->handleCommand();
-    // }
+        $this->command->handleCommand();
+    }
+
+    public function testHandleCommandWithInvalidToken(): void
+    {
+        $this->helloRequest->method('has')->with('command_token')->willReturn(true);
+        $this->helloRequest->method('fetch')->with('command_token')->willReturn('invalid.token.format');
+
+        $this->helloResponse->expects($this->once())->method('setStatusCode')->with(400);
+
+        $this->command->handleCommand();
+    }
 }

@@ -10,5 +10,6 @@ final class OpenIDProviderMetadata
         public readonly string $issuer,
         public readonly string $introspection_endpoint,
         public readonly ?string $jwks_uri = null
-    ) {}
+    ) {
+    }
 }
