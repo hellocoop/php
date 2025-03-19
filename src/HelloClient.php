@@ -135,7 +135,7 @@ class HelloClient
         $this->helloResponse->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         $this->helloResponse->setHeader('Pragma', 'no-cache');
         $this->helloResponse->setHeader('Expires', '0');
-        return $this->commandHandler->handleCommand();
+        return $this->getCommandHandler()->handleCommand();
     }
 
     /**

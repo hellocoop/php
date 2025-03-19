@@ -109,10 +109,10 @@ class Command
     {
         if ($this->helloRequest->has('command_token') === false) {
             $this->helloResponse->setStatusCode(500);
-            return $this->helloResponse->send();
+            $this->helloResponse->send();
         }
 
-        $commandToken = $this->helloRequest->fetch('command_token');
+        $commandToken = $this->helloRequest->fetch('command_token') ?? '';
         $claims = $this->verifyCommandToken($commandToken);
         // Ensure claims is an array before accessing its keys
         if (!$claims || !is_array($claims)) {
@@ -122,10 +122,10 @@ class Command
                 'error' => 'invalid_request',
                 'error_description' => 'invalid command token',
             ]);
-            return $this->helloResponse->send();
+            $this->helloResponse->send();
         }
 
-        $command = CommandEnum::tryFrom((string) $claims['command']) ?? null;
+        $command = CommandEnum::tryFrom((string) $claims['command']) ?? '';
         if (!$command) {
             $this->helloResponse->setStatusCode(400);
             return $this->helloResponse->json(['error' => 'unsupported_command']);
@@ -150,6 +150,6 @@ class Command
         }
 
         $this->helloResponse->setStatusCode(400);
-        $this->helloResponse->json(['error' => 'unsupported_command']);
+        return $this->helloResponse->json(['error' => 'unsupported_command']);
     }
 }
