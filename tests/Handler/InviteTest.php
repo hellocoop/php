@@ -11,11 +11,17 @@ class InviteTest extends TestCase
     use ServiceMocksTrait;
 
     private Invite $invite;
+    private array $originalGet;
+    private array $originalCookie;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->setUpServiceMocks();
+
+        // Backup superglobals
+        $this->originalGet = $_GET;
+        $this->originalCookie = $_COOKIE;
 
         $this->invite = new Invite(
             $this->helloRequestMock,
@@ -23,6 +29,16 @@ class InviteTest extends TestCase
             $this->configMock
         );
     }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        // Restore superglobals after the test
+        $_GET = $this->originalGet;
+        $_COOKIE = $this->originalCookie;
+    }
+
     public function testCanGenerateInviteUrl(): void
     {
         $_GET = [
@@ -40,19 +56,10 @@ class InviteTest extends TestCase
             'authCookie' => ['sub' => 'user123', 'iat' => time()]
         ]);
 
-        // Test the URL generation
         $url = $this->invite->generateInviteUrl();
 
-        // Assert the URL is valid
-        $this->assertTrue(
-            filter_var($url, FILTER_VALIDATE_URL) !== false,
-            "The URL is not valid."
-        );
-
-        // Define the expected URL
         $expectedUrl = "https://wallet.hello.coop/invite?app_name=MyApp&prompt=Login&role=Admin&tenant=Tenant123&state=state456&inviter=user123&client_id=valid_client_id&initiate_login_uri=https%2F%2Fmy-domain&return_uri=https%3A%2F%2Fexample.com";
 
-        // Assert that the generated URL matches the expected one
         $this->assertSame($expectedUrl, $url);
     }
 }
