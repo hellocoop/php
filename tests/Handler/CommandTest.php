@@ -17,6 +17,7 @@ use GuzzleHttp\Exception\RequestException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class CommandTest extends TestCase
 {
