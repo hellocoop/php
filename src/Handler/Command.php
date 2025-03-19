@@ -114,7 +114,6 @@ class Command
 
         $commandToken = $this->helloRequest->fetch('command_token');
         $claims = $this->verifyCommandToken($commandToken);
-        
         // Ensure claims is an array before accessing its keys
         if (!$claims || !is_array($claims)) {
             $this->helloResponse->setStatusCode(400);
