@@ -112,7 +112,7 @@ class Command
             $this->helloResponse->send();
         }
 
-        $commandToken = $this->helloRequest->fetch('command_token') ?? '';
+        $commandToken = (string) $this->helloRequest->fetch('command_token') ?? '';
         $claims = $this->verifyCommandToken($commandToken);
         // Ensure claims is an array before accessing its keys
         if (!$claims || !is_array($claims)) {

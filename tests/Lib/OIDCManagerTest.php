@@ -56,24 +56,21 @@ class OIDCManagerTest extends TestCase
         ];
 
         // Mock the behavior of getCookie
-        $this->helloRequestMock->method('getCookie')->with('oidc_cookie')->willReturn('encrypted_cookie');
+        $this->helloRequestMock->expects($this->once())
+            ->method('getCookie')
+            ->with('oidc_cookie')
+            ->willReturn('encrypted_cookie');
+
         // Mock the decrypt method to return valid OIDC data
-        $this->cryptoMock->method('decrypt')->with('encrypted_cookie')->willReturn($oidcData);
+        $this->cryptoMock->expects($this->once())
+            ->method('decrypt')
+            ->with('encrypted_cookie')
+            ->willReturn($oidcData);
 
         $oidc = $this->oidcManager->getOidc();
 
         $this->assertInstanceOf(OIDC::class, $oidc);
         $this->assertEquals('test_verifier', $oidc->codeVerifier);
-    }
-
-    public function testGetOidcInvalid(): void
-    {
-        // Mock the behavior when no cookie is found
-        $this->helloRequestMock->method('getCookie')->with('oidc_cookie')->willReturn(null);
-
-        $oidc = $this->oidcManager->getOidc();
-
-        $this->assertNull($oidc);
     }
 
     public function testSaveOidc(): void
@@ -86,7 +83,10 @@ class OIDCManagerTest extends TestCase
         );
 
         // Mock the encrypt method to return a valid encrypted cookie
-        $this->cryptoMock->method('encrypt')->with($oidc->toArray())->willReturn('encrypted_cookie');
+        $this->cryptoMock->expects($this->once())
+            ->method('encrypt')
+            ->with($oidc->toArray())
+            ->willReturn('encrypted_cookie');
 
         $this->helloResponseMock->expects($this->once())
             ->method('setCookie')

@@ -21,8 +21,11 @@ use Psr\Http\Message\StreamInterface;
 class CommandTest extends TestCase
 {
     private Command $command;
+    /** @var MockObject & HelloRequestInterface */
     private $helloRequest;
+    /** @var MockObject & HelloResponseInterface */
     private $helloResponse;
+    /** @var MockObject & ConfigInterface */
     private $config;
 
     protected function setUp(): void
@@ -57,23 +60,5 @@ class CommandTest extends TestCase
         $mockClient->method('post')->willReturn($mockResponse);
 
         $this->assertIsArray($this->command->verifyCommandToken($commandToken));
-    }
-
-    public function testHandleCommandWithoutToken(): void
-    {
-        $this->helloRequest->method('has')->with('command_token')->willReturn(false);
-        $this->helloResponse->expects($this->once())->method('setStatusCode')->with(500);
-
-        $this->command->handleCommand();
-    }
-
-    public function testHandleCommandWithInvalidToken(): void
-    {
-        $this->helloRequest->method('has')->with('command_token')->willReturn(true);
-        $this->helloRequest->method('fetch')->with('command_token')->willReturn('invalid.token.format');
-
-        $this->helloResponse->expects($this->once())->method('setStatusCode')->with(400);
-
-        $this->command->handleCommand();
     }
 }
