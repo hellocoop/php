@@ -303,8 +303,8 @@ HTML;
                 </style>
                 <script>
                     function addToRedirectURI(){
-                        window.open("${uri}", "_blank")
-                        window.location.href = "${targetURI}"
+                        window.open("{$uri}", "_blank")
+                        window.location.href = "{$targetURI}"
                     }
                 </script>
             </head>

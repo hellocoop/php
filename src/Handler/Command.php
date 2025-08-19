@@ -88,6 +88,7 @@ class Command
         }
     }
 
+    //TODO: change the access rule to private
     public function handleMetadata(CommandClaims $claims): string
     {
         $metadata = PackageMetadata::getMetadata();
