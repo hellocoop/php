@@ -21,7 +21,6 @@ concurrency:
 jobs:
   coding-standards:
     name: "Coding standards"
-    continue-on-error: true
     runs-on: "ubuntu-latest"
     steps:
       - name: "Checkout repository"
@@ -46,7 +45,6 @@ jobs:
 
   static-analysis:
     name: "Static analysis"
-    continue-on-error: true
     runs-on: "ubuntu-latest"
     steps:
       - name: "Checkout repository"
@@ -72,8 +70,6 @@ jobs:
 
   code-coverage:
     name: "Code coverage"
-    continue-on-error: true
-    needs: ["coding-standards", "static-analysis"]
     runs-on: "ubuntu-latest"
     steps:
       - name: "Checkout repository"
@@ -108,8 +104,6 @@ jobs:
 
   unit-tests:
     name: "Unit Tests"
-    continue-on-error: true
-    needs: ["code-coverage"]
     runs-on: ${{ matrix.operating-system }}
     strategy:
       fail-fast: false
