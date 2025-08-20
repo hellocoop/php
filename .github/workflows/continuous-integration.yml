@@ -29,9 +29,7 @@ jobs:
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"
         with:
-          # Use PHP 8.3 until psalm resolves issues with 8.4
-          # https://github.com/vimeo/psalm/issues/11107
-          php-version: "8.3"
+          php-version: "8.4"
           coverage: "none"
 
       - name: "Install dependencies (Composer)"
@@ -53,9 +51,7 @@ jobs:
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"
         with:
-          # Use PHP 8.3 until psalm resolves issues with 8.4
-          # https://github.com/vimeo/psalm/issues/11107
-          php-version: "8.3"
+          php-version: "8.4"
           coverage: "none"
 
       - name: "Install dependencies (Composer)"
@@ -82,9 +78,7 @@ jobs:
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"
         with:
-          # Use PHP 8.3 until psalm resolves issues with 8.4
-          # https://github.com/vimeo/psalm/issues/11107
-          php-version: "8.3"
+          php-version: "8.4"
           extensions: bcmath, gmp, sodium, uuid
           coverage: "xdebug" # Enable Xdebug for code coverage
           ini-values: "memory_limit=-1"
@@ -95,7 +89,7 @@ jobs:
           dependency-versions: "${{ matrix.dependencies }}"
 
       - name: "Run unit tests (PHPUnit)"
-        run: "./vendor/bin/phpunit --verbose --colors=always --coverage-text --coverage-clover build/logs/clover.xml"
+        run: "./vendor/bin/phpunit --colors=always --coverage-text --coverage-clover build/logs/clover.xml"
 
       - name: "Publish coverage report to Codecov"
         uses: "codecov/codecov-action@v5"
@@ -109,12 +103,8 @@ jobs:
       fail-fast: false
       matrix:
         php-version:
-          - "7.4"
-          - "8.0"
-          - "8.1"
-          - "8.2"
           - "8.3"
-#          - "8.4"
+          - "8.4"
         operating-system:
           - "ubuntu-latest"
           - "windows-latest"
@@ -122,9 +112,6 @@ jobs:
         include:
           # Keep the locked version by default
           - dependency-versions: "locked"
-          # For PHP 8.0, installing with --prefer-highest to use latest libraries.
-          - php-version: "8.0"
-            dependency-versions: "highest"
 
     steps:
       - name: "Configure Git (for Windows)"
@@ -158,5 +145,5 @@ jobs:
 
       # Run Tests
       - name: "Run unit tests (PHPUnit)"
-        run: "./vendor/bin/phpunit --verbose --colors=always --no-coverage"
+        run: "./vendor/bin/phpunit --colors=always --no-coverage"
 
