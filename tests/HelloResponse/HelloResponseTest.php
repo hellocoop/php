@@ -70,6 +70,7 @@ class HelloResponseTest extends TestCase
         $this->response->deleteCookie('delete_cookie');
     }
 
+    // XXX: Comment out for now, since this is causing PHP to die with Fatal error
     // public function testRedirect(): void
     // {
     //     // Mock the header function
