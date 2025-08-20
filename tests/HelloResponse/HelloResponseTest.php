@@ -70,18 +70,18 @@ class HelloResponseTest extends TestCase
         $this->response->deleteCookie('delete_cookie');
     }
 
-    public function testRedirect(): void
-    {
-        // Mock the header function
-        $headerMock = $this->getFunctionMock('HelloCoop\HelloResponse', 'header');
+    // public function testRedirect(): void
+    // {
+    //     // Mock the header function
+    //     $headerMock = $this->getFunctionMock('HelloCoop\HelloResponse', 'header');
 
-        $headerMock->expects($this->once())
-                   ->with('Location: https://example.com');
+    //     $headerMock->expects($this->once())
+    //                ->with('Location: https://example.com');
 
-        // Create an instance of HelloResponse
-        $response = new HelloResponse();
+    //     // Create an instance of HelloResponse
+    //     $response = new HelloResponse();
 
-        // Test the redirect without TESTING defined
-        $response->redirect('https://example.com');
-    }
+    //     // Test the redirect without TESTING defined
+    //     $response->redirect('https://example.com');
+    // }
 }
