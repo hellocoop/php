@@ -70,7 +70,6 @@ jobs:
 
   code-coverage:
     name: "Code coverage"
-    needs: ["coding-standards", "static-analysis"]
     runs-on: "ubuntu-latest"
     steps:
       - name: "Checkout repository"
@@ -105,7 +104,6 @@ jobs:
 
   unit-tests:
     name: "Unit Tests"
-    needs: ["code-coverage"]
     runs-on: ${{ matrix.operating-system }}
     strategy:
       fail-fast: false
