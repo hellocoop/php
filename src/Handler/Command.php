@@ -56,7 +56,7 @@ class Command
              * @var array<string, mixed> $payload
              */
             $payload = json_decode($payloadJson, true);
-            if ($payload === null) {
+            if (!is_array($payload)) {
                 error_log('commands.verifyCommandToken: invalid JSON decoding');
                 return false;
             }
@@ -66,7 +66,8 @@ class Command
                 return false;
             }
 
-            $iss = (string) $payload['iss'];
+            /** @var string $iss */
+            $iss = $payload['iss'];
 
             if (!isset($issuers[$iss])) {
                 error_log("commands.verifyCommandToken: unknown issuer - $iss");
@@ -81,7 +82,9 @@ class Command
                 ]
             ]);
 
-            return json_decode($response->getBody()->getContents(), true);
+            /** @var array<string, mixed> $decodedResponse */
+            $decodedResponse = json_decode($response->getBody()->getContents(), true);
+            return $decodedResponse;
         } catch (RequestException $e) {
             error_log('error verifying command token: ' . $e->getMessage());
             return false;
@@ -116,7 +119,9 @@ class Command
             $this->helloResponse->send();
         }
 
-        $commandToken = (string) $this->helloRequest->fetch('command_token') ?? '';
+        /** @var string $commandToken */
+        $commandToken = $this->helloRequest->fetch('command_token');
+        /** @var array<string, mixed> $claims */
         $claims = $this->verifyCommandToken($commandToken);
         // Ensure claims is an array before accessing its keys
         if (!$claims || !is_array($claims)) {
@@ -129,18 +134,28 @@ class Command
             $this->helloResponse->send();
         }
 
-        $command = CommandEnum::tryFrom((string) $claims['command']) ?? '';
+        /** @var string $commandEnum */
+        $commandEnum = $claims['command'];
+        $command = CommandEnum::tryFrom($commandEnum) ?? '';
         if (!$command) {
             $this->helloResponse->setStatusCode(400);
             return $this->helloResponse->json(['error' => 'unsupported_command']);
         }
 
+        /** @var string $iss */
+        $iss = $claims['iss'];
+        /** @var string $sub */
+        $sub = $claims['sub'];
+        /** @var string|null $tenant */
+        $tenant = isset($claims['tenant']) ? $claims['tenant'] : null;
+        /** @var array<string>|null $groups */
+        $groups = isset($claims['groups']) ? $claims['groups'] : null;
         $commandClaims = new CommandClaims(
-            iss: (string) $claims['iss'],
-            sub: (string) $claims['sub'],
+            iss: $iss,
+            sub: $sub,
             command: $command,
-            tenant: isset($claims['tenant']) ? (string) $claims['tenant'] : null,
-            groups: isset($claims['groups']) ? (array) $claims['groups'] : null
+            tenant: $tenant,
+            groups: $groups
         );
 
         $handler = $this->config->getCommandHandler();
