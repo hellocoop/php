@@ -53,21 +53,25 @@ class AuthUpdates extends Claims implements ArrayAccess
     }
 
     // ArrayAccess implementation
+    #[\Override]
     public function offsetExists($offset): bool
     {
         return isset($this->additionalProperties[$offset]);
     }
 
+    #[\Override]
     public function offsetGet($offset): string
     {
         return is_string($this->additionalProperties[$offset]) ? $this->additionalProperties[$offset] : '';
     }
 
+    #[\Override]
     public function offsetSet($offset, $value): void
     {
         $this->additionalProperties[$offset] = $value;
     }
 
+    #[\Override]
     public function offsetUnset($offset): void
     {
         unset($this->additionalProperties[$offset]);

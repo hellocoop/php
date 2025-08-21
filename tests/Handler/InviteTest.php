@@ -11,7 +11,13 @@ class InviteTest extends TestCase
     use ServiceMocksTrait;
 
     private Invite $invite;
+    /**
+     * @var array<string, mixed>
+     */
     private array $originalGet;
+    /**
+     * @var array<string, mixed>
+     */
     private array $originalCookie;
 
     protected function setUp(): void

@@ -13,6 +13,7 @@ class HelloResponse implements HelloResponseInterface
      * @param string|string[] $value The value(s) of the header.
      * @return void
      */
+    #[\Override]
     public function setHeader(string $name, $value): void
     {
         // Ensure the value is an array to handle multiple values for the same header
@@ -30,6 +31,7 @@ class HelloResponse implements HelloResponseInterface
      * @param int $code HTTP status code.
      * @return void
      */
+    #[\Override]
     public function setStatusCode(int $code): void
     {
         http_response_code($code);
@@ -40,6 +42,7 @@ class HelloResponse implements HelloResponseInterface
      *
      * @return void
      */
+    #[\Override]
     public function send(): void
     {
         http_response_code(200); // Ensure 200 OK status
@@ -49,6 +52,7 @@ class HelloResponse implements HelloResponseInterface
     /**
      * Deletes a cookie by setting its expiration time to the past.
      */
+    #[\Override]
     public function deleteCookie(string $name, string $path = '/', string $domain = ''): void
     {
         $this->setCookie($name, '', time() - 3600, $path, $domain);
@@ -57,6 +61,7 @@ class HelloResponse implements HelloResponseInterface
     /**
      * Sets a cookie with the specified parameters.
      */
+    #[\Override]
     public function setCookie(
         string $name,
         string $value,
@@ -79,6 +84,7 @@ class HelloResponse implements HelloResponseInterface
     /**
      * Redirects the user to the specified URL.
      */
+    #[\Override]
     public function redirect(string $url): void
     {
         header('Location: ' . $url);
@@ -88,6 +94,7 @@ class HelloResponse implements HelloResponseInterface
     /**
      * Renders the given content as a plain string response.
      */
+    #[\Override]
     public function render(string $content): string
     {
         return $content;
@@ -96,6 +103,7 @@ class HelloResponse implements HelloResponseInterface
     /**
      * Converts the given data array into a JSON string.
      */
+    #[\Override]
     public function json(array $data): string
     {
         return json_encode($data) ?: "";

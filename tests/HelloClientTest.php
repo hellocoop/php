@@ -54,7 +54,7 @@ class HelloClientTest extends TestCase
         $this->helloResponseMock
             ->expects($this->once())
             ->method('json')
-            ->with($this->isType('array'))
+            ->with($this->isArray())
             ->willReturn('auth_response');
 
         $result = $this->client->route();
@@ -102,7 +102,7 @@ class HelloClientTest extends TestCase
         $this->pageRendererMock
             ->expects($this->once())
             ->method('renderErrorPage')
-            ->with($this->isType('string'), $this->isType('string'), $this->isType('string'))
+            ->with($this->isString(), $this->isString(), $this->isString())
             ->willReturn('error_page');
 
         $this->helloResponseMock

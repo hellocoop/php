@@ -113,11 +113,13 @@ class HelloConfig implements ConfigInterface
         $this->error = $error;
     }
 
+    #[\Override]
     public function getProduction(): bool
     {
         return $this->production;
     }
 
+    #[\Override]
     public function getSameSiteStrict(): ?bool
     {
         return $this->sameSiteStrict;
@@ -126,6 +128,7 @@ class HelloConfig implements ConfigInterface
     /**
      * @return array<string, int|string>|null
      */
+    #[\Override]
     public function getError(): ?array
     {
         return $this->error;
@@ -134,6 +137,7 @@ class HelloConfig implements ConfigInterface
     /**
      * @return array<string>|null
      */
+    #[\Override]
     public function getScope(): ?array
     {
         return $this->scope;
@@ -142,6 +146,7 @@ class HelloConfig implements ConfigInterface
     /**
      * @return array<string>|null
      */
+    #[\Override]
     public function getProviderHint(): ?array
     {
         return $this->providerHint;
@@ -150,6 +155,7 @@ class HelloConfig implements ConfigInterface
     /**
      * @return array<string, string>
      */
+    #[\Override]
     public function getRoutes(): array
     {
         return $this->routes;
@@ -158,86 +164,103 @@ class HelloConfig implements ConfigInterface
     /**
      * @return array<string, string>
      */
+    #[\Override]
     public function getCookies(): array
     {
         return $this->cookies;
     }
 
+    #[\Override]
     public function getLoginSync(): ?callable
     {
         return $this->loginSync;
     }
 
+    #[\Override]
     public function getLogoutSync(): ?callable
     {
         return $this->logoutSync;
     }
 
+    #[\Override]
     public function getCookieToken(): ?bool
     {
         return $this->cookieToken;
     }
 
+    #[\Override]
     public function getApiRoute(): string
     {
         return $this->apiRoute;
     }
 
+    #[\Override]
     public function getAuthApiRoute(): string
     {
         return $this->authApiRoute;
     }
 
+    #[\Override]
     public function getLoginApiRoute(): string
     {
         return $this->loginApiRoute;
     }
 
+    #[\Override]
     public function getLogoutApiRoute(): string
     {
         return $this->logoutApiRoute;
     }
 
+    #[\Override]
     public function getClientId(): ?string
     {
         return $this->clientId;
     }
 
+    #[\Override]
     public function getHost(): string
     {
         return $this->host;
     }
 
+    #[\Override]
     public function getRedirectURI(): ?string
     {
         return $this->redirectURI;
     }
 
+    #[\Override]
     public function getHelloDomain(): string
     {
         return $this->helloDomain;
     }
 
+    #[\Override]
     public function getHelloWallet(): ?string
     {
         return $this->helloWallet;
     }
 
+    #[\Override]
     public function getSecret(): string
     {
         return $this->secret;
     }
 
+    #[\Override]
     public function getLogDebug(): ?bool
     {
         return $this->logDebug;
     }
 
+    #[\Override]
     public function setCommandHandler(CommandHandlerInterface $handler): void
     {
         $this->commandHandler = $handler;
     }
 
+    #[\Override]
     public function getCommandHandler(): ?CommandHandlerInterface
     {
         return $this->commandHandler;

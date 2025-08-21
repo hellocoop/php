@@ -49,7 +49,9 @@ class CommandTest extends TestCase
 
     public function testVerifyCommandTokenWithValidToken(): void
     {
-        $tokenPayload = base64_encode(json_encode(['iss' => 'https://issuer.hello.coop']));
+        /** @var string tokenJsonPayload */
+        $tokenJsonPayload = json_encode(['iss' => 'https://issuer.hello.coop']);
+        $tokenPayload = base64_encode($tokenJsonPayload);
         $commandToken = 'header.' . $tokenPayload . '.signature';
 
         $mockClient = $this->createMock(Client::class);

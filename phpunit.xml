@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit bootstrap="tests/bootstrap.php"
          colors="true"
+         displayDetailsOnPhpunitDeprecations="true"
+         failOnPhpunitDeprecation="true"
+         failOnRisky="true"
+         failOnWarning="true"
          stderr="true">
     <testsuites>
         <testsuite name="Library Test Suite">
@@ -8,11 +12,18 @@
         </testsuite>
     </testsuites>
 
-    <!-- Code coverage settings -->
-    <coverage>
+    <source>
         <include>
             <directory suffix=".php">src</directory>
         </include>
+    </source>
+
+    <!-- Code coverage settings -->
+    <coverage>
+        <report>
+            <clover outputFile="build/logs/clover.xml"/>
+            <text outputFile="coverage.txt" showUncoveredFiles="false" showOnlySummary="true"/>
+        </report>
     </coverage>
 </phpunit>
 
