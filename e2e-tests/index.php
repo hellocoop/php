@@ -1,0 +1,38 @@
+<?php
+
+require_once __DIR__ . '/../tests/bootstrap.php';
+
+use HelloCoop\Config\HelloConfigBuilder;
+use HelloCoop\HelloClient;
+
+
+define('API_ROUTE', '/api/hellocoop');
+
+$builder = new HelloConfigBuilder();
+$config = $builder
+    ->setApiRoute('/api/hellocoop')
+    ->setAuthApiRoute('/api/hellocoop?op=auth')
+    ->setLoginApiRoute('/api/hellocoop?op=login')
+    ->setLogoutApiRoute('/api/hellocoop?op=logout')
+    ->setSameSiteStrict(false)
+    ->setClientId('000000-0000-0000-0000-000000000000')
+    ->setRedirectURI('http://localhost:8000/api/hellocoop')
+    ->setSecret('66c71f55568f7b0c3b30cb6a8df9975b5125000caa775240b2e76eb96c43715e')
+    ->setHelloWallet('http://127.0.0.1:3333')
+    ->setScope(['openid', 'profile', 'email'])
+    ->build();
+
+// Step 3: Create an instance of HelloClient
+$helloClient = new HelloClient($config);
+
+$requestUri = $_SERVER['REQUEST_URI'];
+$parsedUrl = parse_url($requestUri); // Extract the path from the request URI, ignoring query parameters
+$requestPath = $parsedUrl['path'] ?? '';
+
+// Step 4: Route Hellō API requests
+if ($requestPath === API_ROUTE) {
+    $helloClient->route(); // Handle the routing of the API request
+}
+
+header('Content-Type: application/json');
+print json_encode($helloClient->getAuth());
