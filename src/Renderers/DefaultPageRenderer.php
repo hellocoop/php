@@ -7,6 +7,7 @@ class DefaultPageRenderer implements PageRendererInterface
     /**
      * Render an error page.
      */
+    #[\Override]
     public function renderErrorPage(
         string $error,
         string $errorDescription,
@@ -103,6 +104,7 @@ HTML;
      *
      * @return string Rendered page content.
      */
+    #[\Override]
     public function renderSameSitePage(): string
     {
         // XXX: Is this needed?
@@ -208,6 +210,7 @@ HTML;
      *
      * @return string Rendered page content.
      */
+    #[\Override]
     public function renderRedirectURIBounce(): string
     {
         // XXX: Is this needed?
@@ -233,6 +236,7 @@ HTML;
      *
      * @return string Rendered page content.
      */
+    #[\Override]
     public function renderWildcardConsole(string $uri, string $targetURI, string $appName, string $redirectURI): string
     {
         // XXX: Is this needed?

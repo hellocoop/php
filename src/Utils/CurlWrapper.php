@@ -7,9 +7,8 @@ class CurlWrapper
 {
     /**
      * @param string $url
-     * @return false|resource
      */
-    public function init(string $url)
+    public function init(string $url): \CurlHandle|false
     {
         return curl_init($url);
     }
