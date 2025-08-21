@@ -11,8 +11,13 @@ class TokenFetcherTest extends TestCase
 {
     public function testFetchTokenSuccess(): void
     {
+        $curl = curl_init();
+        if ($curl === false) {
+            $this->fail('curl_init() failed in test setup');
+        }
+
         $curlMock = $this->createMock(CurlWrapper::class);
-        $curlMock->method('init')->willReturn(true);
+        $curlMock->method('init')->willReturn($curl);
         $curlMock->method('setOpt')->willReturn(true);
         $curlMock->method('exec')->willReturn(json_encode(['id_token' => 'mocked_id_token']));
         $curlMock->method('getInfo')->willReturn(200);
@@ -32,8 +37,13 @@ class TokenFetcherTest extends TestCase
 
     public function testFetchTokenErrorResponse(): void
     {
+        $curl = curl_init();
+        if ($curl === false) {
+            $this->fail('curl_init() failed in test setup');
+        }
+
         $curlMock = $this->createMock(CurlWrapper::class);
-        $curlMock->method('init')->willReturn(json_encode(['error' => 'mock_error']));
+        $curlMock->method('init')->willReturn($curl);
         $curlMock->method('exec')->willReturn(json_encode(['error' => 'mock_error']));
         $curlMock->method('getInfo')->willReturn(400);
 

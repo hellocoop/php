@@ -2,7 +2,6 @@
 
 namespace HelloCoop\Utils;
 
-// XXX: phpstan ignores can be removed when 7.x support is dropped in library.
 class CurlWrapper
 {
     /**
@@ -14,50 +13,50 @@ class CurlWrapper
     }
 
     /**
-     * @param resource $ch
+     * @param \CurlHandle $ch
      * @param int $option
      * @param mixed $value
      * @return bool
      */
     public function setOpt($ch, int $option, $value): bool
     {
-        return curl_setopt($ch, $option, $value); // @phpstan-ignore argument.type
+        return curl_setopt($ch, $option, $value);
     }
 
     /**
-     * @param resource $ch
+     * @param \CurlHandle $ch
      * @return bool|string
      */
     public function exec($ch)
     {
-        return curl_exec($ch); // @phpstan-ignore argument.type
+        return curl_exec($ch);
     }
 
     /**
-     * @param resource $ch
+     * @param \CurlHandle $ch
      * @param int $option
      * @return mixed
      */
     public function getInfo($ch, int $option)
     {
-        return curl_getinfo($ch, $option); // @phpstan-ignore argument.type
+        return curl_getinfo($ch, $option);
     }
 
     /**
-     * @param resource $ch
+     * @param \CurlHandle $ch
      * @return void
      */
     public function close($ch): void
     {
-        curl_close($ch); // @phpstan-ignore argument.type
+        curl_close($ch);
     }
 
     /**
-     * @param resource $ch
+     * @param \CurlHandle $ch
      * @return string
      */
     public function error($ch): string
     {
-        return curl_error($ch); // @phpstan-ignore argument.type
+        return curl_error($ch);
     }
 }
