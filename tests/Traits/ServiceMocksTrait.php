@@ -53,7 +53,7 @@ trait ServiceMocksTrait
         $this->configMock->method('getClientId')
             ->willReturn('valid_client_id');
         $this->configMock->method('getRedirectURI')
-            ->willReturn('https//my-domain');
+            ->willReturn('https://my-domain');
 
         $this->configMock->method('getHelloDomain')->willReturn('hello.coop');
 

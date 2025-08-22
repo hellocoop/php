@@ -47,6 +47,7 @@ class InviteTest extends TestCase
 
     public function testCanGenerateInviteUrl(): void
     {
+
         $_GET = [
             'target_uri' => 'https://example.com',
             'app_name' => 'MyApp',
@@ -64,7 +65,7 @@ class InviteTest extends TestCase
 
         $url = $this->invite->generateInviteUrl();
 
-        $expectedUrl = "https://wallet.hello.coop/invite?app_name=MyApp&prompt=Login&role=Admin&tenant=Tenant123&state=state456&inviter=user123&client_id=valid_client_id&initiate_login_uri=https%2F%2Fmy-domain&return_uri=https%3A%2F%2Fexample.com";
+        $expectedUrl = "https://wallet.hello.coop/invite?app_name=MyApp&prompt=Login&role=Admin&tenant=Tenant123&state=state456&inviter=user123&client_id=valid_client_id&initiate_login_uri=https%3A%2F%2Fmy-domain&return_uri=https%3A%2F%2Fexample.com";
 
         $this->assertSame($expectedUrl, $url);
     }
