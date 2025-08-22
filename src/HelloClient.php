@@ -106,7 +106,18 @@ class HelloClient
      */
     public function getAuth(): array
     {
-        return$this->getAuthHandler()->handleAuth()->toArray();
+        $auth = $this->getAuthHandler()->handleAuth()->toArray();
+        if ($auth['isLoggedIn'] && isset($auth['authCookie'])) {
+            return [
+                'isLoggedIn' => true,
+                'email' => $auth['authCookie']['email'],
+                'email_verified' => $auth['authCookie']['email_verified'],
+                'name' => $auth['authCookie']['name'],
+                'picture' => $auth['authCookie']['picture'],
+                'sub' => $auth['authCookie']['sub'],
+            ];
+        }
+        return ['isLoggedIn' => $auth['isLoggedIn']];
     }
 
     /**
@@ -152,7 +163,7 @@ class HelloClient
         $this->helloResponse->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         $this->helloResponse->setHeader('Pragma', 'no-cache');
         $this->helloResponse->setHeader('Expires', '0');
-        return $this->helloResponse->json($this->getAuthHandler()->handleAuth()->toArray());
+        return $this->helloResponse->json($this->getAuth());
     }
 
     /**

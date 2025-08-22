@@ -45,7 +45,7 @@ export default defineConfig({
   webServer: [
     {
        command: 'php -S localhost:8000',
-       url: 'http://127.0.0.1:8000',
+       url: 'http://localhost:8000',
        // stdout: 'pipe',
        timeout: 10000,
        reuseExistingServer: !process.env.CI,

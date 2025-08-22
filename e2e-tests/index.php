@@ -22,17 +22,19 @@ $config = $builder
     ->setScope(['openid', 'profile', 'email'])
     ->build();
 
-// Step 3: Create an instance of HelloClient
+// Create an instance of HelloClient
 $helloClient = new HelloClient($config);
 
 $requestUri = $_SERVER['REQUEST_URI'];
-$parsedUrl = parse_url($requestUri); // Extract the path from the request URI, ignoring query parameters
+// Extract the path from the request URI, ignoring query parameters
+$parsedUrl = parse_url($requestUri);
 $requestPath = $parsedUrl['path'] ?? '';
 
-// Step 4: Route Hellō API requests
+// Route Hellō API requests
 if ($requestPath === API_ROUTE) {
-    $helloClient->route(); // Handle the routing of the API request
+    // Handle the routing of the API request
+    print $helloClient->route();
+} else {
+    header('Content-Type: application/json');
+    print json_encode($helloClient->getAuth());
 }
-
-header('Content-Type: application/json');
-print json_encode($helloClient->getAuth());
