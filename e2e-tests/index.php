@@ -18,7 +18,7 @@ $config = $builder
     ->setClientId('000000-0000-0000-0000-000000000000')
     ->setRedirectURI('http://localhost:8000/api/hellocoop')
     ->setSecret('66c71f55568f7b0c3b30cb6a8df9975b5125000caa775240b2e76eb96c43715e')
-    ->setHelloWallet('http://127.0.0.1:3333')
+    ->setHelloWallet('http://localhost:3333')
     ->setScope(['openid', 'profile', 'email'])
     ->build();
 

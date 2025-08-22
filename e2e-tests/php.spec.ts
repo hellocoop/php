@@ -1,5 +1,6 @@
 const APP_HOME = 'http://localhost:8000/'
 const MOCKIN = 'http://127.0.0.1:3333/'
+
 const APP_API = APP_HOME + 'api/hellocoop'
 
 import { test, expect } from '@playwright/test'
