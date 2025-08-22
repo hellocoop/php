@@ -145,7 +145,7 @@ class Command
         /** @var string $iss */
         $iss = $claims['iss'];
         /** @var string $sub */
-        $sub = $claims['sub'];
+        $sub = $claims['sub'] ?? '';
         /** @var string|null $tenant */
         $tenant = isset($claims['tenant']) ? $claims['tenant'] : null;
         /** @var array<string>|null $groups */

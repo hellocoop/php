@@ -35,23 +35,26 @@ if ($requestPath === API_ROUTE) {
 }
 
 // 2) If a GET like /post-test?op=login&login_hint=... arrives,
-//    convert it into a POST and let HelloClient handle it.
-if (
-    $_SERVER['REQUEST_METHOD'] === 'GET'
-    && isset($_GET['op'], $_GET['login_hint'])
-) {
-    // Synthesize a POST request for the router
-    $_POST = [
-        'op'         => $_GET['op'],
-        'login_hint' => $_GET['login_hint'],
-    ];
-    $_SERVER['REQUEST_METHOD'] = 'POST';
-    // Optional: ensure content-type reflects form-like POST
-    $_SERVER['CONTENT_TYPE']   = $_SERVER['CONTENT_TYPE'] ?? 'application/x-www-form-urlencoded';
+// convert it into a POST and let HelloClient handle it.
+// Handle GET /post-test?... by converting selected query params to POST
+if ($requestPath === '/post-test' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $allowed = ['op', 'login_hint', 'domain_hint', 'iss', 'command_token'];
 
-    // Hand off to the same router (no external HTTP call needed)
-    print $helloClient->route();
-    exit;
+    $payload = [];
+    foreach ($allowed as $key) {
+        if (isset($_GET[$key])) {
+            $payload[$key] = $_GET[$key];
+        }
+    }
+
+    if (!empty($payload)) {
+        $_POST = $payload;
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['CONTENT_TYPE'] = $_SERVER['CONTENT_TYPE'] ?? 'application/x-www-form-urlencoded';
+
+        print $helloClient->route();
+        exit;
+    }
 }
 
 // 3) Fallback: return current auth status
