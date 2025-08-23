@@ -21,7 +21,7 @@ use HelloCoop\Handler\Command;
 use HelloCoop\Exception\CallbackException;
 use HelloCoop\Exception\SameSiteCallbackException;
 
-class HelloClient
+final class HelloClient
 {
     private ConfigInterface $config;
     private HelloResponseInterface $helloResponse;
@@ -41,11 +41,11 @@ class HelloClient
         ?HelloResponseInterface $helloResponse = null,
         ?PageRendererInterface $pageRenderer = null
     ) {
-        $this->config = $config;
-        $this->helloRequest = $helloRequest ??= new HelloRequest();
-        $this->helloResponse = $helloResponse  ??= new HelloResponse();
-        $this->pageRenderer = $pageRenderer ??= new DefaultPageRenderer();
-        $this->issuer = 'https://issuer.' . $this->config->getHelloDomain();
+        $this->config        = $config;
+        $this->helloRequest  = $helloRequest  ?? new HelloRequest();
+        $this->helloResponse = $helloResponse ?? new HelloResponse();
+        $this->pageRenderer  = $pageRenderer  ?? new DefaultPageRenderer();
+        $this->issuer        = 'https://issuer.' . (string)$this->config->getHelloDomain();
     }
 
     private function getCallbackHandler(): Callback
@@ -104,22 +104,31 @@ class HelloClient
     }
 
     /**
-     * @return array<string, bool|string|array<string, mixed>|null>
+     * Return a flattened auth summary.
+     *
+     * @return array<string, bool|string|null>
      */
     public function getAuth(): array
     {
         $auth = $this->getAuthHandler()->handleAuth()->toArray();
-        if ($auth['isLoggedIn'] && isset($auth['authCookie'])) {
-            return [
-                'isLoggedIn' => true,
-                'email' => $auth['authCookie']['email'],
-                'email_verified' => $auth['authCookie']['email_verified'],
-                'name' => $auth['authCookie']['name'],
-                'picture' => $auth['authCookie']['picture'],
-                'sub' => $auth['authCookie']['sub'],
-            ];
+
+        $isLoggedIn = isset($auth['isLoggedIn']) ? (bool)$auth['isLoggedIn'] : false;
+
+        if ($isLoggedIn) {
+            $cookie = $auth['authCookie'] ?? null;
+            if (is_array($cookie)) {
+                return [
+                    'isLoggedIn'     => true,
+                    'email'          => isset($cookie['email']) ? (string)$cookie['email'] : null,
+                    'email_verified' => isset($cookie['email_verified']) ? (bool)$cookie['email_verified'] : null,
+                    'name'           => isset($cookie['name']) ? (string)$cookie['name'] : null,
+                    'picture'        => isset($cookie['picture']) ? (string)$cookie['picture'] : null,
+                    'sub'            => isset($cookie['sub']) ? (string)$cookie['sub'] : null,
+                ];
+            }
         }
-        return ['isLoggedIn' => $auth['isLoggedIn']];
+
+        return ['isLoggedIn' => $isLoggedIn];
     }
 
     /**
@@ -165,7 +174,12 @@ class HelloClient
         $this->helloResponse->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         $this->helloResponse->setHeader('Pragma', 'no-cache');
         $this->helloResponse->setHeader('Expires', '0');
-        return $this->helloResponse->json($this->getAuth());
+
+        // json() expects array<string, mixed>
+        /** @var array<string, mixed> $payload */
+        $payload = $this->getAuth();
+
+        return $this->helloResponse->json($payload);
     }
 
     /**
@@ -176,18 +190,15 @@ class HelloClient
         try {
             return $this->helloResponse->redirect($this->getCallbackHandler()->handleCallback());
         } catch (CallbackException $e) {
+            /** @var array<string,string> $errorDetails */
             $errorDetails = $e->getErrorDetails();
-            /** @var string $error */
-            $error =  $errorDetails['error'];
-            /** @var string $errorDescription */
-            $errorDescription =  $errorDetails['error_description'];
-            /** @var string $targetUri */
-            $targetUri =  $errorDetails['target_uri'];
-            return $this->helloResponse->render($this->pageRenderer->renderErrorPage(
-                $error,
-                $errorDescription,
-                $targetUri
-            ));
+            $error            = (string)($errorDetails['error'] ?? 'callback_error');
+            $errorDescription = (string)($errorDetails['error_description'] ?? 'An error occurred');
+            $targetUri        = (string)($errorDetails['target_uri'] ?? '/');
+
+            return $this->helloResponse->render(
+                $this->pageRenderer->renderErrorPage($error, $errorDescription, $targetUri)
+            );
         } catch (SameSiteCallbackException $e) {
             return $this->helloResponse->render($this->pageRenderer->renderSameSitePage());
         }
@@ -199,11 +210,12 @@ class HelloClient
      */
     public function route()
     {
-        if (in_array($this->helloRequest->getMethod(), ["POST", "GET"]) === false) {
-            return;//TODO: add 500 error here;
+        $method = $this->helloRequest->getMethod();
+        if (!in_array($method, ['POST', 'GET'], true)) {
+            return; // TODO: add 500 error here
         }
 
-        if ($this->helloRequest->getMethod() === "POST" && $this->helloRequest->has('command_token')) {
+        if ($method === 'POST' && $this->helloRequest->has('command_token')) {
             return $this->handleCommand();
         }
 
@@ -220,26 +232,24 @@ class HelloClient
                 case 'invite':
                     return $this->handleInvite();
                 default:
-                    throw new Exception('unknown query: ' . $op);
-                    //TODO: add 500 error here;
+                    throw new Exception('unknown query: ' . (string)$op);
             }
         }
+
         if ($this->helloRequest->fetch('code') || $this->helloRequest->fetch('error')) {
             return $this->handleCallback();
         }
+
         // If the Redirect URI is not configured in Hello Wallet, we will prompt the user to add it.
         if (
             $this->helloRequest->fetch('wildcard_console') &&
             empty($this->helloRequest->fetch('redirect_uri'))
         ) {
             return $this->helloResponse->render($this->pageRenderer->renderWildcardConsole(
-                /** @phpstan-ignore-next-line */
-                strval($this->helloRequest->fetch('uri')),
-                /** @phpstan-ignore-next-line */
-                strval($this->helloRequest->fetch('target_uri')),
-                /** @phpstan-ignore-next-line */
-                strval($this->helloRequest->fetch('app_name')),
-                ""
+                (string)$this->helloRequest->fetch('uri'),
+                (string)$this->helloRequest->fetch('target_uri'),
+                (string)$this->helloRequest->fetch('app_name'),
+                ''
             ));
         }
 
@@ -251,12 +261,18 @@ class HelloClient
             $this->helloRequest->fetch('redirect_uri')
         ) {
             $iss = $this->helloRequest->fetch('iss');
-            if ($iss && $iss !== $this->issuer) {
-                return $this->helloResponse->json(["Passed iss '{$iss}' must be '{$this->issuer}'"]);
+            $issStr = $iss !== null ? (string)$iss : '';
+
+            if ($issStr !== '' && $issStr !== $this->issuer) {
+                // Make this associative so it matches array<string, mixed>
+                return $this->helloResponse->json([
+                    'error' => sprintf("Passed iss '%s' must be '%s'", $issStr, $this->issuer),
+                ]);
             }
+
             return $this->helloResponse->redirect($this->getLoginHandler()->generateLoginUrl());
         }
 
-        return; //TODO: add 500 error here;
+        return; // TODO: add 500 error here
     }
 }
