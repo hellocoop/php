@@ -33,6 +33,7 @@ class HelloClient
     private ?Logout $logout = null;
     private ?Login $login = null;
     private ?Command $commandHandler = null;
+    private string $issuer;
 
     public function __construct(
         ConfigInterface $config,
@@ -44,6 +45,7 @@ class HelloClient
         $this->helloRequest = $helloRequest ??= new HelloRequest();
         $this->helloResponse = $helloResponse  ??= new HelloResponse();
         $this->pageRenderer = $pageRenderer ??= new DefaultPageRenderer();
+        $this->issuer = 'https://issuer.' . $this->config->getHelloDomain();
     }
 
     private function getCallbackHandler(): Callback
@@ -239,6 +241,20 @@ class HelloClient
                 strval($this->helloRequest->fetch('app_name')),
                 ""
             ));
+        }
+
+        if (
+            $this->helloRequest->fetch('iss') ||
+            $this->helloRequest->fetch('login_hint') ||
+            $this->helloRequest->fetch('domain_hint') ||
+            $this->helloRequest->fetch('target_link_uri') ||
+            $this->helloRequest->fetch('redirect_uri')
+        ) {
+            $iss = $this->helloRequest->fetch('iss');
+            if ($iss && $iss !== $this->issuer) {
+                return $this->helloResponse->json(["Passed iss '{$iss}' must be '{$this->issuer}'"]);
+            }
+            return $this->helloResponse->redirect($this->getLoginHandler()->generateLoginUrl());
         }
 
         return; //TODO: add 500 error here;
