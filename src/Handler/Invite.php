@@ -128,9 +128,11 @@ final class Invite
         $helloDomainRaw = $this->config->getHelloDomain();
         $helloDomain    = is_string($helloDomainRaw) ? $helloDomainRaw : '';
 
-        // Normalize return URI first to avoid ternary that PHPStan flags
-        $targetUri  = $this->strFrom($params, 'target_uri');
-        $returnUri  = ($targetUri === null || $targetUri === '') ? $defaultTargetURI : $targetUri;
+        $targetUri = $this->strFrom($params, 'target_uri');
+        $returnUri = $defaultTargetURI;
+        if ($targetUri !== null && $targetUri !== '') {
+            $returnUri = $targetUri;
+        }
 
         $request = [
             'app_name'           => $this->strFrom($params, 'app_name'),
