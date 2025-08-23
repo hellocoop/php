@@ -125,8 +125,7 @@ final class Invite
         // Safe scalar config values
         $clientIdRaw    = $this->config->getClientId();
         $clientId       = is_string($clientIdRaw) ? $clientIdRaw : '';
-        $helloDomainRaw = $this->config->getHelloDomain();
-        $helloDomain    = is_string($helloDomainRaw) ? $helloDomainRaw : '';
+        $helloDomain    = $this->config->getHelloDomain();
 
         $targetUri = $this->strFrom($params, 'target_uri');
         $returnUri = $defaultTargetURI;
