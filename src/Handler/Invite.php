@@ -84,8 +84,9 @@ final class Invite
 
         $auth    = $this->getAuthLib()->getAuthfromCookies();
         $authArr = $auth->toArray();
+
         /** @var array<string,mixed>|null $cookie */
-        $cookie  = isset($authArr['authCookie']) && is_array($authArr['authCookie'])
+        $cookie = isset($authArr['authCookie']) && is_array($authArr['authCookie'])
             ? $authArr['authCookie']
             : null;
 
@@ -110,7 +111,7 @@ final class Invite
 
         // Safe inviter/app names
         $inviterName = $this->strFrom($cookie, 'name')
-            ?? (is_array($authArr) ? ($this->strFrom($authArr, 'name') ?? null) : null)
+            ?? $this->strFrom($authArr, 'name')
             ?? 'Someone';
 
         $appName = $this->strFrom($params, 'app_name', 'your app');
@@ -122,10 +123,13 @@ final class Invite
         );
 
         // Safe scalar config values
-        $clientIdRaw   = $this->config->getClientId();
-        $clientId      = is_string($clientIdRaw) ? $clientIdRaw : '';
+        $clientIdRaw    = $this->config->getClientId();
+        $clientId       = is_string($clientIdRaw) ? $clientIdRaw : '';
         $helloDomainRaw = $this->config->getHelloDomain();
         $helloDomain    = is_string($helloDomainRaw) ? $helloDomainRaw : '';
+
+        // Compute once to avoid “always true” inference
+        $targetUri = $this->strFrom($params, 'target_uri');
 
         $request = [
             'app_name'           => $this->strFrom($params, 'app_name'),
@@ -136,9 +140,7 @@ final class Invite
             'inviter'            => $inviterSub,
             'client_id'          => $clientId,
             'initiate_login_uri' => $redirectURI !== '' ? $redirectURI : '/',
-            'return_uri'         => ($this->strFrom($params, 'target_uri') ?? '') !== ''
-                ? (string)$this->strFrom($params, 'target_uri')
-                : $defaultTargetURI,
+            'return_uri'         => ($targetUri !== null && $targetUri !== '') ? $targetUri : $defaultTargetURI,
         ];
 
         // Remove nulls so http_build_query only serializes present fields

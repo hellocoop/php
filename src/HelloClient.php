@@ -3,23 +3,22 @@
 namespace HelloCoop;
 
 use Exception;
+use HelloCoop\Exception\CallbackException;
 use HelloCoop\Exception\CryptoFailedException;
 use HelloCoop\Exception\InvalidSecretException;
-use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\HelloRequest\HelloRequest;
-use HelloCoop\HelloResponse\HelloResponseInterface;
+use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\HelloResponse\HelloResponse;
-use HelloCoop\Renderers\PageRendererInterface;
+use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\Renderers\DefaultPageRenderer;
+use HelloCoop\Renderers\PageRendererInterface;
 use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Handler\Auth;
 use HelloCoop\Handler\Invite;
-use HelloCoop\Handler\Logout;
 use HelloCoop\Handler\Login;
+use HelloCoop\Handler\Logout;
 use HelloCoop\Handler\Callback;
 use HelloCoop\Handler\Command;
-use HelloCoop\Exception\CallbackException;
-use HelloCoop\Exception\SameSiteCallbackException;
 
 final class HelloClient
 {
@@ -46,9 +45,8 @@ final class HelloClient
         $this->helloResponse = $helloResponse ?? new HelloResponse();
         $this->pageRenderer  = $pageRenderer  ?? new DefaultPageRenderer();
 
-        $domainRaw = $this->config->getHelloDomain();
-        $domain    = is_string($domainRaw) ? $domainRaw : '';
-        $this->issuer = 'https://issuer.' . $domain;
+        // getHelloDomain() is typed as string by PHPStan, so no ternary/guards needed
+        $this->issuer = 'https://issuer.' . $this->config->getHelloDomain();
     }
 
     private function getCallbackHandler(): Callback
