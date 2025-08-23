@@ -45,7 +45,10 @@ final class HelloClient
         $this->helloRequest  = $helloRequest  ?? new HelloRequest();
         $this->helloResponse = $helloResponse ?? new HelloResponse();
         $this->pageRenderer  = $pageRenderer  ?? new DefaultPageRenderer();
-        $this->issuer        = 'https://issuer.' . (string)$this->config->getHelloDomain();
+
+        $domainRaw = $this->config->getHelloDomain();
+        $domain    = is_string($domainRaw) ? $domainRaw : '';
+        $this->issuer = 'https://issuer.' . $domain;
     }
 
     private function getCallbackHandler(): Callback
@@ -119,11 +122,11 @@ final class HelloClient
             if (is_array($cookie)) {
                 return [
                     'isLoggedIn'     => true,
-                    'email'          => isset($cookie['email']) ? (string)$cookie['email'] : null,
+                    'email'          => isset($cookie['email']) && is_string($cookie['email']) ? $cookie['email'] : null,
                     'email_verified' => isset($cookie['email_verified']) ? (bool)$cookie['email_verified'] : null,
-                    'name'           => isset($cookie['name']) ? (string)$cookie['name'] : null,
-                    'picture'        => isset($cookie['picture']) ? (string)$cookie['picture'] : null,
-                    'sub'            => isset($cookie['sub']) ? (string)$cookie['sub'] : null,
+                    'name'           => isset($cookie['name']) && is_string($cookie['name']) ? $cookie['name'] : null,
+                    'picture'        => isset($cookie['picture']) && is_string($cookie['picture']) ? $cookie['picture'] : null,
+                    'sub'            => isset($cookie['sub']) && is_string($cookie['sub']) ? $cookie['sub'] : null,
                 ];
             }
         }
@@ -175,7 +178,6 @@ final class HelloClient
         $this->helloResponse->setHeader('Pragma', 'no-cache');
         $this->helloResponse->setHeader('Expires', '0');
 
-        // json() expects array<string, mixed>
         /** @var array<string, mixed> $payload */
         $payload = $this->getAuth();
 
@@ -190,11 +192,10 @@ final class HelloClient
         try {
             return $this->helloResponse->redirect($this->getCallbackHandler()->handleCallback());
         } catch (CallbackException $e) {
-            /** @var array<string,string> $errorDetails */
-            $errorDetails = $e->getErrorDetails();
-            $error            = (string)($errorDetails['error'] ?? 'callback_error');
-            $errorDescription = (string)($errorDetails['error_description'] ?? 'An error occurred');
-            $targetUri        = (string)($errorDetails['target_uri'] ?? '/');
+            $details = $e->getErrorDetails();
+            $error            = is_array($details) && isset($details['error']) && is_string($details['error']) ? $details['error'] : 'callback_error';
+            $errorDescription = is_array($details) && isset($details['error_description']) && is_string($details['error_description']) ? $details['error_description'] : 'An error occurred';
+            $targetUri        = is_array($details) && isset($details['target_uri']) && is_string($details['target_uri']) ? $details['target_uri'] : '/';
 
             return $this->helloResponse->render(
                 $this->pageRenderer->renderErrorPage($error, $errorDescription, $targetUri)
@@ -219,8 +220,10 @@ final class HelloClient
             return $this->handleCommand();
         }
 
-        $op = $this->helloRequest->fetch('op');
-        if ($op) {
+        $opRaw = $this->helloRequest->fetch('op');
+        $op    = is_string($opRaw) ? $opRaw : null;
+
+        if ($op !== null) {
             switch ($op) {
                 case 'auth':
                 case 'getAuth':
@@ -232,39 +235,53 @@ final class HelloClient
                 case 'invite':
                     return $this->handleInvite();
                 default:
-                    throw new Exception('unknown query: ' . (string)$op);
+                    throw new Exception('unknown query: ' . $op);
             }
         }
 
-        if ($this->helloRequest->fetch('code') || $this->helloRequest->fetch('error')) {
+        $hasCode  = $this->helloRequest->fetch('code');
+        $hasError = $this->helloRequest->fetch('error');
+        if ($hasCode !== null || $hasError !== null) {
             return $this->handleCallback();
         }
 
         // If the Redirect URI is not configured in Hello Wallet, we will prompt the user to add it.
-        if (
-            $this->helloRequest->fetch('wildcard_console') &&
-            empty($this->helloRequest->fetch('redirect_uri'))
-        ) {
+        $wildcardConsole = $this->helloRequest->fetch('wildcard_console');
+        $redirectUriRaw  = $this->helloRequest->fetch('redirect_uri');
+        $redirectUriStr  = is_string($redirectUriRaw) ? $redirectUriRaw : '';
+
+        if ($wildcardConsole !== null && $redirectUriStr === '') {
+            $uri        = $this->helloRequest->fetch('uri');
+            $targetUri  = $this->helloRequest->fetch('target_uri');
+            $appName    = $this->helloRequest->fetch('app_name');
+
+            $uriStr       = is_string($uri) ? $uri : '';
+            $targetUriStr = is_string($targetUri) ? $targetUri : '';
+            $appNameStr   = is_string($appName) ? $appName : '';
+
             return $this->helloResponse->render($this->pageRenderer->renderWildcardConsole(
-                (string)$this->helloRequest->fetch('uri'),
-                (string)$this->helloRequest->fetch('target_uri'),
-                (string)$this->helloRequest->fetch('app_name'),
+                $uriStr,
+                $targetUriStr,
+                $appNameStr,
                 ''
             ));
         }
 
+        $issRaw           = $this->helloRequest->fetch('iss');
+        $loginHintRaw     = $this->helloRequest->fetch('login_hint');
+        $domainHintRaw    = $this->helloRequest->fetch('domain_hint');
+        $targetLinkUriRaw = $this->helloRequest->fetch('target_link_uri');
+
         if (
-            $this->helloRequest->fetch('iss') ||
-            $this->helloRequest->fetch('login_hint') ||
-            $this->helloRequest->fetch('domain_hint') ||
-            $this->helloRequest->fetch('target_link_uri') ||
-            $this->helloRequest->fetch('redirect_uri')
+            $issRaw !== null ||
+            $loginHintRaw !== null ||
+            $domainHintRaw !== null ||
+            $targetLinkUriRaw !== null ||
+            $redirectUriStr !== ''
         ) {
-            $iss = $this->helloRequest->fetch('iss');
-            $issStr = $iss !== null ? (string)$iss : '';
+            $issStr = is_string($issRaw) ? $issRaw : '';
 
             if ($issStr !== '' && $issStr !== $this->issuer) {
-                // Make this associative so it matches array<string, mixed>
                 return $this->helloResponse->json([
                     'error' => sprintf("Passed iss '%s' must be '%s'", $issStr, $this->issuer),
                 ]);

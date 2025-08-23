@@ -57,10 +57,21 @@ final class Invite
     }
 
     /**
+     * Safely fetch a string from an array of mixed.
+     * @param array<string,mixed> $arr
+     */
+    private function strFrom(array $arr, string $key, ?string $default = null): ?string
+    {
+        $v = $arr[$key] ?? null;
+        return is_string($v) ? $v : $default;
+    }
+
+    /**
      * @throws Exception
      */
     public function generateInviteUrl(): string
     {
+        /** @var array<string,mixed> $params */
         $params = $this->helloRequest->fetchMultiple([
             'target_uri',
             'app_name',
@@ -81,13 +92,14 @@ final class Invite
         if ($cookie === null) {
             throw new Exception('User not logged in');
         }
-        $inviterSub = isset($cookie['sub']) ? (string)$cookie['sub'] : '';
+
+        $inviterSub = $this->strFrom($cookie, 'sub', '');
         if ($inviterSub === '') {
             throw new Exception('User cookie missing');
         }
 
         // Choose redirect URI: request param overrides config if present
-        $redirectURIParam = isset($params['redirect_uri']) ? (string)$params['redirect_uri'] : null;
+        $redirectURIParam = $this->strFrom($params, 'redirect_uri');
         $redirectURIConf  = $this->config->getRedirectURI(); // ?string
         $redirectURI      = $redirectURIParam !== null && $redirectURIParam !== ''
             ? $redirectURIParam
@@ -96,30 +108,36 @@ final class Invite
         $origin = $this->buildOrigin($redirectURI);
         $defaultTargetURI = ($origin !== '' ? $origin . '/' : '/');
 
-        // Ensure strings for sprintf()
-        $inviterName = isset($cookie['name']) && is_string($cookie['name'])
-            ? $cookie['name']
-            : (isset($authArr['name']) && is_string($authArr['name']) ? $authArr['name'] : 'Someone');
+        // Safe inviter/app names
+        $inviterName = $this->strFrom($cookie, 'name')
+            ?? (is_array($authArr) ? ($this->strFrom($authArr, 'name') ?? null) : null)
+            ?? 'Someone';
 
-        $appName = isset($params['app_name']) ? (string)$params['app_name'] : 'your app';
+        $appName = $this->strFrom($params, 'app_name', 'your app');
 
         $defaultPrompt = sprintf(
             '%s has invited you to join %s',
-            (string)$inviterName,
-            (string)$appName
+            $inviterName,
+            $appName
         );
 
+        // Safe scalar config values
+        $clientIdRaw   = $this->config->getClientId();
+        $clientId      = is_string($clientIdRaw) ? $clientIdRaw : '';
+        $helloDomainRaw = $this->config->getHelloDomain();
+        $helloDomain    = is_string($helloDomainRaw) ? $helloDomainRaw : '';
+
         $request = [
-            'app_name'           => isset($params['app_name']) ? (string)$params['app_name'] : null,
-            'prompt'             => isset($params['prompt']) ? (string)$params['prompt'] : $defaultPrompt,
-            'role'               => isset($params['role']) ? (string)$params['role'] : null,
-            'tenant'             => isset($params['tenant']) ? (string)$params['tenant'] : null,
-            'state'              => isset($params['state']) ? (string)$params['state'] : null,
+            'app_name'           => $this->strFrom($params, 'app_name'),
+            'prompt'             => $this->strFrom($params, 'prompt', $defaultPrompt),
+            'role'               => $this->strFrom($params, 'role'),
+            'tenant'             => $this->strFrom($params, 'tenant'),
+            'state'              => $this->strFrom($params, 'state'),
             'inviter'            => $inviterSub,
-            'client_id'          => (string)$this->config->getClientId(),
+            'client_id'          => $clientId,
             'initiate_login_uri' => $redirectURI !== '' ? $redirectURI : '/',
-            'return_uri'         => isset($params['target_uri']) && $params['target_uri'] !== ''
-                ? (string)$params['target_uri']
+            'return_uri'         => ($this->strFrom($params, 'target_uri') ?? '') !== ''
+                ? (string)$this->strFrom($params, 'target_uri')
                 : $defaultTargetURI,
         ];
 
@@ -131,6 +149,6 @@ final class Invite
 
         $queryString = http_build_query($request, '', '&', PHP_QUERY_RFC3986);
 
-        return 'https://wallet.' . (string)$this->config->getHelloDomain() . '/invite?' . $queryString;
+        return 'https://wallet.' . $helloDomain . '/invite?' . $queryString;
     }
 }
