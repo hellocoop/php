@@ -6,6 +6,7 @@ use Exception;
 use HelloCoop\Exception\CallbackException;
 use HelloCoop\Exception\CryptoFailedException;
 use HelloCoop\Exception\InvalidSecretException;
+use HelloCoop\Exception\SameSiteCallbackException;
 use HelloCoop\HelloRequest\HelloRequest;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\HelloResponse\HelloResponse;

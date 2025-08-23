@@ -128,8 +128,9 @@ final class Invite
         $helloDomainRaw = $this->config->getHelloDomain();
         $helloDomain    = is_string($helloDomainRaw) ? $helloDomainRaw : '';
 
-        // Compute once to avoid “always true” inference
-        $targetUri = $this->strFrom($params, 'target_uri');
+        // Normalize return URI first to avoid ternary that PHPStan flags
+        $targetUri  = $this->strFrom($params, 'target_uri');
+        $returnUri  = ($targetUri === null || $targetUri === '') ? $defaultTargetURI : $targetUri;
 
         $request = [
             'app_name'           => $this->strFrom($params, 'app_name'),
@@ -140,7 +141,7 @@ final class Invite
             'inviter'            => $inviterSub,
             'client_id'          => $clientId,
             'initiate_login_uri' => $redirectURI !== '' ? $redirectURI : '/',
-            'return_uri'         => ($targetUri !== null && $targetUri !== '') ? $targetUri : $defaultTargetURI,
+            'return_uri'         => $returnUri,
         ];
 
         // Remove nulls so http_build_query only serializes present fields
