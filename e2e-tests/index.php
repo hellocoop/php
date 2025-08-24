@@ -5,15 +5,14 @@ require_once __DIR__ . '/../tests/bootstrap.php';
 use HelloCoop\Config\HelloConfigBuilder;
 use HelloCoop\HelloClient;
 
-
 define('API_ROUTE', '/api/hellocoop');
 
 $builder = new HelloConfigBuilder();
 $config = $builder
-    ->setApiRoute('/api/hellocoop')
-    ->setAuthApiRoute('/api/hellocoop?op=auth')
-    ->setLoginApiRoute('/api/hellocoop?op=login')
-    ->setLogoutApiRoute('/api/hellocoop?op=logout')
+    ->setApiRoute(API_ROUTE)
+    ->setAuthApiRoute(API_ROUTE . '?op=auth')
+    ->setLoginApiRoute(API_ROUTE . '?op=login')
+    ->setLogoutApiRoute(API_ROUTE . '?op=logout')
     ->setSameSiteStrict(false)
     ->setClientId('000000-0000-0000-0000-000000000000')
     ->setRedirectURI('http://localhost:8000/api/hellocoop')
@@ -22,17 +21,42 @@ $config = $builder
     ->setScope(['openid', 'profile', 'email'])
     ->build();
 
-// Step 3: Create an instance of HelloClient
 $helloClient = new HelloClient($config);
 
-$requestUri = $_SERVER['REQUEST_URI'];
-$parsedUrl = parse_url($requestUri); // Extract the path from the request URI, ignoring query parameters
-$requestPath = $parsedUrl['path'] ?? '';
+// Current request path (ignore query string)
+$requestUri  = $_SERVER['REQUEST_URI'] ?? '/';
+$parsedUrl   = parse_url($requestUri);
+$requestPath = $parsedUrl['path'] ?? '/';
 
-// Step 4: Route Hellō API requests
+// 1) Direct Hellō API route → just route it
 if ($requestPath === API_ROUTE) {
-    $helloClient->route(); // Handle the routing of the API request
+    print $helloClient->route();
+    exit;
 }
 
+// 2) If a GET like /post-test?op=login&login_hint=... arrives,
+// convert it into a POST and let HelloClient handle it.
+// Handle GET /post-test?... by converting selected query params to POST
+if ($requestPath === '/post-test' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $allowed = ['op', 'login_hint', 'domain_hint', 'iss', 'command_token'];
+
+    $payload = [];
+    foreach ($allowed as $key) {
+        if (isset($_GET[$key])) {
+            $payload[$key] = $_GET[$key];
+        }
+    }
+
+    if (!empty($payload)) {
+        $_POST = $payload;
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['CONTENT_TYPE'] = $_SERVER['CONTENT_TYPE'] ?? 'application/x-www-form-urlencoded';
+
+        print $helloClient->route();
+        exit;
+    }
+}
+
+// 3) Fallback: return current auth status
 header('Content-Type: application/json');
 print json_encode($helloClient->getAuth());

@@ -3,25 +3,25 @@
 namespace HelloCoop;
 
 use Exception;
+use HelloCoop\Exception\CallbackException;
 use HelloCoop\Exception\CryptoFailedException;
 use HelloCoop\Exception\InvalidSecretException;
-use HelloCoop\HelloRequest\HelloRequestInterface;
+use HelloCoop\Exception\SameSiteCallbackException;
 use HelloCoop\HelloRequest\HelloRequest;
-use HelloCoop\HelloResponse\HelloResponseInterface;
+use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\HelloResponse\HelloResponse;
-use HelloCoop\Renderers\PageRendererInterface;
+use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\Renderers\DefaultPageRenderer;
+use HelloCoop\Renderers\PageRendererInterface;
 use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Handler\Auth;
 use HelloCoop\Handler\Invite;
-use HelloCoop\Handler\Logout;
 use HelloCoop\Handler\Login;
+use HelloCoop\Handler\Logout;
 use HelloCoop\Handler\Callback;
 use HelloCoop\Handler\Command;
-use HelloCoop\Exception\CallbackException;
-use HelloCoop\Exception\SameSiteCallbackException;
 
-class HelloClient
+final class HelloClient
 {
     private ConfigInterface $config;
     private HelloResponseInterface $helloResponse;
@@ -33,6 +33,7 @@ class HelloClient
     private ?Logout $logout = null;
     private ?Login $login = null;
     private ?Command $commandHandler = null;
+    private string $issuer;
 
     public function __construct(
         ConfigInterface $config,
@@ -40,10 +41,13 @@ class HelloClient
         ?HelloResponseInterface $helloResponse = null,
         ?PageRendererInterface $pageRenderer = null
     ) {
-        $this->config = $config;
-        $this->helloRequest = $helloRequest ??= new HelloRequest();
-        $this->helloResponse = $helloResponse  ??= new HelloResponse();
-        $this->pageRenderer = $pageRenderer ??= new DefaultPageRenderer();
+        $this->config        = $config;
+        $this->helloRequest  = $helloRequest  ?? new HelloRequest();
+        $this->helloResponse = $helloResponse ?? new HelloResponse();
+        $this->pageRenderer  = $pageRenderer  ?? new DefaultPageRenderer();
+
+        // getHelloDomain() is typed as string by PHPStan, so no ternary/guards needed
+        $this->issuer = 'https://issuer.' . $this->config->getHelloDomain();
     }
 
     private function getCallbackHandler(): Callback
@@ -102,11 +106,31 @@ class HelloClient
     }
 
     /**
-     * @return array<string, bool|string|array<string, mixed>|null>
+     * Return a flattened auth summary.
+     *
+     * @return array<string, bool|string|null>
      */
     public function getAuth(): array
     {
-        return$this->getAuthHandler()->handleAuth()->toArray();
+        $auth = $this->getAuthHandler()->handleAuth()->toArray();
+
+        $isLoggedIn = isset($auth['isLoggedIn']) ? (bool)$auth['isLoggedIn'] : false;
+
+        if ($isLoggedIn) {
+            $cookie = $auth['authCookie'] ?? null;
+            if (is_array($cookie)) {
+                return [
+                    'isLoggedIn'     => true,
+                    'email'          => isset($cookie['email']) && is_string($cookie['email']) ? $cookie['email'] : null,
+                    'email_verified' => isset($cookie['email_verified']) ? (bool)$cookie['email_verified'] : null,
+                    'name'           => isset($cookie['name']) && is_string($cookie['name']) ? $cookie['name'] : null,
+                    'picture'        => isset($cookie['picture']) && is_string($cookie['picture']) ? $cookie['picture'] : null,
+                    'sub'            => isset($cookie['sub']) && is_string($cookie['sub']) ? $cookie['sub'] : null,
+                ];
+            }
+        }
+
+        return ['isLoggedIn' => $isLoggedIn];
     }
 
     /**
@@ -152,7 +176,11 @@ class HelloClient
         $this->helloResponse->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         $this->helloResponse->setHeader('Pragma', 'no-cache');
         $this->helloResponse->setHeader('Expires', '0');
-        return $this->helloResponse->json($this->getAuthHandler()->handleAuth()->toArray());
+
+        /** @var array<string, mixed> $payload */
+        $payload = $this->getAuth();
+
+        return $this->helloResponse->json($payload);
     }
 
     /**
@@ -163,18 +191,14 @@ class HelloClient
         try {
             return $this->helloResponse->redirect($this->getCallbackHandler()->handleCallback());
         } catch (CallbackException $e) {
-            $errorDetails = $e->getErrorDetails();
-            /** @var string $error */
-            $error =  $errorDetails['error'];
-            /** @var string $errorDescription */
-            $errorDescription =  $errorDetails['error_description'];
-            /** @var string $targetUri */
-            $targetUri =  $errorDetails['target_uri'];
-            return $this->helloResponse->render($this->pageRenderer->renderErrorPage(
-                $error,
-                $errorDescription,
-                $targetUri
-            ));
+            $details = $e->getErrorDetails();
+            $error            = is_array($details) && isset($details['error']) && is_string($details['error']) ? $details['error'] : 'callback_error';
+            $errorDescription = is_array($details) && isset($details['error_description']) && is_string($details['error_description']) ? $details['error_description'] : 'An error occurred';
+            $targetUri        = is_array($details) && isset($details['target_uri']) && is_string($details['target_uri']) ? $details['target_uri'] : '/';
+
+            return $this->helloResponse->render(
+                $this->pageRenderer->renderErrorPage($error, $errorDescription, $targetUri)
+            );
         } catch (SameSiteCallbackException $e) {
             return $this->helloResponse->render($this->pageRenderer->renderSameSitePage());
         }
@@ -186,16 +210,19 @@ class HelloClient
      */
     public function route()
     {
-        if (in_array($this->helloRequest->getMethod(), ["POST", "GET"]) === false) {
-            return;//TODO: add 500 error here;
+        $method = $this->helloRequest->getMethod();
+        if (!in_array($method, ['POST', 'GET'], true)) {
+            return; // TODO: add 500 error here
         }
 
-        if ($this->helloRequest->getMethod() === "POST" && $this->helloRequest->has('command_token')) {
+        if ($method === 'POST' && $this->helloRequest->has('command_token')) {
             return $this->handleCommand();
         }
 
-        $op = $this->helloRequest->fetch('op');
-        if ($op) {
+        $opRaw = $this->helloRequest->fetch('op');
+        $op    = is_string($opRaw) ? $opRaw : null;
+
+        if ($op !== null) {
             switch ($op) {
                 case 'auth':
                 case 'getAuth':
@@ -208,28 +235,60 @@ class HelloClient
                     return $this->handleInvite();
                 default:
                     throw new Exception('unknown query: ' . $op);
-                    //TODO: add 500 error here;
             }
         }
-        if ($this->helloRequest->fetch('code') || $this->helloRequest->fetch('error')) {
+
+        $hasCode  = $this->helloRequest->fetch('code');
+        $hasError = $this->helloRequest->fetch('error');
+        if ($hasCode !== null || $hasError !== null) {
             return $this->handleCallback();
         }
+
         // If the Redirect URI is not configured in Hello Wallet, we will prompt the user to add it.
-        if (
-            $this->helloRequest->fetch('wildcard_console') &&
-            empty($this->helloRequest->fetch('redirect_uri'))
-        ) {
+        $wildcardConsole = $this->helloRequest->fetch('wildcard_console');
+        $redirectUriRaw  = $this->helloRequest->fetch('redirect_uri');
+        $redirectUriStr  = is_string($redirectUriRaw) ? $redirectUriRaw : '';
+
+        if ($wildcardConsole !== null && $redirectUriStr === '') {
+            $uri        = $this->helloRequest->fetch('uri');
+            $targetUri  = $this->helloRequest->fetch('target_uri');
+            $appName    = $this->helloRequest->fetch('app_name');
+
+            $uriStr       = is_string($uri) ? $uri : '';
+            $targetUriStr = is_string($targetUri) ? $targetUri : '';
+            $appNameStr   = is_string($appName) ? $appName : '';
+
             return $this->helloResponse->render($this->pageRenderer->renderWildcardConsole(
-                /** @phpstan-ignore-next-line */
-                strval($this->helloRequest->fetch('uri')),
-                /** @phpstan-ignore-next-line */
-                strval($this->helloRequest->fetch('target_uri')),
-                /** @phpstan-ignore-next-line */
-                strval($this->helloRequest->fetch('app_name')),
-                ""
+                $uriStr,
+                $targetUriStr,
+                $appNameStr,
+                ''
             ));
         }
 
-        return; //TODO: add 500 error here;
+        $issRaw           = $this->helloRequest->fetch('iss');
+        $loginHintRaw     = $this->helloRequest->fetch('login_hint');
+        $domainHintRaw    = $this->helloRequest->fetch('domain_hint');
+        $targetLinkUriRaw = $this->helloRequest->fetch('target_link_uri');
+
+        if (
+            $issRaw !== null ||
+            $loginHintRaw !== null ||
+            $domainHintRaw !== null ||
+            $targetLinkUriRaw !== null ||
+            $redirectUriStr !== ''
+        ) {
+            $issStr = is_string($issRaw) ? $issRaw : '';
+
+            if ($issStr !== '' && $issStr !== $this->issuer) {
+                return $this->helloResponse->json([
+                    'error' => sprintf("Passed iss '%s' must be '%s'", $issStr, $this->issuer),
+                ]);
+            }
+
+            return $this->helloResponse->redirect($this->getLoginHandler()->generateLoginUrl());
+        }
+
+        return; // TODO: add 500 error here
     }
 }

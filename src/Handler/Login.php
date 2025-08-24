@@ -126,7 +126,7 @@ class Login
         $authResponse = $this->getAuthHelper()->createAuthRequest($request);
 
         /** @var string $targetUri */
-        $targetUri = $params['target_uri'];
+        $targetUri = $params['target_uri'] ?? '/';
 
         $this->getOIDCManager()->saveOidc(OIDC::fromArray([
             'nonce' => $authResponse['nonce'],
