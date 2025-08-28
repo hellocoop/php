@@ -73,7 +73,7 @@ interface HelloResponseInterface
      * @param string $url The URL to redirect the user to.
      * @return mixed
      */
-    public function redirect(string $url);
+    public function redirect(string $url): mixed;
 
     /**
      * Converts the given data array into a JSON response format.
@@ -85,7 +85,7 @@ interface HelloResponseInterface
      * @param array<string, mixed> $data The data to be converted to a JSON response.
      * @return mixed
      */
-    public function json(array $data);
+    public function json(array $data): mixed;
 
     /**
      * Renders the given content as an HTTP response.
@@ -97,5 +97,5 @@ interface HelloResponseInterface
      * @param string $content The content to render as a response.
      * @return mixed
      */
-    public function render(string $content);
+    public function render(string $content): mixed;
 }

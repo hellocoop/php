@@ -171,7 +171,7 @@ final class HelloClient
         return $this->helloResponse->redirect($this->getInviteHandler()->generateInviteUrl());
     }
 
-    private function handleAuth(): string
+    private function handleAuth(): mixed
     {
         $this->helloResponse->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         $this->helloResponse->setHeader('Pragma', 'no-cache');

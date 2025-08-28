@@ -92,7 +92,7 @@ class Command
     }
 
     //TODO: change the access rule to private
-    public function handleMetadata(CommandClaims $claims): string
+    public function handleMetadata(CommandClaims $claims): mixed
     {
         $metadata = PackageMetadata::getMetadata();
 
@@ -112,7 +112,7 @@ class Command
         return $this->helloResponse->json($metadataResponse->toArray());
     }
 
-    public function handleCommand(): string
+    public function handleCommand(): mixed
     {
         if ($this->helloRequest->has('command_token') === false) {
             $this->helloResponse->setStatusCode(500);
