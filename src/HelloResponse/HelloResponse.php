@@ -85,7 +85,7 @@ class HelloResponse implements HelloResponseInterface
      * Redirects the user to the specified URL.
      */
     #[\Override]
-    public function redirect(string $url): void
+    public function redirect(string $url): mixed
     {
         header('Location: ' . $url);
         exit;
