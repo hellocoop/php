@@ -26,7 +26,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Checkout repository"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
 
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"
@@ -48,7 +48,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Checkout repository"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
 
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"
@@ -72,7 +72,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Checkout repository"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
 
       - name: "Install dependencies (apt)"
         run: sudo apt-get update
@@ -122,7 +122,7 @@ jobs:
 
       # Check out the repository
       - name: "Checkout Code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
 
       - name: "Install dependencies (apt)"
         if: ${{ matrix.operating-system == 'ubuntu-latest' }}
@@ -164,7 +164,7 @@ jobs:
     steps:
       # Check out the repository
       - name: "Checkout Code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
 
       # Set up PHP
       - name: "Setup PHP"
@@ -192,7 +192,7 @@ jobs:
         run: cd e2e-tests && npx playwright test
 
       # Upload report after each run
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
           name: playwright-report-${{ matrix.php-version }}-${{ matrix.operating-system }}
