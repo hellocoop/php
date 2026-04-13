@@ -35,7 +35,7 @@ jobs:
           coverage: "none"
 
       - name: "Install dependencies (Composer)"
-        uses: "ramsey/composer-install@v3"
+        uses: "ramsey/composer-install@v4"
 
       - name: "Check syntax (php-parallel-lint)"
         run: "composer lint src tests --colors"
@@ -58,7 +58,7 @@ jobs:
           coverage: "none"
 
       - name: "Install dependencies (Composer)"
-        uses: "ramsey/composer-install@v3"
+        uses: "ramsey/composer-install@v4"
 
       - name: "Statically analyze code (PHPStan)"
         run: "composer phpstan src tests -- --ansi"
@@ -86,13 +86,13 @@ jobs:
           ini-values: "memory_limit=-1"
 
       - name: "Install dependencies (Composer)"
-        uses: "ramsey/composer-install@v3"
+        uses: "ramsey/composer-install@v4"
 
       - name: "Run unit tests (PHPUnit)"
         run: "./vendor/bin/phpunit --colors=always --coverage-text --coverage-clover build/logs/clover.xml"
 
       - name: "Publish coverage report to Codecov"
-        uses: "codecov/codecov-action@v5"
+        uses: "codecov/codecov-action@v6"
         with:
           token: "${{ secrets.CODECOV_TOKEN }}"
 
@@ -138,7 +138,7 @@ jobs:
 
       # Install Composer dependencies
       - name: "Install dependencies (Composer)"
-        uses: "ramsey/composer-install@v3"
+        uses: "ramsey/composer-install@v4"
 
       # Run Tests
       - name: "Run unit tests (PHPUnit)"
@@ -176,7 +176,7 @@ jobs:
 
       # Install Composer dependencies
       - name: "Install dependencies (Composer)"
-        uses: "ramsey/composer-install@v3"
+        uses: "ramsey/composer-install@v4"
 
       # Set up node
       - uses: actions/setup-node@v6
@@ -192,7 +192,7 @@ jobs:
         run: cd e2e-tests && npx playwright test
 
       # Upload report after each run
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: playwright-report-${{ matrix.php-version }}-${{ matrix.operating-system }}
