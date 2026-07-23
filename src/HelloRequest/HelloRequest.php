@@ -76,7 +76,10 @@ class HelloRequest implements HelloRequestInterface
     private function getAllHeaders(): array
     {
         if (function_exists('getallheaders')) {
-            return getallheaders();
+            $headers = getallheaders();
+            if ($headers !== false) {
+                return $headers;
+            }
         }
 
         $headers = [];
