@@ -21,6 +21,9 @@ use HelloCoop\Handler\Logout;
 use HelloCoop\Handler\Callback;
 use HelloCoop\Handler\Command;
 
+/**
+ * @psalm-api
+ */
 final class HelloClient
 {
     private ConfigInterface $config;

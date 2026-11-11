@@ -4,6 +4,9 @@ namespace HelloCoop\Config;
 
 use HelloCoop\Handler\CommandHandlerInterface;
 
+/**
+ * @psalm-api
+ */
 class HelloConfig implements ConfigInterface
 {
     private string $apiRoute;
