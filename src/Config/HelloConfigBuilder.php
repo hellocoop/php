@@ -2,6 +2,9 @@
 
 namespace HelloCoop\Config;
 
+/**
+ * @psalm-api
+ */
 class HelloConfigBuilder
 {
     private string $apiRoute;
