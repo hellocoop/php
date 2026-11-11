@@ -56,9 +56,11 @@ class Logout
      */
     public function generateLogoutUrl(): string
     {
+        // setRoutes() may replace the map without a loggedOut entry
+        $routes    = $this->config->getRoutes();
         $targetUri = RedirectUri::sanitize(
             $this->helloRequest->fetch('target_uri'),
-            $this->config->getRoutes()['loggedOut']
+            $routes['loggedOut'] ?? '/'
         );
         $this->getAuthLib()->clearAuthCookie();
         if ($this->config->getLogoutSync()) {

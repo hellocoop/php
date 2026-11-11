@@ -2,6 +2,8 @@
 
 namespace HelloCoop\Renderers;
 
+use HelloCoop\Utils\RedirectUri;
+
 class DefaultPageRenderer implements PageRendererInterface
 {
     /**
@@ -242,11 +244,15 @@ HTML;
         // XXX: Is this needed?
         // $info = $data['info'] ?? 'No additional information provided.';
 
-        // Every value comes from the request: JSON-encode for the script
-        // strings, HTML-escape for markup. Malformed UTF-8 is replaced with
-        // U+FFFD rather than failing the render. The caller is expected to
-        // have constrained $uri and $targetURI to http(s) URLs or absolute
-        // paths; encoding does not reject executable schemes.
+        // Every value comes from the request. $uri and $targetURI are
+        // navigation targets, and encoding alone does not stop a javascript:
+        // URL, so they are constrained to http(s) URLs or absolute paths
+        // first. Then JSON-encode for the script strings and HTML-escape for
+        // markup; malformed UTF-8 is replaced with U+FFFD rather than failing
+        // the render.
+        $uri       = RedirectUri::sanitize($uri, '');
+        $targetURI = RedirectUri::sanitize($targetURI, '/');
+
         $jsonFlags       = JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE
             | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
         $htmlFlags       = ENT_QUOTES | ENT_SUBSTITUTE;

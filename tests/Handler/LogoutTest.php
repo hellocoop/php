@@ -100,6 +100,36 @@ class LogoutTest extends TestCase
         $this->assertEquals('http://example.com/logout', $result);
     }
 
+    public function testGenerateLogoutUrlWithTargetUriAndPartialRoutes(): void
+    {
+        $_GET = [
+            'target_uri' => 'https://example.com/target',
+        ];
+
+        $this->configMock
+            ->method('getRoutes')
+            ->willReturn(['loggedIn' => '/home']);
+
+        $result = $this->logoutHandler->generateLogoutUrl();
+
+        $this->assertEquals('https://example.com/target', $result);
+    }
+
+    public function testGenerateLogoutUrlWithoutTargetUriAndPartialRoutes(): void
+    {
+        $_GET = [
+            'target_uri' => null,
+        ];
+
+        $this->configMock
+            ->method('getRoutes')
+            ->willReturn(['loggedIn' => '/home']);
+
+        $result = $this->logoutHandler->generateLogoutUrl();
+
+        $this->assertEquals('/', $result);
+    }
+
     public function testGenerateLogoutUrlWithLoginSync(): void
     {
         $_GET = [
