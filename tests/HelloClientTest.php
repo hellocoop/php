@@ -152,4 +152,33 @@ class HelloClientTest extends TestCase
         $result = $this->client->route();
         $this->assertSame('render_response', $result);
     }
+
+    public function testRouteWildcardConsoleRejectsExecutableSchemes(): void
+    {
+        $_GET = [
+            'wildcard_console' => 'true',
+            'uri' => 'javascript:alert(document.domain)',
+            'target_uri' => 'javascript:alert(1)',
+            'app_name' => 'TestApp',
+            'redirect_uri' => '',
+        ];
+
+        // The renderer only ever sees http(s) URLs or absolute paths
+        $this->pageRendererMock
+            ->expects($this->once())
+            ->method('renderWildcardConsole')
+            ->with(
+                'https://console.hello.coop',
+                '/',
+                'TestApp',
+                ''
+            )
+            ->willReturn('wildcard_console_page');
+
+        $this->helloResponseMock
+            ->method('render')
+            ->willReturn('render_response');
+
+        $this->assertSame('render_response', $this->client->route());
+    }
 }

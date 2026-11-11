@@ -243,13 +243,18 @@ HTML;
         // $info = $data['info'] ?? 'No additional information provided.';
 
         // Every value comes from the request: JSON-encode for the script
-        // strings, HTML-escape for markup.
-        $jsonFlags       = JSON_THROW_ON_ERROR | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
+        // strings, HTML-escape for markup. Malformed UTF-8 is replaced with
+        // U+FFFD rather than failing the render. The caller is expected to
+        // have constrained $uri and $targetURI to http(s) URLs or absolute
+        // paths; encoding does not reject executable schemes.
+        $jsonFlags       = JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE
+            | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
+        $htmlFlags       = ENT_QUOTES | ENT_SUBSTITUTE;
         $uriJs           = json_encode($uri, $jsonFlags);
         $targetUriJs     = json_encode($targetURI, $jsonFlags);
-        $targetUriHtml   = htmlspecialchars($targetURI, ENT_QUOTES);
-        $appNameHtml     = htmlspecialchars($appName, ENT_QUOTES);
-        $redirectUriHtml = htmlspecialchars($redirectURI, ENT_QUOTES);
+        $targetUriHtml   = htmlspecialchars($targetURI, $htmlFlags);
+        $appNameHtml     = htmlspecialchars($appName, $htmlFlags);
+        $redirectUriHtml = htmlspecialchars($redirectURI, $htmlFlags);
 
         return <<<HTML
         <html lang="en-US">

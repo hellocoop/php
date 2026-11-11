@@ -107,8 +107,10 @@ final class Invite
             ? $redirectURIParam
             : ($redirectURIConf ?? '');
 
+        // The derived fallback inherits redirect_uri's scheme, so it is held
+        // to the same http(s) policy as target_uri itself.
         $origin = $this->buildOrigin($redirectURI);
-        $defaultTargetURI = ($origin !== '' ? $origin . '/' : '/');
+        $defaultTargetURI = RedirectUri::sanitize($origin !== '' ? $origin . '/' : '/', '/');
 
         // Safe inviter/app names
         $inviterName = $this->strFrom($cookie, 'name')
