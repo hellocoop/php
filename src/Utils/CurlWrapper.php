@@ -24,6 +24,26 @@ class CurlWrapper
     }
 
     /**
+     * Sets the request body of a POST.
+     *
+     * @param \CurlHandle $ch
+     */
+    public function setPostFields($ch, string $body): bool
+    {
+        /**
+         * The body is the POST payload. It is not a URL, a file path, a
+         * callable or a duration, which is what the generic curl_setopt
+         * sink covers.
+         * @psalm-taint-escape callable
+         * @psalm-taint-escape ssrf
+         * @psalm-taint-escape file
+         * @psalm-taint-escape sleep
+         */
+        $postFields = $body;
+        return curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+    }
+
+    /**
      * @param \CurlHandle $ch
      * @return bool|string
      */

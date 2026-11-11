@@ -6,6 +6,7 @@ use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Lib\Auth as AuthLib;
+use HelloCoop\Utils\RedirectUri;
 
 /**
  * Handles user logout functionality, including generating the logout URL and clearing authentication cookies.
@@ -55,13 +56,15 @@ class Logout
      */
     public function generateLogoutUrl(): string
     {
-        /** @var string|null $targetUri */
-        $targetUri = $this->helloRequest->fetch('target_uri');
+        $targetUri = RedirectUri::sanitize(
+            $this->helloRequest->fetch('target_uri'),
+            $this->config->getRoutes()['loggedOut']
+        );
         $this->getAuthLib()->clearAuthCookie();
         if ($this->config->getLogoutSync()) {
             // Call the logoutSync callback
             call_user_func($this->config->getLogoutSync());
         }
-        return $targetUri ?? $this->config->getRoutes()['loggedOut'];
+        return $targetUri;
     }
 }

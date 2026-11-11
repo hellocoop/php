@@ -17,6 +17,7 @@ use HelloCoop\Lib\TokenFetcher;
 use HelloCoop\Lib\TokenParser;
 use Exception;
 use HelloCoop\Utils\CurlWrapper;
+use HelloCoop\Utils\RedirectUri;
 use Throwable;
 
 class Callback
@@ -106,8 +107,7 @@ class Callback
             }
 
             $codeVerifier = $oidcState['code_verifier'] ?? null;
-            /** @var string $targetUri */
-            $targetUri    = $oidcState['target_uri'] ?? '';
+            $targetUri    = RedirectUri::sanitize($oidcState['target_uri'] ?? null, '');
             /** @var string $redirectUri */
             $redirectUri  = $oidcState['redirect_uri'] ?? '';
             $nonce        = $oidcState['nonce'] ?? null;
@@ -240,7 +240,11 @@ class Callback
                 // Build query string
                 $queryString = http_build_query($queryParams);
 
-                // Update targetUri with the apiRoute and query string
+                /**
+                 * Config route plus a URL-encoded query string: nothing
+                 * request-controlled can escape the query.
+                 * @psalm-taint-escape header
+                 */
                 $targetUri = $this->config->getApiRoute() . '?' . $queryString;
             }
 
@@ -285,8 +289,14 @@ class Callback
             }
             // Build the new query string
             $newQueryString = http_build_query($queryArray);
-            // Construct the URL
-            return $pathString . '?' . $newQueryString;
+
+            /**
+             * The path is a sanitized target_uri or a config route and the
+             * query string is URL-encoded.
+             * @psalm-taint-escape header
+             */
+            $url = $pathString . '?' . $newQueryString;
+            return $url;
         }
         throw new CallbackException($error, $errorMessage, 0, $previous);
     }

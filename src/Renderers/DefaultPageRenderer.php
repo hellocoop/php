@@ -242,6 +242,15 @@ HTML;
         // XXX: Is this needed?
         // $info = $data['info'] ?? 'No additional information provided.';
 
+        // Every value comes from the request: JSON-encode for the script
+        // strings, HTML-escape for markup.
+        $jsonFlags       = JSON_THROW_ON_ERROR | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
+        $uriJs           = json_encode($uri, $jsonFlags);
+        $targetUriJs     = json_encode($targetURI, $jsonFlags);
+        $targetUriHtml   = htmlspecialchars($targetURI, ENT_QUOTES);
+        $appNameHtml     = htmlspecialchars($appName, ENT_QUOTES);
+        $redirectUriHtml = htmlspecialchars($redirectURI, ENT_QUOTES);
+
         return <<<HTML
         <html lang="en-US">
             <head>
@@ -307,8 +316,8 @@ HTML;
                 </style>
                 <script>
                     function addToRedirectURI(){
-                        window.open("{$uri}", "_blank")
-                        window.location.href = "{$targetURI}"
+                        window.open({$uriJs}, "_blank")
+                        window.location.href = {$targetUriJs}
                     }
                 </script>
             </head>
@@ -317,11 +326,11 @@ HTML;
                 <main>
                     <h1>The following Redirect URI is not configured for</h1>
                     <p>
-                        <span>{$appName}</span><br/>
-                        <span>{$redirectURI}</span><br/>
+                        <span>{$appNameHtml}</span><br/>
+                        <span>{$redirectUriHtml}</span><br/>
                     </p>
                     <button onClick="addToRedirectURI()">Add to Redirect URIs</button><br/>
-                    <a href="{$targetURI}">Do this later</a>
+                    <a href="{$targetUriHtml}">Do this later</a>
                 </main>
             </body>
         </html>

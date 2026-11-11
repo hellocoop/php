@@ -12,6 +12,7 @@ use HelloCoop\Type\OIDC;
 use HelloCoop\Lib\AuthHelper;
 use HelloCoop\Lib\Crypto;
 use HelloCoop\Lib\PKCE;
+use HelloCoop\Utils\RedirectUri;
 use RuntimeException;
 
 class Login
@@ -125,8 +126,7 @@ class Login
 
         $authResponse = $this->getAuthHelper()->createAuthRequest($request);
 
-        /** @var string $targetUri */
-        $targetUri = $params['target_uri'] ?? '/';
+        $targetUri = RedirectUri::sanitize($params['target_uri'] ?? null, '/');
 
         $this->getOIDCManager()->saveOidc(OIDC::fromArray([
             'nonce' => $authResponse['nonce'],

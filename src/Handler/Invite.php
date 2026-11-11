@@ -9,6 +9,7 @@ use HelloCoop\HelloResponse\HelloResponseInterface;
 use HelloCoop\HelloRequest\HelloRequestInterface;
 use HelloCoop\Config\ConfigInterface;
 use HelloCoop\Lib\Auth as AuthLib;
+use HelloCoop\Utils\RedirectUri;
 
 final class Invite
 {
@@ -127,11 +128,7 @@ final class Invite
         $clientId       = is_string($clientIdRaw) ? $clientIdRaw : '';
         $helloDomain    = $this->config->getHelloDomain();
 
-        $targetUri = $this->strFrom($params, 'target_uri');
-        $returnUri = $defaultTargetURI;
-        if ($targetUri !== null && $targetUri !== '') {
-            $returnUri = $targetUri;
-        }
+        $returnUri = RedirectUri::sanitize($this->strFrom($params, 'target_uri'), $defaultTargetURI);
 
         $request = [
             'app_name'           => $this->strFrom($params, 'app_name'),
@@ -153,6 +150,11 @@ final class Invite
 
         $queryString = http_build_query($request, '', '&', PHP_QUERY_RFC3986);
 
-        return 'https://wallet.' . $helloDomain . '/invite?' . $queryString;
+        /**
+         * Fixed wallet origin plus an RFC 3986-encoded query string.
+         * @psalm-taint-escape header
+         */
+        $url = 'https://wallet.' . $helloDomain . '/invite?' . $queryString;
+        return $url;
     }
 }
