@@ -68,6 +68,41 @@ class CallbackTest extends TestCase
         $this->assertEquals('http://api.example.com?uri=example.com&appName=MyApp&redirectURI=https%3A%2F%2Fexample.com%2Fcallback&targetURI=%2Fdashboard&wildcard_console=true', $result);
     }
 
+    public function testHandleCallbackRejectsUnsafeTargetUriFromCookie(): void
+    {
+        $_COOKIE['oidcName'] = $this->crypto->encrypt([
+            'code_verifier' => 'test_verifier',
+            'nonce' => 'valid_nonce',
+            'redirect_uri' => 'https://example.com/callback',
+            'target_uri' => 'javascript:alert(1)'
+        ]);
+
+        $_GET = array_merge($_GET, [
+            'code' => 'hello',
+            'error' => null,
+            'same_site' => 'Strict',
+            'wildcard_domain' => null,
+            'app_name' => null
+        ]);
+
+        $this->tokenParserMock->method('parseToken')->willReturn([
+            'payload' => [
+                'aud' => 'valid_client_id',
+                'nonce' => 'valid_nonce',
+                'sub' => 'user_sub',
+                'iat' => time(),
+                'exp' => time() + 3600
+            ]
+        ]);
+
+        $this->configMock->method('getSameSiteStrict')->willReturn(false);
+        $this->configMock->method('getHelloWallet')->willReturn('valid_wallet');
+        $this->configMock->method('getRoutes')->willReturn(['loggedIn' => '/home']);
+
+        // The unsafe target from the cookie is dropped in favour of the loggedIn route
+        $this->assertEquals('/home', $this->callback->handleCallback());
+    }
+
     public function testHandleCallbackMissingCode(): void
     {
         $_COOKIE['oidcName'] = $this->crypto->encrypt([

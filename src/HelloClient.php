@@ -20,6 +20,7 @@ use HelloCoop\Handler\Login;
 use HelloCoop\Handler\Logout;
 use HelloCoop\Handler\Callback;
 use HelloCoop\Handler\Command;
+use HelloCoop\Utils\RedirectUri;
 
 /**
  * @psalm-api
@@ -257,8 +258,12 @@ final class HelloClient
             $targetUri  = $this->helloRequest->fetch('target_uri');
             $appName    = $this->helloRequest->fetch('app_name');
 
-            $uriStr       = is_string($uri) ? $uri : '';
-            $targetUriStr = is_string($targetUri) ? $targetUri : '';
+            // Both values end up as navigation targets in the rendered page
+            // (window.open, window.location, href). Escaping alone does not
+            // stop a javascript: URL, so constrain them here, before any
+            // renderer sees them.
+            $uriStr       = RedirectUri::sanitize($uri, 'https://console.' . $this->config->getHelloDomain());
+            $targetUriStr = RedirectUri::sanitize($targetUri, '/');
             $appNameStr   = is_string($appName) ? $appName : '';
 
             return $this->helloResponse->render($this->pageRenderer->renderWildcardConsole(

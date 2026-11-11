@@ -69,4 +69,65 @@ class InviteTest extends TestCase
 
         $this->assertSame($expectedUrl, $url);
     }
+
+    /** @return array<string, string> */
+    private function inviteQuery(string $url): array
+    {
+        $query = parse_url($url, PHP_URL_QUERY);
+        $this->assertIsString($query);
+        parse_str($query, $params);
+        /** @var array<string, string> $params */
+        return $params;
+    }
+
+    public function testFallbackReturnUriDerivedFromHttpsRedirectUri(): void
+    {
+        // No target_uri: the return_uri falls back to the redirect_uri origin
+        $_GET = [
+            'app_name' => 'MyApp',
+            'redirect_uri' => 'https://example.com/callback',
+        ];
+        $_COOKIE['authName'] = $this->crypto->encrypt([
+            'isLoggedIn' => true,
+            'authCookie' => ['sub' => 'user123', 'iat' => time()]
+        ]);
+
+        $params = $this->inviteQuery($this->invite->generateInviteUrl());
+
+        $this->assertSame('https://example.com/', $params['return_uri']);
+    }
+
+    public function testFallbackReturnUriRejectsNonHttpRedirectUri(): void
+    {
+        // The derived fallback must obey the same http(s) policy as target_uri
+        $_GET = [
+            'app_name' => 'MyApp',
+            'redirect_uri' => 'ftp://example.com/callback',
+        ];
+        $_COOKIE['authName'] = $this->crypto->encrypt([
+            'isLoggedIn' => true,
+            'authCookie' => ['sub' => 'user123', 'iat' => time()]
+        ]);
+
+        $params = $this->inviteQuery($this->invite->generateInviteUrl());
+
+        $this->assertSame('/', $params['return_uri']);
+    }
+
+    public function testUnsafeTargetUriFallsBackToSafeDefault(): void
+    {
+        $_GET = [
+            'target_uri' => 'javascript:alert(1)',
+            'app_name' => 'MyApp',
+            'redirect_uri' => 'ftp://example.com/callback',
+        ];
+        $_COOKIE['authName'] = $this->crypto->encrypt([
+            'isLoggedIn' => true,
+            'authCookie' => ['sub' => 'user123', 'iat' => time()]
+        ]);
+
+        $params = $this->inviteQuery($this->invite->generateInviteUrl());
+
+        $this->assertSame('/', $params['return_uri']);
+    }
 }

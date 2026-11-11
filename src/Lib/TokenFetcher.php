@@ -48,7 +48,7 @@ class TokenFetcher
 
             $this->curl->setOpt($ch, CURLOPT_POST, true);
             $this->curl->setOpt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
-            $this->curl->setOpt($ch, CURLOPT_POSTFIELDS, $body);
+            $this->curl->setPostFields($ch, $body);
             $this->curl->setOpt($ch, CURLOPT_RETURNTRANSFER, true);
 
             /** @var string $response */

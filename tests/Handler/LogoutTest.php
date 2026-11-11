@@ -43,6 +43,44 @@ class LogoutTest extends TestCase
         $this->assertEquals('https://example.com/target', $result);
     }
 
+    public function testGenerateLogoutUrlRejectsUnsafeTargetUri(): void
+    {
+        $_GET = [
+            'target_uri' => 'javascript:alert(1)',
+        ];
+
+        $this->configMock
+            ->method('getLoginSync')
+            ->willReturn(null);
+
+        $this->configMock
+            ->method('getRoutes')
+            ->willReturn(['loggedOut' => 'http://example.com/logout']);
+
+        $result = $this->logoutHandler->generateLogoutUrl();
+
+        $this->assertEquals('http://example.com/logout', $result);
+    }
+
+    public function testGenerateLogoutUrlRejectsSchemeRelativeTargetUri(): void
+    {
+        $_GET = [
+            'target_uri' => '//evil.example/',
+        ];
+
+        $this->configMock
+            ->method('getLoginSync')
+            ->willReturn(null);
+
+        $this->configMock
+            ->method('getRoutes')
+            ->willReturn(['loggedOut' => 'http://example.com/logout']);
+
+        $result = $this->logoutHandler->generateLogoutUrl();
+
+        $this->assertEquals('http://example.com/logout', $result);
+    }
+
     public function testGenerateLogoutUrlWithoutTargetUri(): void
     {
         $_GET = [
@@ -60,6 +98,36 @@ class LogoutTest extends TestCase
         $result = $this->logoutHandler->generateLogoutUrl();
 
         $this->assertEquals('http://example.com/logout', $result);
+    }
+
+    public function testGenerateLogoutUrlWithTargetUriAndPartialRoutes(): void
+    {
+        $_GET = [
+            'target_uri' => 'https://example.com/target',
+        ];
+
+        $this->configMock
+            ->method('getRoutes')
+            ->willReturn(['loggedIn' => '/home']);
+
+        $result = $this->logoutHandler->generateLogoutUrl();
+
+        $this->assertEquals('https://example.com/target', $result);
+    }
+
+    public function testGenerateLogoutUrlWithoutTargetUriAndPartialRoutes(): void
+    {
+        $_GET = [
+            'target_uri' => null,
+        ];
+
+        $this->configMock
+            ->method('getRoutes')
+            ->willReturn(['loggedIn' => '/home']);
+
+        $result = $this->logoutHandler->generateLogoutUrl();
+
+        $this->assertEquals('/', $result);
     }
 
     public function testGenerateLogoutUrlWithLoginSync(): void

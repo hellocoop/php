@@ -78,6 +78,11 @@ class AuthHelper
         }
 
         $wallet = !isset($config['wallet']) ? Constants::$PRODUCTION_WALLET : $config['wallet'];
+
+        /**
+         * The wallet comes from config and the query string is URL-encoded.
+         * @psalm-taint-escape header
+         */
         $url = $wallet . Constants::$DEFAULT_PATH . '?' . http_build_query($params);
 
         return [
