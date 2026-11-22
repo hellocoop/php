@@ -242,8 +242,10 @@ class Callback
 
                 /**
                  * Config route plus a URL-encoded query string: nothing
-                 * request-controlled can escape the query.
+                 * request-controlled can escape the query, so it cannot
+                 * change where the redirect goes either.
                  * @psalm-taint-escape header
+                 * @psalm-taint-escape redirect
                  */
                 $targetUri = $this->config->getApiRoute() . '?' . $queryString;
             }
@@ -292,8 +294,14 @@ class Callback
 
             /**
              * The path is a sanitized target_uri or a config route and the
-             * query string is URL-encoded.
+             * query string is URL-encoded, so the query cannot change
+             * where the redirect goes. Psalm tracks $error as a whole and
+             * so counts the request's error fields against the path too;
+             * no caller passes a request-supplied 'target_uri'.
              * @psalm-taint-escape header
+             * @psalm-taint-escape redirect
+             * @psalm-taint-escape url_component
+             * @psalm-taint-escape url_path
              */
             $url = $pathString . '?' . $newQueryString;
             return $url;

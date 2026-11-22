@@ -153,8 +153,10 @@ final class Invite
         $queryString = http_build_query($request, '', '&', PHP_QUERY_RFC3986);
 
         /**
-         * Fixed wallet origin plus an RFC 3986-encoded query string.
+         * Fixed wallet origin plus an RFC 3986-encoded query string, so
+         * the query cannot change where the redirect goes.
          * @psalm-taint-escape header
+         * @psalm-taint-escape redirect
          */
         $url = 'https://wallet.' . $helloDomain . '/invite?' . $queryString;
         return $url;
