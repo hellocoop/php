@@ -22,7 +22,19 @@ final class RedirectUri
      * reference @hellocoop/api implementation accepts any target_uri and
      * applications rely on cross-host targets.
      *
+     * Taint kinds, as Psalm 7.16 models a Location header and an href:
+     * - header, url_scheme: enforced here. No control characters, and only
+     *   http, https or an absolute path, so javascript: never reaches an
+     *   href.
+     * - redirect, url_component, url_path: accepted by design. The caller
+     *   supplies the whole target, host included (see above), so its path
+     *   and query are the caller's to choose as well.
+     *
      * @psalm-taint-escape header
+     * @psalm-taint-escape url_scheme
+     * @psalm-taint-escape redirect
+     * @psalm-taint-escape url_component
+     * @psalm-taint-escape url_path
      */
     public static function sanitize(mixed $uri, string $fallback): string
     {
